@@ -4150,13 +4150,43 @@ Highlights:
 2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
+
 \newpage
 ### logExpPC x K
 
 No studies related the log of per capita expenditure with the size of upper house (K).
 
 \newpage
-\blandscape
+```{r, echo=FALSE, fig.width=16, fig.height=16, warning = F,message = FALSE}
+
+#grid.arrange(f1, f2, f3, 
+#             f4,f5, f6,
+#             f7,
+#             ncol = 2,
+#             nrow = 4) + rotate() 
+
+#grid.arrange(f1,f2) + rotate()
+#library(ggplot2)
+
+ggpubr::ggarrange(f1,f2, f3,
+                  f4, f5, f6,
+                  f7,
+#          labels = c("A", "B"),
+          ncol = 2, nrow = 4) 
+
+#grid.draw(rbind(f1,f2, size = "first")) 
+
+
+#plot_grid(f1,f2 + rremove("x.text"), 
+#          labels = c("A", "B"),
+#           align = "v", nrow = 2, rel_heights = c(1/4, 1/4))
+```
+
+
+
+
+
+\newpage
 ```{r, echo=FALSE, fig.width=10, fig.height=10, warning = F,message = FALSE,fig.cap="test size"}
 
 #grid.arrange(f1, f2, f3, 
@@ -4182,9 +4212,6 @@ ggpubr::ggarrange(f1,f2, f3,
 #           align = "v", nrow = 2, rel_heights = c(1/4, 1/4))
 ```
 
-
-
-\elandscape
 
 
 \newpage
@@ -4463,10 +4490,10 @@ No studies related the log of per capita expenditure with the size of upper hous
 
 \newpage
 ### Summary of results
-```{r, echo=FALSE, fig.width=20, fig.height=35, fig.cap="test size"}
+```{r, echo=FALSE, fig.width=17, fig.height=24}
 
-grid.arrange(f8, f9, f10, 
-             f11,f12, f13,
+grid.arrange(f8, f9, f11, 
+             f10,f12, f13,
              f14,
              ncol = 2,
              nrow = 4)
