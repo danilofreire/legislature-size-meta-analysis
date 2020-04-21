@@ -75,7 +75,7 @@ set.seed(732578) # From random.org
 
 # Needed packages
 pkgs <- c('tidyverse', 'meta', 'metafor', 'readxl',
-          'dmetar', 'knitr', 'gridGraphics', 'gridExtra','ggpubr','kableExtra')
+          'dmetar', 'knitr', 'gridGraphics', 'gridExtra','ggpubr','kableExtra','magick')
 
 # Install if not already installed
 installIfNot <- function(x) {
@@ -3930,8 +3930,9 @@ f1 <- mod2 %>%
   # Theme
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank()) 
-
 f1
+ggsave("./plots/f1.png", width = 20, height = 10, units = "cm")
+
 ```
 
 Highlights:
@@ -4059,7 +4060,7 @@ f2 <- mod2 %>%
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank()) 
 f2
-
+ggsave("./plots/f2.png", width = 20, height = 10, units = "cm")
 ```
 
 Highlights:
@@ -4138,6 +4139,7 @@ f3 <- mod2 %>%
   theme(strip.text.y = element_blank()) 
 
 f3
+ggsave("./plots/f3.png", width = 20, height = 10, units = "cm")
 ```
 
 Highlights:
@@ -4219,6 +4221,7 @@ f4 <- mod2 %>%
   theme(strip.text.y = element_blank()) 
 
 f4
+ggsave("./plots/f4.png", width = 20, height = 10, units = "cm")
 ```
 
 Highlights:
@@ -4294,6 +4297,7 @@ f5 <- mod2 %>%
   theme(strip.text.y = element_blank()) 
 
 f5
+ggsave("./plots/f5.png", width = 20, height = 10, units = "cm")
 ```
 
 Highlights:
@@ -4369,6 +4373,7 @@ f6 <- mod2 %>%
   theme(strip.text.y = element_blank()) 
 
 f6
+ggsave("./plots/f6.png", width = 20, height = 10, units = "cm")
 ```
 
 Highlights:
@@ -4444,6 +4449,7 @@ f7 <- mod2 %>%
   theme(strip.text.y = element_blank()) 
 
 f7
+ggsave("./plots/f7.png", width = 20, height = 10, units = "cm")
 ```
 
 Highlights:
@@ -4467,6 +4473,7 @@ No studies related the log of per capita expenditure with the size of upper hous
 #             ncol = 2,
 #             nrow = 4) + rotate() 
 
+
 #grid.arrange(f1,f2) + rotate()
 #library(ggplot2)
 
@@ -4475,6 +4482,9 @@ ggpubr::ggarrange(f1,f2, f3,
                   f7,
 #          labels = c("A", "B"),
           ncol = 2, nrow = 4) 
+
+#f1 + rotate()
+
 
 #grid.draw(rbind(f1,f2, size = "first")) 
 
@@ -4582,7 +4592,7 @@ f8 <- mod2 %>%
   theme(strip.text.y = element_blank()) 
 
 f8
-
+ggsave("./plots/f8.png", width = 20, height = 10, units = "cm")
 ```
 
 Highlights:
@@ -4701,6 +4711,7 @@ f9 <- mod2 %>%
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank()) 
 f9
+ggsave("./plots/f9.png", width = 20, height = 10, units = "cm")
 ```
 
 Highlights:
@@ -4776,6 +4787,7 @@ f10 <- mod2 %>%
   theme(strip.text.y = element_blank()) 
 
 f10
+ggsave("./plots/f10.png", width = 20, height = 10, units = "cm")
 ```
 
 Highlights:
@@ -4855,6 +4867,7 @@ f11 <- mod2 %>%
   theme(strip.text.y = element_blank()) 
 
 f11
+ggsave("./plots/f11.png", width = 20, height = 10, units = "cm")
 ```
 
 Highlights:
@@ -4929,6 +4942,7 @@ f12 <- mod2 %>%
   theme(strip.text.y = element_blank()) 
 
 f12
+ggsave("./plots/f12.png", width = 20, height = 10, units = "cm")
 ```
 
 Highlights:
@@ -5004,6 +5018,7 @@ f13 <- mod2 %>%
   theme(strip.text.y = element_blank()) 
 
 f13
+ggsave("./plots/f13.png", width = 20, height = 10, units = "cm")
 ```
 
 Highlights:
@@ -5079,6 +5094,7 @@ f14 <- mod2 %>%
   theme(strip.text.y = element_blank()) 
 
 f14
+ggsave("./plots/f14.png", width = 20, height = 10, units = "cm")
 ```
 
 Highlights:
@@ -5095,12 +5111,39 @@ No studies related the log of per capita expenditure with the size of upper hous
 ### Summary of results
 ```{r, echo=FALSE, fig.width=17, fig.height=24}
 
-grid.arrange(f8, f9, f11, 
-             f10,f12, f13,
-             f14,
-             ncol = 2,
-             nrow = 4)
+#grid.arrange(f8, f9, f11, 
+#             f10,f12, f13,
+#             f14,
+#             ncol = 2,
+#             nrow = 4)
 #library(ggplot2)
+
+blank = ggplot() + 
+  geom_blank() +
+  theme_minimal()
+blank
+ggsave("./plots/zz_blank.png", width = 20, height = 10, units = "cm")
+
+plots = list.files(path = "./plots/", pattern = "*.png") %>%
+  map(~{
+    image_rotate(image_read(path = paste0("./plots/", .x)), 270)
+  })
+
+p_1 = image_append(c(plots[[3]], plots[[2]], plots[[1]]), stack = T)
+p_2 = image_append(c(plots[[6]], plots[[5]], plots[[4]]), stack = T)
+p_3 = image_append(c(plots[[15]],plots[[7]],plots[[15]]), stack = T)
+p_full = image_append(c(p_1, p_2, p_3))
+p_full
+
+
+#p_full
+
+#ggpubr::ggarrange(plots[[1]],plots[[2]],
+#                  plots[[3]],plots[[4]],
+#                  plots[[5]],plots[[6]],
+#                  plots[[7]],
+#                  nrow = 4, ncol = 2
+#                  )
 
 #ggpubr::ggarrange(f1,f2, 
 #          labels = c("A", "B"),
