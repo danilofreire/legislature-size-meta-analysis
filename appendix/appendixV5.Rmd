@@ -2,11 +2,7 @@
 title: "Appendix"
 author: "Umberto Mignozzetti"
 date: "12/25/2019"
-header-includes:
-- \usepackage{pdflscape}
-- \newcommand{\blandscape}{\begin{landscape}}
-- \newcommand{\elandscape}{\end{landscape}}
-output: pdf_document 
+output: pdf_document
 ---
 
 ```{=latex}
@@ -3893,12 +3889,49 @@ mod
 
 And the forest plot:
 
-```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)"}
-forest(mod, sortvar = -TE, layout = "RevMan5", comb.fixed = FALSE,
-       prediction = TRUE)
+```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
 
-f1 <- grid.grab()
 
+f1 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(color = "black") +
+  # Error Bars
+  geom_errorbarh(height = 0.1) +
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank()) 
+
+f1
 ```
 
 Highlights:
@@ -3912,12 +3945,51 @@ Highlights:
 
 The law of 1/n was created for majoritarian systems. In the theoretical section below, we explain why the argument have potential issues when applied to non-majoritarian electoral systems. We estimated a subgroup analysis using a binary electoral system.
 
-```{r, echo=FALSE, fig.width=8, fig.height=6, fig.cap="Subgroup Analysis of (N) x (ExpPC), controlling by electoral system"}
+```{r, echo=FALSE, fig.width=8, fig.height=6, fig.cap="Subgroup Analysis of (N) x (ExpPC), controlling by electoral system",warning=FALSE}
 mod <- update(mod, byvar = aux$elecsys2, print.byvar = F)
-forest(mod, sortvar = -TE, layout = "RevMan5", comb.fixed = FALSE,
-       prediction = TRUE, digits.se = 3,
-       test.subgroup.random = TRUE)
 
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+
+f1b <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(color = "black") +
+  # Error Bars
+  geom_errorbarh(height = 0.1) +
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank()) 
+
+f1b
 ```
 
 Therefore, we can see that the hypothesis that majoritarian systems produce systematic positive effects was disproved. The majoritarian systems in the sample had a random effects model estimate of -0.25, while the random effects model in the non-majoritarian subgroup fitted a value of 0.08. Both are non-significant, but they reassure us that the absense of effect is not caused by pooling multiple types of electoral systems.
@@ -3946,11 +4018,47 @@ mod
 
 And the forest plot:
 
-```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap="Effect of lower houses size (N) on percentage of public expenditure GDP (PCTGDP)"}
-forest(mod, sortvar = -TE, layout = "RevMan5", comb.fixed = FALSE,
-       prediction = TRUE)
-f2 <- grid.grab()
+```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap="Effect of lower houses size (N) on percentage of public expenditure GDP (PCTGDP)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
 
+f2 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(color = "black") +
+  # Error Bars
+  geom_errorbarh(height = 0.1) +
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank()) 
+f2
 
 ```
 
@@ -3987,10 +4095,49 @@ mod
 
 And the forest plot:
 
-```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap="Effect of lower houses size (N) on log of per capita expenditure (logExpPC)"}
-forest(mod, sortvar = -TE, layout = "RevMan5", comb.fixed = FALSE,
-       prediction = TRUE, digits.se = 3)
-f3 <- grid.grab()
+```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap="Effect of lower houses size (N) on log of per capita expenditure (logExpPC)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+
+f3 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(color = "black") +
+  # Error Bars
+  geom_errorbarh(height = 0.1) +
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank()) 
+
+f3
 ```
 
 Highlights:
@@ -4030,10 +4177,48 @@ mod
 
 And the forest plot:
 
-```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of log lower houses size (logN) on the GDP share of public expenditure (PCTGDP)"}
-forest(mod, sortvar = -TE, layout = "RevMan5", comb.fixed = FALSE,
-       prediction = TRUE, digits.se = 3)
-f4 <- grid.grab()
+```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of log lower houses size (logN) on the GDP share of public expenditure (PCTGDP)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+f4 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(color = "black") +
+  # Error Bars
+  geom_errorbarh(height = 0.1) +
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank()) 
+
+f4
 ```
 
 Highlights:
@@ -4066,10 +4251,49 @@ mod
 
 And the forest plot:
 
-```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of log lower houses size (logN) on the log of per capita government expenditure (logExpPC)"}
-forest(mod, sortvar = -TE, layout = "RevMan5", comb.fixed = FALSE,
-       prediction = TRUE, digits.se = 3)
-f5 <- grid.grab()
+```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of log lower houses size (logN) on the log of per capita government expenditure (logExpPC)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+
+f5 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(color = "black") +
+  # Error Bars
+  geom_errorbarh(height = 0.1) +
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank()) 
+
+f5
 ```
 
 Highlights:
@@ -4102,10 +4326,49 @@ mod
 
 And the forest plot:
 
-```{r, echo=FALSE, fig.width=7, fig.height=4, fig.cap="Effect of upper house size (K) on the per capita government expenditure (ExpPC)"}
-forest(mod, sortvar = -TE, layout = "RevMan5", comb.fixed = FALSE,
-       prediction = TRUE, digits.se = 3)
-f6 <- grid.grab()
+```{r, echo=FALSE, fig.width=7, fig.height=4, fig.cap="Effect of upper house size (K) on the per capita government expenditure (ExpPC)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+
+f6 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(color = "black") +
+  # Error Bars
+  geom_errorbarh(height = 0.1) +
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank()) 
+
+f6
 ```
 
 Highlights:
@@ -4138,10 +4401,49 @@ mod
 
 And the forest plot:
 
-```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of upper house size (K) on the public expenditure share of the GDP (PCTGDP)"}
-forest(mod, sortvar = -TE, layout = "RevMan5", comb.fixed = FALSE,
-       prediction = TRUE, digits.se = 3)
-f7 <- grid.grab()
+```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of upper house size (K) on the public expenditure share of the GDP (PCTGDP)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+
+f7 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(color = "black") +
+  # Error Bars
+  geom_errorbarh(height = 0.1) +
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank()) 
+
+f7
 ```
 
 Highlights:
@@ -4238,10 +4540,49 @@ mod
 
 And the forest plot:
 
-```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)"}
-forest(mod, sortvar = -TE, layout = "RevMan5", comb.fixed = FALSE,
-       prediction = TRUE)
-f8 <- grid.grab()
+```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+f8 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(color = "black") +
+  # Error Bars
+  geom_errorbarh(height = 0.1) +
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank()) 
+
+f8
+
 ```
 
 Highlights:
@@ -4255,11 +4596,47 @@ Highlights:
 
 The law of 1/n was created for majoritarian systems. In the theoretical section below, we explain why the argument have potential issues when applied to non-majoritarian electoral systems. We estimated a subgroup analysis using a binary electoral system.
 
-```{r, echo=FALSE, fig.width=8, fig.height=6, fig.cap="Subgroup Analysis of (N) x (ExpPC), controlling by electoral system"}
-mod <- update(mod, byvar = aux$elecsys2, print.byvar = F)
-forest(mod, sortvar = -TE, layout = "RevMan5", comb.fixed = FALSE,
-       prediction = TRUE, digits.se = 3,
-       test.subgroup.random = TRUE)
+```{r, echo=FALSE, fig.width=8, fig.height=6, fig.cap="Subgroup Analysis of (N) x (ExpPC), controlling by electoral system",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+f8b <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(color = "black") +
+  # Error Bars
+  geom_errorbarh(height = 0.1) +
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank()) 
+f8b
 ```
 
 Therefore, we can see that the hypothesis that majoritarian systems produce systematic positive effects was disproved. The majoritarian systems in the sample had a random effects model estimate of -0.25, while the random effects model in the non-majoritarian subgroup fitted a value of 0.08. Both are non-significant, but they reassure us that the absense of effect is not caused by pooling multiple types of electoral systems.
@@ -4288,10 +4665,42 @@ mod
 
 And the forest plot:
 
-```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap="Effect of lower houses size (N) on percentage of public expenditure GDP (PCTGDP)"}
-forest(mod, sortvar = -TE, layout = "RevMan5", comb.fixed = FALSE,
-       prediction = TRUE)
-f9 <- grid.grab()
+```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap="Effect of lower houses size (N) on percentage of public expenditure GDP (PCTGDP)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B"))
+
+f9 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(color = "black") +
+  # Error Bars
+  geom_errorbarh(height = 0.1) +
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank()) 
+f9
 ```
 
 Highlights:
@@ -4324,10 +4733,49 @@ mod
 
 And the forest plot:
 
-```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap="Effect of lower houses size (N) on log of per capita expenditure (logExpPC)"}
-forest(mod, sortvar = -TE, layout = "RevMan5", comb.fixed = FALSE,
-       prediction = TRUE, digits.se = 3)
-f10 <- grid.grab()
+```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap="Effect of lower houses size (N) on log of per capita expenditure (logExpPC)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+
+f10 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(color = "black") +
+  # Error Bars
+  geom_errorbarh(height = 0.1) +
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank()) 
+
+f10
 ```
 
 Highlights:
@@ -4364,10 +4812,49 @@ mod
 
 And the forest plot:
 
-```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of log lower houses size (logN) on the GDP share of public expenditure (PCTGDP)"}
-forest(mod, sortvar = -TE, layout = "RevMan5", comb.fixed = FALSE,
-       prediction = TRUE, digits.se = 3)
-f11 <- grid.grab()
+```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of log lower houses size (logN) on the GDP share of public expenditure (PCTGDP)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+
+f11 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(color = "black") +
+  # Error Bars
+  geom_errorbarh(height = 0.1) +
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank()) 
+
+f11
 ```
 
 Highlights:
@@ -4400,10 +4887,48 @@ mod
 
 And the forest plot:
 
-```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of log lower houses size (logN) on the log of per capita government expenditure (logExpPC)"}
-forest(mod, sortvar = -TE, layout = "RevMan5", comb.fixed = FALSE,
-       prediction = TRUE, digits.se = 3)
-f12 <- grid.grab()
+```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of log lower houses size (logN) on the log of per capita government expenditure (logExpPC)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+f12 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(color = "black") +
+  # Error Bars
+  geom_errorbarh(height = 0.1) +
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank()) 
+
+f12
 ```
 
 Highlights:
@@ -4436,10 +4961,49 @@ mod
 
 And the forest plot:
 
-```{r, echo=FALSE, fig.width=7, fig.height=4, fig.cap="Effect of upper house size (K) on the per capita government expenditure (ExpPC)"}
-forest(mod, sortvar = -TE, layout = "RevMan5", comb.fixed = FALSE,
-       prediction = TRUE, digits.se = 3)
-f13 <- grid.grab()
+```{r, echo=FALSE, fig.width=7, fig.height=4, fig.cap="Effect of upper house size (K) on the per capita government expenditure (ExpPC)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+
+f13 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(color = "black") +
+  # Error Bars
+  geom_errorbarh(height = 0.1) +
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank()) 
+
+f13
 ```
 
 Highlights:
@@ -4472,10 +5036,49 @@ mod
 
 And the forest plot:
 
-```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of upper house size (K) on the public expenditure share of the GDP (PCTGDP)"}
-forest(mod, sortvar = -TE, layout = "RevMan5", comb.fixed = FALSE,
-       prediction = TRUE, digits.se = 3)
-f14 <- grid.grab()
+```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of upper house size (K) on the public expenditure share of the GDP (PCTGDP)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+
+f14 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(color = "black") +
+  # Error Bars
+  geom_errorbarh(height = 0.1) +
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank()) 
+
+f14
 ```
 
 Highlights:
@@ -4511,6 +5114,35 @@ grid.arrange(f8, f9, f11,
 #           align = "v", nrow = 2, rel_heights = c(1/4, 1/4))
 ```
 
+
+\newpage
+```{r, echo=FALSE, fig.width=17, fig.height=24}
+
+#grid.arrange(f8, f9, f11, 
+#             f10,f12, f13,
+#             f14,
+#             ncol = 2,
+#             nrow = 4)
+#library(ggplot2)
+
+print(ggpubr::ggarrange(f8, f9, f11, 
+             f10,f12, f13,
+             f14,
+          ncol = 2,
+          nrow = 4)) + rotate()
+
+#ggpubr::ggarrange(f8) + rotate()
+#ggpubr::ggarrange(f9) + rotate()
+
+
+
+#grid.draw(rbind(f1,f2, size = "first")) 
+
+
+#plot_grid(f1,f2 + rremove("x.text"), 
+#          labels = c("A", "B"),
+#           align = "v", nrow = 2, rel_heights = c(1/4, 1/4))
+```
 
 \newpage
 ## Meta-regressions
