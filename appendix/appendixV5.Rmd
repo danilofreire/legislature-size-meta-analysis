@@ -2,9 +2,7 @@
 title: "Appendix"
 author: "Umberto Mignozzetti"
 date: "12/25/2019"
-output:
-  pdf_document:
-    keep_tex: true
+output: pdf_document
 ---
 
 ```{=latex}
@@ -3930,11 +3928,25 @@ f1 <- mod2 %>%
   facet_grid(group~., scales = "free", space = "free") + 
   # Theme
   theme_minimal() %+replace%
-  theme(strip.text.y = element_blank()) 
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
 f1
-ggsave("./plots/f1.png", width = 20, height = 10, units = "cm")
+```
+
+```{r,include=F,warning=F}
+f1 + 
+  labs(caption = "ExpPC x N") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 18, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fa.png", width = 20, height = 12.5, units = "cm")
 
 ```
+
 
 Highlights:
 
@@ -3989,7 +4001,9 @@ f1b <- mod2 %>%
   facet_grid(group~., scales = "free", space = "free") + 
   # Theme
   theme_minimal() %+replace%
-  theme(strip.text.y = element_blank()) 
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
 f1b
 ```
@@ -4059,9 +4073,23 @@ f2 <- mod2 %>%
   facet_grid(group~., scales = "free", space = "free") + 
   # Theme
   theme_minimal() %+replace%
-  theme(strip.text.y = element_blank()) 
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
 f2
-ggsave("./plots/f2.png", width = 20, height = 10, units = "cm")
+```
+
+```{r,include=F,warning=F}
+f2 + 
+  labs(caption = "PCTGDP x N") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 18, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fb.png", width = 20, height = 12.5, units = "cm")
+
 ```
 
 Highlights:
@@ -4137,10 +4165,24 @@ f3 <- mod2 %>%
   facet_grid(group~., scales = "free", space = "free") + 
   # Theme
   theme_minimal() %+replace%
-  theme(strip.text.y = element_blank()) 
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
 f3
-ggsave("./plots/f3.png", width = 20, height = 10, units = "cm")
+```
+
+```{r,include=F,warning=F}
+f3 + 
+  labs(caption = "logExpPC x N") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 18, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fc.png", width = 20, height = 12.5, units = "cm")
+
 ```
 
 Highlights:
@@ -4219,10 +4261,24 @@ f4 <- mod2 %>%
   facet_grid(group~., scales = "free", space = "free") + 
   # Theme
   theme_minimal() %+replace%
-  theme(strip.text.y = element_blank()) 
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
 f4
-ggsave("./plots/f4.png", width = 20, height = 10, units = "cm")
+```
+
+```{r,include=F,warning=F}
+f4 + 
+  labs(caption = "PCTGDP x logN") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 18, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fd.png", width = 20, height = 12.5, units = "cm")
+
 ```
 
 Highlights:
@@ -4295,10 +4351,24 @@ f5 <- mod2 %>%
   facet_grid(group~., scales = "free", space = "free") + 
   # Theme
   theme_minimal() %+replace%
-  theme(strip.text.y = element_blank()) 
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
 f5
-ggsave("./plots/f5.png", width = 20, height = 10, units = "cm")
+```
+
+```{r,include=F,warning=F}
+f5 + 
+  labs(caption = "logExpPC x logN") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 18, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fe.png", width = 20, height = 12.5, units = "cm")
+
 ```
 
 Highlights:
@@ -4371,10 +4441,24 @@ f6 <- mod2 %>%
   facet_grid(group~., scales = "free", space = "free") + 
   # Theme
   theme_minimal() %+replace%
-  theme(strip.text.y = element_blank()) 
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
 f6
-ggsave("./plots/f6.png", width = 20, height = 10, units = "cm")
+```
+
+```{r,include=F,warning=F}
+f6 + 
+  labs(caption = "ExpPC x K") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 18, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/ff.png", width = 20, height = 12.5, units = "cm")
+
 ```
 
 Highlights:
@@ -4447,10 +4531,24 @@ f7 <- mod2 %>%
   facet_grid(group~., scales = "free", space = "free") + 
   # Theme
   theme_minimal() %+replace%
-  theme(strip.text.y = element_blank()) 
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
 f7
-ggsave("./plots/f7.png", width = 20, height = 10, units = "cm")
+```
+
+```{r,include=F,warning=F}
+f7 + 
+  labs(caption = "PCTGDP x K") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 18, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fg.png", width = 20, height = 12.5, units = "cm")
+
 ```
 
 Highlights:
@@ -4465,26 +4563,22 @@ Highlights:
 
 No studies related the log of per capita expenditure with the size of upper house (K).
 
-
-```{r, echo=FALSE, fig.width=12.5, fig.height=5}
-
-#grid.arrange(f8, f9, f11, 
-#             f10,f12, f13,
-#             f14,
-#             ncol = 2,
-#             nrow = 4)
-#library(ggplot2)
-
+```{r,include=F,warning=F}
 blank = ggplot() + 
   geom_blank() +
   theme_minimal()
 blank
-ggsave("./plots/zz_blank.png", width = 20, height = 10, units = "cm")
+ggsave("./plots/zz_blank.png", width = 20, height = 12.5, units = "cm")
 
 plots = list.files(path = "./plots/", pattern = "*.png") %>%
   map(~{
-    image_rotate(image_read(path = paste0("./plots/", .x)), 270)
+    image_read(path = paste0("./plots/", .x)) %>%
+      image_rotate(., 270) %>%
+      image_border(., "#ffffff ", "90x18")
   })
+```
+
+```{r, echo=FALSE, fig.width=12.5, fig.height=5}
 
 p_1 = image_append(c(plots[[3]], plots[[2]], plots[[1]]), stack = T)
 p_2 = image_append(c(plots[[6]], plots[[5]], plots[[4]]), stack = T)
@@ -4493,27 +4587,7 @@ p_full = image_append(c(p_1, p_2, p_3))
 
 p_full
 
-#p_full
-
-#ggpubr::ggarrange(plots[[1]],plots[[2]],
-#                  plots[[3]],plots[[4]],
-#                  plots[[5]],plots[[6]],
-#                  plots[[7]],
-#                  nrow = 4, ncol = 2
-#                  )
-
-#ggpubr::ggarrange(f1,f2, 
-#          labels = c("A", "B"),
-#          ncol = 1, nrow = 2)
-
-#grid.draw(rbind(f1,f2, size = "first")) 
-
-
-#plot_grid(f1,f2 + rremove("x.text"), 
-#          labels = c("A", "B"),
-#           align = "v", nrow = 2, rel_heights = c(1/4, 1/4))
 ```
-
 
 
 \newpage
@@ -4579,10 +4653,24 @@ f8 <- mod2 %>%
   facet_grid(group~., scales = "free", space = "free") + 
   # Theme
   theme_minimal() %+replace%
-  theme(strip.text.y = element_blank()) 
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 9, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
 f8
-ggsave("./plots/f8.png", width = 20, height = 10, units = "cm")
+```
+
+```{r,include=F,warning=F}
+f8 + 
+  labs(caption = "ExpPC x N") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 9, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fh.png", width = 20, height = 12.5, units = "cm")
+
 ```
 
 Highlights:
@@ -4635,7 +4723,9 @@ f8b <- mod2 %>%
   facet_grid(group~., scales = "free", space = "free") + 
   # Theme
   theme_minimal() %+replace%
-  theme(strip.text.y = element_blank()) 
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 13, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
 f8b
 ```
 
@@ -4680,16 +4770,21 @@ mod2 <- tibble(
               studlab = c("Overall Effect", "Prediction Interval"),
               lower = c(mod$lower.random, mod$lower.predict),
               upper = c(mod$upper.random, mod$upper.predict),
-              group = "B"))
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
 
 f9 <- mod2 %>%
-  ggplot(aes(y = reorder(studlab,TE), x = TE, xmin = lower, xmax = upper)) +
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
   # Studies coefs
   geom_point(color = "black") +
   # Error Bars
   geom_errorbarh(height = 0.1) +
   # X-axis limit
   scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
   # Vertical dashed line
   geom_vline(xintercept=0, color="black", linetype="dashed") +
   # Labels
@@ -4699,9 +4794,23 @@ f9 <- mod2 %>%
   facet_grid(group~., scales = "free", space = "free") + 
   # Theme
   theme_minimal() %+replace%
-  theme(strip.text.y = element_blank()) 
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 13, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
 f9
-ggsave("./plots/f9.png", width = 20, height = 10, units = "cm")
+```
+
+```{r,include=F,warning=F}
+f9 + 
+  labs(caption = "PCTGDP x N") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 13, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fi.png", width = 20, height = 12.5, units = "cm")
+
 ```
 
 Highlights:
@@ -4774,10 +4883,24 @@ f10 <- mod2 %>%
   facet_grid(group~., scales = "free", space = "free") + 
   # Theme
   theme_minimal() %+replace%
-  theme(strip.text.y = element_blank()) 
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
 f10
-ggsave("./plots/f10.png", width = 20, height = 10, units = "cm")
+```
+
+```{r,include=F,warning=F}
+f10 + 
+  labs(caption = "logExpPC x N") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fj.png", width = 20, height = 12.5, units = "cm")
+
 ```
 
 Highlights:
@@ -4854,10 +4977,24 @@ f11 <- mod2 %>%
   facet_grid(group~., scales = "free", space = "free") + 
   # Theme
   theme_minimal() %+replace%
-  theme(strip.text.y = element_blank()) 
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
 f11
-ggsave("./plots/f11.png", width = 20, height = 10, units = "cm")
+```
+
+```{r,include=F,warning=F}
+f11 + 
+  labs(caption = "PCTGDP x logN") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fk.png", width = 20, height = 12.5, units = "cm")
+
 ```
 
 Highlights:
@@ -4917,7 +5054,7 @@ f12 <- mod2 %>%
   # Error Bars
   geom_errorbarh(height = 0.1) +
   # X-axis limit
-  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  scale_x_continuous(limits=c(-0.1, 1.2*(max(mod2$upper)))) +
   # Y-axis names
   scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
   # Vertical dashed line
@@ -4929,10 +5066,24 @@ f12 <- mod2 %>%
   facet_grid(group~., scales = "free", space = "free") + 
   # Theme
   theme_minimal() %+replace%
-  theme(strip.text.y = element_blank()) 
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
 f12
-ggsave("./plots/f12.png", width = 20, height = 10, units = "cm")
+```
+
+```{r,include=F,warning=F}
+f12 + 
+  labs(caption = "logExpPC x logN") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fl.png", width = 20, height = 12.5, units = "cm")
+
 ```
 
 Highlights:
@@ -5005,10 +5156,24 @@ f13 <- mod2 %>%
   facet_grid(group~., scales = "free", space = "free") + 
   # Theme
   theme_minimal() %+replace%
-  theme(strip.text.y = element_blank()) 
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 12, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
 f13
-ggsave("./plots/f13.png", width = 20, height = 10, units = "cm")
+```
+
+```{r,include=F,warning=F}
+f13 + 
+  labs(caption = "ExpPC x K") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 12, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fm.png", width = 20, height = 12.5, units = "cm")
+
 ```
 
 Highlights:
@@ -5081,10 +5246,24 @@ f14 <- mod2 %>%
   facet_grid(group~., scales = "free", space = "free") + 
   # Theme
   theme_minimal() %+replace%
-  theme(strip.text.y = element_blank()) 
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
 f14
-ggsave("./plots/f14.png", width = 20, height = 10, units = "cm")
+```
+
+```{r,include=F,warning=F}
+f14 + 
+  labs(caption = "PCTGDP x K") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fn.png", width = 20, height = 12.5, units = "cm")
+
 ```
 
 Highlights:
@@ -5107,25 +5286,12 @@ No studies related the log of per capita expenditure with the size of upper hous
 #             nrow = 4)
 #library(ggplot2)
 
-blank = ggplot() + 
-  geom_blank() +
-  theme_minimal()
-blank
-ggsave("./plots/zz_blank.png", width = 20, height = 10, units = "cm")
-
-plots = list.files(path = "./plots/", pattern = "*.png") %>%
-  map(~{
-    image_rotate(image_read(path = paste0("./plots/", .x)), 270)
-  })
-
 p_1 = image_append(c(plots[[10]], plots[[9]], plots[[8]]), stack = T)
 p_2 = image_append(c(plots[[13]], plots[[12]], plots[[11]]), stack = T)
 p_3 = image_append(c(plots[[15]],plots[[14]],plots[[15]]), stack = T)
 p_full = image_append(c(p_1, p_2, p_3))
 
 p_full
-
-#p_full
 
 #ggpubr::ggarrange(plots[[1]],plots[[2]],
 #                  plots[[3]],plots[[4]],
