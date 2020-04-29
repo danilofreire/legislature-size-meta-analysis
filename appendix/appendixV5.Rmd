@@ -3862,6 +3862,58 @@ table(dat$scoef, dat$depvar2)
 chisq.test(table(dat$scoef, dat$depvar2), simulate.p.value = T)
 ```
 
+\newpage 
+### Descriptive Stats of Moderators
+
+```{r, echo=F}
+
+#TABLE 2 ABOUT HERE: Moderator, frequency, percentage (mean and median for publication year)
+
+aux = dat %>%
+  group_by(depvar2) %>%
+  summarise(n = n(),
+            mean_coef = mean(coef, na.rm = T),
+            median_coef = median(coef, na.rm = T)) %>%
+  mutate(pct = round(n/sum(n, na.rm = T), digits = 2)) %>%
+  select(depvar2, n, pct, mean_coef, median_coef)
+
+kable(aux)
+
+
+
+```
+
+
+### Descriptive Stats of Moderators by Year
+
+```{r, echo=F}
+
+#TABLE 2 ABOUT HERE: Moderator, frequency, percentage (mean and median for publication year)
+
+aux = dat %>%
+  group_by(depvar2, year) %>%
+  summarise(n = n(),
+            mean_coef = round(mean(coef, na.rm = T), digits = 3),
+            median_coef = round(median(coef, na.rm = T), digits = 3)) %>%
+  group_by(year) %>%
+  mutate(pct = paste0(100*(round(n/sum(n, na.rm = T), digits = 2)), " %")) %>%
+  select(depvar2, year, n, pct, mean_coef, median_coef) %>%
+  arrange(year) %>%
+  rename(Moderator = depvar2,
+         Year = year,
+         N = n,
+         Pct = pct,
+         Mean = mean_coef,
+         Median = median_coef
+         )
+
+kable(aux)
+
+
+```
+
+
+
 \newpage
 ## Meta-analysis
 
@@ -3912,15 +3964,17 @@ mod2 <- tibble(
 f1 <- mod2 %>%
   ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
   # Studies coefs
-  geom_point(color = "black") +
+  geom_point(aes(color = group)) +
   # Error Bars
-  geom_errorbarh(height = 0.1) +
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
   # X-axis limit
   scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
   # Y-axis names
-  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
   # Vertical dashed line
-  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
   # Labels
   labs(x = "",
        y = "") + 
@@ -3929,6 +3983,7 @@ f1 <- mod2 %>%
   # Theme
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 15, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1)) 
 f1
@@ -3939,11 +3994,12 @@ f1 +
   labs(caption = "ExpPC x N") +
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 18, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1),
         plot.caption = element_text(size=22)) 
 
-ggsave("./plots/fa.png", width = 20, height = 12.5, units = "cm")
+ggsave("./plots/fa.png", width = 30, height = 18.75, units = "cm")
 
 ```
 
@@ -3985,15 +4041,17 @@ mod2 <- tibble(
 f1b <- mod2 %>%
   ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
   # Studies coefs
-  geom_point(color = "black") +
+  geom_point(aes(color = group)) +
   # Error Bars
-  geom_errorbarh(height = 0.1) +
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
   # X-axis limit
   scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
   # Y-axis names
-  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
   # Vertical dashed line
-  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
   # Labels
   labs(x = "",
        y = "") + 
@@ -4002,6 +4060,7 @@ f1b <- mod2 %>%
   # Theme
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 15, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
@@ -4057,15 +4116,17 @@ mod2 <- tibble(
 f2 <- mod2 %>%
   ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
   # Studies coefs
-  geom_point(color = "black") +
+  geom_point(aes(color = group)) +
   # Error Bars
-  geom_errorbarh(height = 0.1) +
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
   # X-axis limit
   scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
   # Y-axis names
-  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
   # Vertical dashed line
-  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
   # Labels
   labs(x = "",
        y = "") + 
@@ -4074,6 +4135,7 @@ f2 <- mod2 %>%
   # Theme
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 15, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1)) 
 f2
@@ -4084,11 +4146,12 @@ f2 +
   labs(caption = "PCTGDP x N") +
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 18, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1),
         plot.caption = element_text(size=22)) 
 
-ggsave("./plots/fb.png", width = 20, height = 12.5, units = "cm")
+ggsave("./plots/fb.png", width = 30, height = 18.75, units = "cm")
 
 ```
 
@@ -4149,15 +4212,17 @@ mod2 <- tibble(
 f3 <- mod2 %>%
   ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
   # Studies coefs
-  geom_point(color = "black") +
+  geom_point(aes(color = group)) +
   # Error Bars
-  geom_errorbarh(height = 0.1) +
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
   # X-axis limit
   scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
   # Y-axis names
-  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
   # Vertical dashed line
-  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
   # Labels
   labs(x = "",
        y = "") + 
@@ -4166,6 +4231,7 @@ f3 <- mod2 %>%
   # Theme
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 15, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
@@ -4177,11 +4243,12 @@ f3 +
   labs(caption = "logExpPC x N") +
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 18, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1),
         plot.caption = element_text(size=22)) 
 
-ggsave("./plots/fc.png", width = 20, height = 12.5, units = "cm")
+ggsave("./plots/fc.png", width = 30, height = 18.75, units = "cm")
 
 ```
 
@@ -4245,15 +4312,17 @@ mod2 <- tibble(
 f4 <- mod2 %>%
   ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
   # Studies coefs
-  geom_point(color = "black") +
+  geom_point(aes(color = group)) +
   # Error Bars
-  geom_errorbarh(height = 0.1) +
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
   # X-axis limit
   scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
   # Y-axis names
-  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
   # Vertical dashed line
-  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
   # Labels
   labs(x = "",
        y = "") + 
@@ -4262,6 +4331,7 @@ f4 <- mod2 %>%
   # Theme
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 15, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
@@ -4273,11 +4343,12 @@ f4 +
   labs(caption = "PCTGDP x logN") +
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 18, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1),
         plot.caption = element_text(size=22)) 
 
-ggsave("./plots/fd.png", width = 20, height = 12.5, units = "cm")
+ggsave("./plots/fd.png", width = 30, height = 18.75, units = "cm")
 
 ```
 
@@ -4335,15 +4406,17 @@ mod2 <- tibble(
 f5 <- mod2 %>%
   ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
   # Studies coefs
-  geom_point(color = "black") +
+  geom_point(aes(color = group)) +
   # Error Bars
-  geom_errorbarh(height = 0.1) +
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
   # X-axis limit
   scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
   # Y-axis names
-  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
   # Vertical dashed line
-  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
   # Labels
   labs(x = "",
        y = "") + 
@@ -4352,6 +4425,7 @@ f5 <- mod2 %>%
   # Theme
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 15, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
@@ -4363,11 +4437,12 @@ f5 +
   labs(caption = "logExpPC x logN") +
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 18, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1),
         plot.caption = element_text(size=22)) 
 
-ggsave("./plots/fe.png", width = 20, height = 12.5, units = "cm")
+ggsave("./plots/fe.png", width = 30, height = 18.75, units = "cm")
 
 ```
 
@@ -4425,15 +4500,17 @@ mod2 <- tibble(
 f6 <- mod2 %>%
   ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
   # Studies coefs
-  geom_point(color = "black") +
+  geom_point(aes(color = group)) +
   # Error Bars
-  geom_errorbarh(height = 0.1) +
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
   # X-axis limit
   scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
   # Y-axis names
-  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
   # Vertical dashed line
-  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
   # Labels
   labs(x = "",
        y = "") + 
@@ -4442,6 +4519,7 @@ f6 <- mod2 %>%
   # Theme
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 15, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
@@ -4453,11 +4531,12 @@ f6 +
   labs(caption = "ExpPC x K") +
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 18, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1),
         plot.caption = element_text(size=22)) 
 
-ggsave("./plots/ff.png", width = 20, height = 12.5, units = "cm")
+ggsave("./plots/ff.png", width = 30, height = 18.75, units = "cm")
 
 ```
 
@@ -4515,15 +4594,17 @@ mod2 <- tibble(
 f7 <- mod2 %>%
   ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
   # Studies coefs
-  geom_point(color = "black") +
+  geom_point(aes(color = group)) +
   # Error Bars
-  geom_errorbarh(height = 0.1) +
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
   # X-axis limit
   scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
   # Y-axis names
-  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
   # Vertical dashed line
-  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
   # Labels
   labs(x = "",
        y = "") + 
@@ -4532,6 +4613,7 @@ f7 <- mod2 %>%
   # Theme
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 15, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
@@ -4543,11 +4625,12 @@ f7 +
   labs(caption = "PCTGDP x K") +
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 18, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1),
         plot.caption = element_text(size=22)) 
 
-ggsave("./plots/fg.png", width = 20, height = 12.5, units = "cm")
+ggsave("./plots/fg.png", width = 30, height = 18.75, units = "cm")
 
 ```
 
@@ -4568,7 +4651,7 @@ blank = ggplot() +
   geom_blank() +
   theme_minimal()
 blank
-ggsave("./plots/zz_blank.png", width = 20, height = 12.5, units = "cm")
+ggsave("./plots/zz_blank.png", width = 30, height = 18.75, units = "cm")
 
 plots = list.files(path = "./plots/", pattern = "*.png") %>%
   map(~{
@@ -4578,7 +4661,7 @@ plots = list.files(path = "./plots/", pattern = "*.png") %>%
   })
 ```
 
-```{r, echo=FALSE, fig.width=12.5, fig.height=5}
+```{r, echo=FALSE, fig.width=20, fig.height=5}
 
 p_1 = image_append(c(plots[[3]], plots[[2]], plots[[1]]), stack = T)
 p_2 = image_append(c(plots[[6]], plots[[5]], plots[[4]]), stack = T)
@@ -4614,7 +4697,7 @@ mod
 
 And the forest plot:
 
-```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)",warning=FALSE}
+```{r, echo=FALSE, fig.width=12, fig.height=6, fig.cap="Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)",warning=FALSE}
 mod2 <- tibble(
   TE = mod$TE,
   seTE = mod$seTE,
@@ -4637,15 +4720,17 @@ mod2 <- tibble(
 f8 <- mod2 %>%
   ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
   # Studies coefs
-  geom_point(color = "black") +
+  geom_point(aes(color = group)) +
   # Error Bars
-  geom_errorbarh(height = 0.1) +
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
   # X-axis limit
   scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
   # Y-axis names
-  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
   # Vertical dashed line
-  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
   # Labels
   labs(x = "",
        y = "") + 
@@ -4654,6 +4739,7 @@ f8 <- mod2 %>%
   # Theme
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 9, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
@@ -4665,11 +4751,12 @@ f8 +
   labs(caption = "ExpPC x N") +
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
-        axis.text.y = element_text(size = 9, hjust = 1.1),
+        legend.position = "none",
+        axis.text.y = element_text(size = 15, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1),
         plot.caption = element_text(size=22)) 
 
-ggsave("./plots/fh.png", width = 20, height = 12.5, units = "cm")
+ggsave("./plots/fh.png", width = 30, height = 18.75, units = "cm")
 
 ```
 
@@ -4707,15 +4794,17 @@ mod2 <- tibble(
 f8b <- mod2 %>%
   ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
   # Studies coefs
-  geom_point(color = "black") +
+  geom_point(aes(color = group)) +
   # Error Bars
-  geom_errorbarh(height = 0.1) +
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
   # X-axis limit
   scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
   # Y-axis names
-  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
   # Vertical dashed line
-  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
   # Labels
   labs(x = "",
        y = "") + 
@@ -4724,6 +4813,7 @@ f8b <- mod2 %>%
   # Theme
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 13, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1)) 
 f8b
@@ -4778,15 +4868,17 @@ mod2 <- tibble(
 f9 <- mod2 %>%
   ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
   # Studies coefs
-  geom_point(color = "black") +
+  geom_point(aes(color = group)) +
   # Error Bars
-  geom_errorbarh(height = 0.1) +
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
   # X-axis limit
   scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
   # Y-axis names
-  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
   # Vertical dashed line
-  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
   # Labels
   labs(x = "",
        y = "") + 
@@ -4795,7 +4887,8 @@ f9 <- mod2 %>%
   # Theme
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
-        axis.text.y = element_text(size = 13, hjust = 1.1),
+        legend.position = "none",
+        axis.text.y = element_text(size = 10, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1)) 
 f9
 ```
@@ -4805,11 +4898,12 @@ f9 +
   labs(caption = "PCTGDP x N") +
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 13, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1),
         plot.caption = element_text(size=22)) 
 
-ggsave("./plots/fi.png", width = 20, height = 12.5, units = "cm")
+ggsave("./plots/fi.png", width = 30, height = 18.75, units = "cm")
 
 ```
 
@@ -4867,15 +4961,17 @@ mod2 <- tibble(
 f10 <- mod2 %>%
   ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
   # Studies coefs
-  geom_point(color = "black") +
+  geom_point(aes(color = group)) +
   # Error Bars
-  geom_errorbarh(height = 0.1) +
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
   # X-axis limit
   scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
   # Y-axis names
-  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
   # Vertical dashed line
-  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
   # Labels
   labs(x = "",
        y = "") + 
@@ -4884,7 +4980,8 @@ f10 <- mod2 %>%
   # Theme
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
-        axis.text.y = element_text(size = 15, hjust = 1.1),
+        legend.position = "none",
+        axis.text.y = element_text(size = 13, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
 f10
@@ -4895,11 +4992,12 @@ f10 +
   labs(caption = "logExpPC x N") +
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 15, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1),
         plot.caption = element_text(size=22)) 
 
-ggsave("./plots/fj.png", width = 20, height = 12.5, units = "cm")
+ggsave("./plots/fj.png", width = 30, height = 18.75, units = "cm")
 
 ```
 
@@ -4961,15 +5059,17 @@ mod2 <- tibble(
 f11 <- mod2 %>%
   ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
   # Studies coefs
-  geom_point(color = "black") +
+  geom_point(aes(color = group)) +
   # Error Bars
-  geom_errorbarh(height = 0.1) +
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
   # X-axis limit
   scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
   # Y-axis names
-  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
   # Vertical dashed line
-  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
   # Labels
   labs(x = "",
        y = "") + 
@@ -4978,6 +5078,7 @@ f11 <- mod2 %>%
   # Theme
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 15, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
@@ -4989,11 +5090,12 @@ f11 +
   labs(caption = "PCTGDP x logN") +
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
-        axis.text.y = element_text(size = 15, hjust = 1.1),
+        legend.position = "none",
+        axis.text.y = element_text(size = 20, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1),
         plot.caption = element_text(size=22)) 
 
-ggsave("./plots/fk.png", width = 20, height = 12.5, units = "cm")
+ggsave("./plots/fk.png", width = 30, height = 18.75, units = "cm")
 
 ```
 
@@ -5050,15 +5152,17 @@ mod2 <- tibble(
 f12 <- mod2 %>%
   ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
   # Studies coefs
-  geom_point(color = "black") +
+  geom_point(aes(color = group)) +
   # Error Bars
-  geom_errorbarh(height = 0.1) +
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
   # X-axis limit
-  scale_x_continuous(limits=c(-0.1, 1.2*(max(mod2$upper)))) +
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
   # Y-axis names
-  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
   # Vertical dashed line
-  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
   # Labels
   labs(x = "",
        y = "") + 
@@ -5067,6 +5171,7 @@ f12 <- mod2 %>%
   # Theme
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 15, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
@@ -5078,11 +5183,12 @@ f12 +
   labs(caption = "logExpPC x logN") +
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 15, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1),
         plot.caption = element_text(size=22)) 
 
-ggsave("./plots/fl.png", width = 20, height = 12.5, units = "cm")
+ggsave("./plots/fl.png", width = 30, height = 18.75, units = "cm")
 
 ```
 
@@ -5140,15 +5246,17 @@ mod2 <- tibble(
 f13 <- mod2 %>%
   ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
   # Studies coefs
-  geom_point(color = "black") +
+  geom_point(aes(color = group)) +
   # Error Bars
-  geom_errorbarh(height = 0.1) +
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
   # X-axis limit
   scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
   # Y-axis names
-  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
   # Vertical dashed line
-  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
   # Labels
   labs(x = "",
        y = "") + 
@@ -5157,6 +5265,7 @@ f13 <- mod2 %>%
   # Theme
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 12, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
@@ -5168,11 +5277,12 @@ f13 +
   labs(caption = "ExpPC x K") +
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 12, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1),
         plot.caption = element_text(size=22)) 
 
-ggsave("./plots/fm.png", width = 20, height = 12.5, units = "cm")
+ggsave("./plots/fm.png", width = 30, height = 18.75, units = "cm")
 
 ```
 
@@ -5230,15 +5340,17 @@ mod2 <- tibble(
 f14 <- mod2 %>%
   ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
   # Studies coefs
-  geom_point(color = "black") +
+  geom_point(aes(color = group)) +
   # Error Bars
-  geom_errorbarh(height = 0.1) +
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
   # X-axis limit
   scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
   # Y-axis names
-  scale_y_discrete(labels= function(x) str_replace(x, "_[0-9]*$", "")) + 
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
   # Vertical dashed line
-  geom_vline(xintercept=0, color="black", linetype="dashed") +
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
   # Labels
   labs(x = "",
        y = "") + 
@@ -5247,6 +5359,7 @@ f14 <- mod2 %>%
   # Theme
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 15, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
@@ -5258,11 +5371,12 @@ f14 +
   labs(caption = "PCTGDP x K") +
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
+        legend.position = "none",
         axis.text.y = element_text(size = 15, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1),
         plot.caption = element_text(size=22)) 
 
-ggsave("./plots/fn.png", width = 20, height = 12.5, units = "cm")
+ggsave("./plots/fn.png", width = 30, height = 18.75, units = "cm")
 
 ```
 
@@ -5277,7 +5391,7 @@ Highlights:
 No studies related the log of per capita expenditure with the size of upper house (K).
 
 
-```{r, echo=FALSE, fig.width=10, fig.height=1}
+```{r, echo=FALSE, fig.width=20, fig.height=2}
 
 #grid.arrange(f8, f9, f11, 
 #             f10,f12, f13,
@@ -5316,6 +5430,9 @@ p_full
 \newpage
 ## Meta-regressions
 
+
+### Meta-regressions for Expenditure measured as 
+
 ### Meta-regressions for Expenditure as a Percentage of the GDP
 
 ```{r, echo=F, warning=F}
@@ -5327,6 +5444,21 @@ mod <-  rma(yi = coef,
               test = "knha",
             subset = dat$depvar2=='PCTGDP',
             slab = dat$authoryear)
+
+mod1 <- tibble(
+  estimate = mod[["beta"]],
+  se = mod[["se"]],
+  tval = mod[["zval"]],
+  pval = mod[["pval"]],
+  ci.lb = mod[["ci.lb"]],
+  ci.ub = mod[["ci.ub"]],
+  model = "PCTGDP"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 4)))
+
+kable(mod1)  
+  
+  
 ```
 
 ```{r}
@@ -5336,7 +5468,22 @@ summary(mod)
 As we have considerable heterogeneity in our sample, we run a permutation test to ensure the validity of our estimates. The results follow below.
 
 ```{r, echo=FALSE}
-permutest(mod, progbar = F)
+mod = permutest(mod, progbar = F)
+mod
+
+mod1_permu <- tibble(
+  estimate = mod[["beta"]],
+  se = mod[["se"]],
+  tval = mod[["zval"]],
+  pval = mod[["pval"]],
+  ci.lb = mod[["ci.lb"]],
+  ci.ub = mod[["ci.ub"]],
+  model = "PCTGDP - Permutation"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 4)))
+
+kable(mod1_permu)
+
 ```
 
 We have the following results for the meta-regressions of Expenditure Per Capita:
@@ -5359,14 +5506,44 @@ mod <- rma(yi = coef,
               test = "knha",
             subset = fulldat$depvar2=='PCTGDP',
             slab = fulldat$authoryear)
+
+mod2 <- tibble(
+  estimate = mod[["beta"]],
+  se = mod[["se"]],
+  tval = mod[["zval"]],
+  pval = mod[["pval"]],
+  ci.lb = mod[["ci.lb"]],
+  ci.ub = mod[["ci.ub"]],
+  model = "PCTGDP - All coefs"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 4)))
+
+kable(mod2)
+
 ```
 
 ```{r}
 summary(mod)
 ```
 
-```{r}
-permutest(mod, progbar = F)
+```{r, echo=FALSE}
+
+mod = permutest(mod, progbar = F)
+mod 
+
+mod2_permu <- tibble(
+  estimate = mod[["beta"]],
+  se = mod[["se"]],
+  tval = mod[["zval"]],
+  pval = mod[["pval"]],
+  ci.lb = mod[["ci.lb"]],
+  ci.ub = mod[["ci.ub"]],
+  model = "PCTGDP - All coefs - Permutation"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 4)))
+
+kable(mod2_permu)
+
 ```
 
 For all the coefficients, we have the following results:
@@ -5389,6 +5566,20 @@ mod <-  rma(yi = coef,
               test = "knha",
             subset = dat$depvar2=='ExpPC',
             slab = dat$authoryear)
+
+mod3 <- tibble(
+  estimate = mod[["beta"]],
+  se = mod[["se"]],
+  tval = mod[["zval"]],
+  pval = mod[["pval"]],
+  ci.lb = mod[["ci.lb"]],
+  ci.ub = mod[["ci.ub"]],
+  model = "ExpPC"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 4)))
+
+kable(mod3)
+
 ```
 
 ```{r}
@@ -5398,7 +5589,22 @@ summary(mod)
 As we have considerable heterogeneity in our sample, we run a permutation test to ensure the validity of our estimates. The results follow below.
 
 ```{r, echo=FALSE}
-permutest(mod, progbar = F)
+mod = permutest(mod, progbar = F)
+mod 
+
+mod3_permu <- tibble(
+  estimate = mod[["beta"]],
+  se = mod[["se"]],
+  tval = mod[["zval"]],
+  pval = mod[["pval"]],
+  ci.lb = mod[["ci.lb"]],
+  ci.ub = mod[["ci.ub"]],
+  model = "ExpPC - Permutation"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 4)))
+
+kable(mod3_permu)
+
 ```
 
 We have the following results for the meta-regressions of Expenditure Per Capita:
@@ -5420,14 +5626,45 @@ mod <- rma(yi = coef,
               test = "knha",
             subset = fulldat$depvar2=='ExpPC',
             slab = fulldat$authoryear)
+
+mod4 <- tibble(
+  estimate = mod[["beta"]],
+  se = mod[["se"]],
+  tval = mod[["zval"]],
+  pval = mod[["pval"]],
+  ci.lb = mod[["ci.lb"]],
+  ci.ub = mod[["ci.ub"]],
+  model = "ExpPC - All coefs"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 4)))
+
+kable(mod4)
+
 ```
 
 ```{r}
 summary(mod)
 ```
 
-```{r}
-permutest(mod, progbar = F)
+```{r, echo=FALSE}
+
+mod = permutest(mod, progbar = F)
+mod
+
+
+mod4_permu <- tibble(
+  estimate = mod[["beta"]],
+  se = mod[["se"]],
+  tval = mod[["zval"]],
+  pval = mod[["pval"]],
+  ci.lb = mod[["ci.lb"]],
+  ci.ub = mod[["ci.ub"]],
+  model = "ExpPC - All coefs - Permutation"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 4)))
+
+kable(mod4_permu)
+
 ```
 
 With all coefficients, the results of the effect sizes on the Expenditure Per Capita Regressions are the following:
@@ -5449,6 +5686,21 @@ mod <-  rma(yi = coef,
               test = "knha",
             subset = dat$depvar2=='logExpPC',
             slab = dat$authoryear)
+
+
+mod5 <- tibble(
+  estimate = mod[["beta"]],
+  se = mod[["se"]],
+  tval = mod[["zval"]],
+  pval = mod[["pval"]],
+  ci.lb = mod[["ci.lb"]],
+  ci.ub = mod[["ci.ub"]],
+  model = "logExpPC"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 4)))
+
+kable(mod5)
+
 ```
 
 ```{r}
@@ -5458,7 +5710,23 @@ summary(mod)
 As we have considerable heterogeneity in our sample, we run a permutation test to ensure the validity of our estimates. The results follow below.
 
 ```{r, echo=FALSE}
-permutest(mod, progbar = F)
+mod = permutest(mod, progbar = F)
+mod
+
+mod5_permu <- tibble(
+  estimate = mod[["beta"]],
+  se = mod[["se"]],
+  tval = mod[["zval"]],
+  pval = mod[["pval"]],
+  ci.lb = mod[["ci.lb"]],
+  ci.ub = mod[["ci.ub"]],
+  model = "logExpPC - Permutation"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 4)))
+
+kable(mod5_permu)
+
+
 ```
 
 We have the following results for the meta-regressions of Log of Expenditure Per Capita:
@@ -5478,14 +5746,45 @@ mod <- rma(yi = coef,
               test = "knha",
             subset = fulldat$depvar2=='logExpPC',
             slab = fulldat$authoryear)
+
+mod6 <- tibble(
+  estimate = mod[["beta"]],
+  se = mod[["se"]],
+  tval = mod[["zval"]],
+  pval = mod[["pval"]],
+  ci.lb = mod[["ci.lb"]],
+  ci.ub = mod[["ci.ub"]],
+  model = "logExpPC - All coefs"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 4)))
+
+kable(mod5_permu)
+
 ```
 
 ```{r}
 summary(mod)
 ```
 
-```{r}
-permutest(mod, progbar = F)
+```{r, echo=FALSE}
+mod = permutest(mod, progbar = F)
+mod 
+
+mod6_permu <- tibble(
+  estimate = mod[["beta"]],
+  se = mod[["se"]],
+  tval = mod[["zval"]],
+  pval = mod[["pval"]],
+  ci.lb = mod[["ci.lb"]],
+  ci.ub = mod[["ci.ub"]],
+  model = "logExpPC - All coefs - Permutation"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 4)))
+
+kable(mod5_permu)
+
+
+
 ```
 
 With all coefficients, the results of the effect sizes on the Log of Expenditure Per Capita Regressions are the following:
