@@ -3877,7 +3877,8 @@ aux = dat %>%
   mutate(pct = round(n/sum(n, na.rm = T), digits = 2)) %>%
   select(depvar2, n, pct, mean_coef, median_coef)
 
-kable(aux)
+kable(aux) %>%
+  kable_styling(position = "center")
 
 
 
@@ -3907,7 +3908,8 @@ aux = dat %>%
          Median = median_coef
          )
 
-kable(aux)
+kable(aux) %>%
+  kable_styling(position = "center")
 
 
 ```
@@ -5456,7 +5458,8 @@ mod1 <- tibble(
 ) %>%
   mutate_if(is.numeric, list(~round(., digits = 4)))
 
-kable(mod1)  
+kable(mod1) %>%
+  kable_styling(position = "center")
   
   
 ```
@@ -5482,7 +5485,8 @@ mod1_permu <- tibble(
 ) %>%
   mutate_if(is.numeric, list(~round(., digits = 4)))
 
-kable(mod1_permu)
+kable(mod1_permu) %>%
+  kable_styling(position = "center")
 
 ```
 
@@ -5518,7 +5522,8 @@ mod2 <- tibble(
 ) %>%
   mutate_if(is.numeric, list(~round(., digits = 4)))
 
-kable(mod2)
+kable(mod2) %>%
+  kable_styling(position = "center")
 
 ```
 
@@ -5542,7 +5547,8 @@ mod2_permu <- tibble(
 ) %>%
   mutate_if(is.numeric, list(~round(., digits = 4)))
 
-kable(mod2_permu)
+kable(mod2_permu) %>%
+  kable_styling(position = "center")
 
 ```
 
@@ -5578,7 +5584,8 @@ mod3 <- tibble(
 ) %>%
   mutate_if(is.numeric, list(~round(., digits = 4)))
 
-kable(mod3)
+kable(mod3) %>%
+  kable_styling(position = "center")
 
 ```
 
@@ -5603,7 +5610,8 @@ mod3_permu <- tibble(
 ) %>%
   mutate_if(is.numeric, list(~round(., digits = 4)))
 
-kable(mod3_permu)
+kable(mod3_permu) %>%
+  kable_styling(position = "center")
 
 ```
 
@@ -5638,7 +5646,8 @@ mod4 <- tibble(
 ) %>%
   mutate_if(is.numeric, list(~round(., digits = 4)))
 
-kable(mod4)
+kable(mod4) %>%
+  kable_styling(position = "center")
 
 ```
 
@@ -5663,7 +5672,8 @@ mod4_permu <- tibble(
 ) %>%
   mutate_if(is.numeric, list(~round(., digits = 4)))
 
-kable(mod4_permu)
+kable(mod4_permu) %>%
+  kable_styling(position = "center")
 
 ```
 
@@ -5699,8 +5709,9 @@ mod5 <- tibble(
 ) %>%
   mutate_if(is.numeric, list(~round(., digits = 4)))
 
-kable(mod5)
-
+kable(mod5) %>%
+  kable_styling(position = "center")
+ 
 ```
 
 ```{r}
@@ -5724,7 +5735,8 @@ mod5_permu <- tibble(
 ) %>%
   mutate_if(is.numeric, list(~round(., digits = 4)))
 
-kable(mod5_permu)
+kable(mod5_permu) %>%
+  kable_styling(position = "center")
 
 
 ```
@@ -5758,7 +5770,8 @@ mod6 <- tibble(
 ) %>%
   mutate_if(is.numeric, list(~round(., digits = 4)))
 
-kable(mod5_permu)
+kable(mod6) %>%
+  kable_styling(position = "center")
 
 ```
 
@@ -5781,7 +5794,8 @@ mod6_permu <- tibble(
 ) %>%
   mutate_if(is.numeric, list(~round(., digits = 4)))
 
-kable(mod5_permu)
+kable(mod6_permu) %>%
+  kable_styling(position = "center")
 
 
 
@@ -5791,6 +5805,77 @@ With all coefficients, the results of the effect sizes on the Log of Expenditure
 
 1. In terms of the modeling, passing from `OLS` to `PANEL` or `RDD` decreases the detected effects.
 2. All other coefficients remained insignificant.
+
+\newpage
+
+## Summary of Models
+
+### Summary of Base Models
+
+```{r}
+aux = bind_rows(
+  mod1,
+  mod3,
+  mod5
+) %>%
+  mutate(model = gsub(" .*", "", model))
+
+kable(aux) %>%
+  kable_styling(position = "center")
+
+```
+
+
+### Summary of Base Models (Permutation)
+
+
+```{r,echo=F}
+aux = bind_rows(
+  mod1_permu,
+  mod3_permu,
+  mod5_permu
+) %>%
+  mutate(model = gsub(" .*", "", model))
+
+kable(aux) %>%
+  kable_styling(position = "center")
+
+
+```
+
+### Summary of Models with all coefficients 
+
+```{r,echo=F}
+aux = bind_rows(
+  mod2,
+  mod4,
+  mod6
+) %>%
+  mutate(model = gsub(" .*", "", model))
+
+kable(aux) %>%
+  kable_styling(position = "center")
+
+```
+
+
+### Summary of Models with all coefficients (Permutation)
+
+```{r,echo=F}
+
+aux = bind_rows(
+  mod2_permu,
+  mod4_permu,
+  mod6_permu
+) %>%
+  mutate(model = gsub(" .*", "", model))
+
+kable(aux) %>%
+  kable_styling(position = "center")
+
+```
+
+
 
 ## Theory of Meta Analysis
 
@@ -5837,6 +5922,21 @@ mod <-  rma(yi = coef,
               method = "REML", 
               mods = ~ depvar2+indepvar2+year+published+elecsys2+method+agglevel+location2, 
               test = "knha")
+
+aux <- tibble(
+  estimate = mod[["beta"]],
+  se = mod[["se"]],
+  tval = mod[["zval"]],
+  pval = mod[["pval"]],
+  ci.lb = mod[["ci.lb"]],
+  ci.ub = mod[["ci.ub"]],
+  model = "logExpPC - All coefs - Permutation"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 4)))
+
+kable(aux) %>%
+  kable_styling(position = "center")
+
 ```
 
 ```{r}
@@ -5846,7 +5946,23 @@ summary(mod)
 As we have considerable heterogeneity in our sample, we run a permutation test to ensure the validity of our estimates. The results follow below.
 
 ```{r, echo=FALSE}
-permutest(mod, progbar = F)
+mod = permutest(mod, progbar = F)
+
+
+aux <- tibble(
+  estimate = mod[["beta"]],
+  se = mod[["se"]],
+  tval = mod[["zval"]],
+  pval = mod[["pval"]],
+  ci.lb = mod[["ci.lb"]],
+  ci.ub = mod[["ci.ub"]],
+  model = "logExpPC - All coefs - Permutation"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 4)))
+
+kable(aux) %>%
+  kable_styling(position = "center")
+
 ```
 
 In the main text, we selected the coefficients based on the regressions that had most observations and that presented a full model (with fixed effects or intermediate bandwidth in RDD). Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
@@ -5858,13 +5974,43 @@ mod <- rma(yi = coef,
               method = "REML", 
               mods = ~ depvar2+indepvar2+year+published+elecsys2+method+agglevel+location2, 
               test = "knha")
+
+aux <- tibble(
+  estimate = mod[["beta"]],
+  se = mod[["se"]],
+  tval = mod[["zval"]],
+  pval = mod[["pval"]],
+  ci.lb = mod[["ci.lb"]],
+  ci.ub = mod[["ci.ub"]],
+  model = "logExpPC - All coefs - Permutation"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 4)))
+
+kable(aux) %>%
+  kable_styling(position = "center")
+
 ```
 
 ```{r}
 summary(mod)
 ```
 
-```{r}
-permutest(mod, progbar = F)
+```{r, echo=F, warning=F}
+mod = permutest(mod, progbar = F)
+
+aux <- tibble(
+  estimate = mod[["beta"]],
+  se = mod[["se"]],
+  tval = mod[["zval"]],
+  pval = mod[["pval"]],
+  ci.lb = mod[["ci.lb"]],
+  ci.ub = mod[["ci.ub"]],
+  model = "logExpPC - All coefs - Permutation"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 4)))
+
+kable(aux) %>%
+  kable_styling(position = "center")
+
 ```
 
