@@ -3877,8 +3877,8 @@ aux = dat %>%
   mutate(pct = round(n/sum(n, na.rm = T), digits = 2)) %>%
   select(depvar2, n, pct, mean_coef, median_coef)
 
-kable(aux) %>%
-  kable_styling(position = "center")
+kable(aux, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
 
 
 
@@ -3908,8 +3908,8 @@ aux = dat %>%
          Median = median_coef
          )
 
-kable(aux) %>%
-  kable_styling(position = "center")
+kable(aux, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
 
 
 ```
@@ -4012,6 +4012,7 @@ Highlights:
 2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
+
 \newpage
 #### Electoral system subgroup analysis
 
@@ -4071,16 +4072,22 @@ f1b
 
 Therefore, we can see that the hypothesis that majoritarian systems produce systematic positive effects was disproved. The majoritarian systems in the sample had a random effects model estimate of -0.25, while the random effects model in the non-majoritarian subgroup fitted a value of 0.08. Both are non-significant, but they reassure us that the absense of effect is not caused by pooling multiple types of electoral systems.
 
-\newpage
-### PCTGDP x N
 
-This model fits the random effects for the percentage of GDP as public expenditure as the main outcome, and the size of lower house as the main treatment variable.
+\newpage
+### ExpPC x logN
+
+There were no studies that had per capita expenditure in the dependent variable and log of lower house size in the treatment variable.
+
+\newpage
+### ExpPC x K
+
+Now we are investigating the upper house size (K). In this model, we investigate the effect of upper house size on expenditure per capita (ExpPC).
 
 ```{r}
-# Pooling effects analysis -- PCTGDP x N
+# Pooling effects analysis -- ExpPC x K
 aux <- dat %>%
-  filter(indepvar2 == 'N',
-         depvar2 == 'PCTGDP')
+  filter(indepvar2 == 'K',
+         depvar2 == 'ExpPC')
 
 mod <- metagen(coef, SE, data=aux, 
           studlab=paste(authoryear),
@@ -4095,7 +4102,7 @@ mod
 
 And the forest plot:
 
-```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap="Effect of lower houses size (N) on percentage of public expenditure GDP (PCTGDP)",warning=FALSE}
+```{r, echo=FALSE, fig.width=7, fig.height=4, fig.cap="Effect of upper house size (K) on the per capita government expenditure (ExpPC)",warning=FALSE}
 mod2 <- tibble(
   TE = mod$TE,
   seTE = mod$seTE,
@@ -4114,6 +4121,7 @@ mod2 <- tibble(
   group_by(studlab) %>%
   mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
   ungroup()
+
 
 f2 <- mod2 %>%
   ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
@@ -4140,12 +4148,13 @@ f2 <- mod2 %>%
         legend.position = "none",
         axis.text.y = element_text(size = 15, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1)) 
+
 f2
 ```
 
 ```{r,include=F,warning=F}
 f2 + 
-  labs(caption = "PCTGDP x N") +
+  labs(caption = "ExpPC x K") +
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
         legend.position = "none",
@@ -4261,10 +4270,196 @@ Highlights:
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
 \newpage
-### ExpPC x logN
+### logExpPC x logN
 
-There were no studies that had per capita expenditure in the dependent variable and log of lower house size in the treatment variable.
+In this specification, we study the log of per capita expenditure (logExpPC) as a function of the log of lower house size (logN).
 
+```{r}
+# Pooling effects analysis -- logExpPC x logN
+aux <- dat %>%
+  filter(indepvar2 == 'logN',
+         depvar2 == 'logExpPC')
+
+mod <- metagen(coef, SE, data=aux, 
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
+mod
+```
+
+And the forest plot:
+
+```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of log lower houses size (logN) on the log of per capita government expenditure (logExpPC)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+
+f4 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(aes(color = group)) +
+  # Error Bars
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
+
+f4
+```
+
+```{r,include=F,warning=F}
+f4 + 
+  labs(caption = "logExpPC x logN") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 18, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fd.png", width = 30, height = 18.75, units = "cm")
+
+```
+
+Highlights:
+
+1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`). **This model is significant at the 10\% confidence level.**
+3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+
+\newpage
+### logExpPC x K
+
+No studies related the log of per capita expenditure with the size of upper house (K).
+
+### PCTGDP x N
+
+This model fits the random effects for the percentage of GDP as public expenditure as the main outcome, and the size of lower house as the main treatment variable.
+
+```{r}
+# Pooling effects analysis -- PCTGDP x N
+aux <- dat %>%
+  filter(indepvar2 == 'N',
+         depvar2 == 'PCTGDP')
+
+mod <- metagen(coef, SE, data=aux, 
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
+mod
+```
+
+And the forest plot:
+
+```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap="Effect of lower houses size (N) on percentage of public expenditure GDP (PCTGDP)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+f5 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(aes(color = group)) +
+  # Error Bars
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
+f5
+```
+
+```{r,include=F,warning=F}
+f5 + 
+  labs(caption = "PCTGDP x N") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 18, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fe.png", width = 30, height = 18.75, units = "cm")
+
+```
+
+Highlights:
+
+1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+
+\newpage
 ### PCTGDP x logN
 
 This meta-regression investigates the percentage of GDP as public expenditure as the dependent variable and the log lower house size (logN) as the treatment variable.
@@ -4311,194 +4506,6 @@ mod2 <- tibble(
   mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
   ungroup()
 
-f4 <- mod2 %>%
-  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
-  # Studies coefs
-  geom_point(aes(color = group)) +
-  # Error Bars
-  geom_errorbarh(aes(color = group), height = 0.1) +
-  # Colors
-  scale_color_manual(values = c("#000000", "#8b0000")) + 
-  # X-axis limit
-  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
-  # Y-axis names
-  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
-  # Vertical dashed line
-  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
-  # Labels
-  labs(x = "",
-       y = "") + 
-  # Facet - Separating Studies from Overall Effect
-  facet_grid(group~., scales = "free", space = "free") + 
-  # Theme
-  theme_minimal() %+replace%
-  theme(strip.text.y = element_blank(),
-        legend.position = "none",
-        axis.text.y = element_text(size = 15, hjust = 1.1),
-        axis.text.x = element_text(size = 15, hjust = 1.1)) 
-
-f4
-```
-
-```{r,include=F,warning=F}
-f4 + 
-  labs(caption = "PCTGDP x logN") +
-  theme_minimal() %+replace%
-  theme(strip.text.y = element_blank(),
-        legend.position = "none",
-        axis.text.y = element_text(size = 18, hjust = 1.1),
-        axis.text.x = element_text(size = 15, hjust = 1.1),
-        plot.caption = element_text(size=22)) 
-
-ggsave("./plots/fd.png", width = 30, height = 18.75, units = "cm")
-
-```
-
-Highlights:
-
-1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
-2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
-3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-
-\newpage
-### logExpPC x logN
-
-In this specification, we study the log of per capita expenditure (logExpPC) as a function of the log of lower house size (logN).
-
-```{r}
-# Pooling effects analysis -- logExpPC x logN
-aux <- dat %>%
-  filter(indepvar2 == 'logN',
-         depvar2 == 'logExpPC')
-
-mod <- metagen(coef, SE, data=aux, 
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
-mod
-```
-
-And the forest plot:
-
-```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of log lower houses size (logN) on the log of per capita government expenditure (logExpPC)",warning=FALSE}
-mod2 <- tibble(
-  TE = mod$TE,
-  seTE = mod$seTE,
-  studlab = mod$studlab,
-  lower = mod$lower,
-  upper = mod$upper,
-  group = "A") %>%
-  bind_rows(.,
-            aux = tibble(
-              TE = c(mod$TE.random, NA),
-              seTE = c(mod$seTE.random, NA),
-              studlab = c("Overall Effect", "Prediction Interval"),
-              lower = c(mod$lower.random, mod$lower.predict),
-              upper = c(mod$upper.random, mod$upper.predict),
-              group = "B")) %>%
-  group_by(studlab) %>%
-  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
-  ungroup()
-
-
-f5 <- mod2 %>%
-  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
-  # Studies coefs
-  geom_point(aes(color = group)) +
-  # Error Bars
-  geom_errorbarh(aes(color = group), height = 0.1) +
-  # Colors
-  scale_color_manual(values = c("#000000", "#8b0000")) + 
-  # X-axis limit
-  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
-  # Y-axis names
-  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
-  # Vertical dashed line
-  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
-  # Labels
-  labs(x = "",
-       y = "") + 
-  # Facet - Separating Studies from Overall Effect
-  facet_grid(group~., scales = "free", space = "free") + 
-  # Theme
-  theme_minimal() %+replace%
-  theme(strip.text.y = element_blank(),
-        legend.position = "none",
-        axis.text.y = element_text(size = 15, hjust = 1.1),
-        axis.text.x = element_text(size = 15, hjust = 1.1)) 
-
-f5
-```
-
-```{r,include=F,warning=F}
-f5 + 
-  labs(caption = "logExpPC x logN") +
-  theme_minimal() %+replace%
-  theme(strip.text.y = element_blank(),
-        legend.position = "none",
-        axis.text.y = element_text(size = 18, hjust = 1.1),
-        axis.text.x = element_text(size = 15, hjust = 1.1),
-        plot.caption = element_text(size=22)) 
-
-ggsave("./plots/fe.png", width = 30, height = 18.75, units = "cm")
-
-```
-
-Highlights:
-
-1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
-2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`). **This model is significant at the 10\% confidence level.**
-3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-
-\newpage
-### ExpPC x K
-
-Now we are investigating the upper house size (K). In this model, we investigate the effect of upper house size on expenditure per capita (ExpPC).
-
-```{r}
-# Pooling effects analysis -- ExpPC x K
-aux <- dat %>%
-  filter(indepvar2 == 'K',
-         depvar2 == 'ExpPC')
-
-mod <- metagen(coef, SE, data=aux, 
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
-mod
-```
-
-And the forest plot:
-
-```{r, echo=FALSE, fig.width=7, fig.height=4, fig.cap="Effect of upper house size (K) on the per capita government expenditure (ExpPC)",warning=FALSE}
-mod2 <- tibble(
-  TE = mod$TE,
-  seTE = mod$seTE,
-  studlab = mod$studlab,
-  lower = mod$lower,
-  upper = mod$upper,
-  group = "A") %>%
-  bind_rows(.,
-            aux = tibble(
-              TE = c(mod$TE.random, NA),
-              seTE = c(mod$seTE.random, NA),
-              studlab = c("Overall Effect", "Prediction Interval"),
-              lower = c(mod$lower.random, mod$lower.predict),
-              upper = c(mod$upper.random, mod$upper.predict),
-              group = "B")) %>%
-  group_by(studlab) %>%
-  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
-  ungroup()
-
-
 f6 <- mod2 %>%
   ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
   # Studies coefs
@@ -4530,7 +4537,7 @@ f6
 
 ```{r,include=F,warning=F}
 f6 + 
-  labs(caption = "ExpPC x K") +
+  labs(caption = "PCTGDP x logN") +
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
         legend.position = "none",
@@ -4644,10 +4651,6 @@ Highlights:
 
 
 \newpage
-### logExpPC x K
-
-No studies related the log of per capita expenditure with the size of upper house (K).
-
 ```{r,include=F,warning=F}
 blank = ggplot() + 
   geom_blank() +
@@ -4823,16 +4826,23 @@ f8b
 
 Therefore, we can see that the hypothesis that majoritarian systems produce systematic positive effects was disproved. The majoritarian systems in the sample had a random effects model estimate of -0.25, while the random effects model in the non-majoritarian subgroup fitted a value of 0.08. Both are non-significant, but they reassure us that the absense of effect is not caused by pooling multiple types of electoral systems.
 
-\newpage
-### PCTGDP x N
 
-This model fits the random effects for the percentage of GDP as public expenditure as the main outcome, and the size of lower house as the main treatment variable.
+\newpage
+### ExpPC x logN
+
+There were no studies that had per capita expenditure in the dependent variable and log of lower house size in the treatment variable.
+
+
+\newpage
+### ExpPC x K
+
+Now we are investigating the upper house size (K). In this model, we investigate the effect of upper house size on expenditure per capita (ExpPC).
 
 ```{r}
-# Pooling effects analysis -- PCTGDP x N
+# Pooling effects analysis -- ExpPC x K
 aux <- fulldat %>%
-  filter(indepvar2 == 'N',
-         depvar2 == 'PCTGDP')
+  filter(indepvar2 == 'K',
+         depvar2 == 'ExpPC')
 
 mod <- metagen(coef, SE, data=aux, 
           studlab=paste(authoryear),
@@ -4847,7 +4857,7 @@ mod
 
 And the forest plot:
 
-```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap="Effect of lower houses size (N) on percentage of public expenditure GDP (PCTGDP)",warning=FALSE}
+```{r, echo=FALSE, fig.width=7, fig.height=4, fig.cap="Effect of upper house size (K) on the per capita government expenditure (ExpPC)",warning=FALSE}
 mod2 <- tibble(
   TE = mod$TE,
   seTE = mod$seTE,
@@ -4866,6 +4876,7 @@ mod2 <- tibble(
   group_by(studlab) %>%
   mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
   ungroup()
+
 
 f9 <- mod2 %>%
   ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
@@ -4890,18 +4901,19 @@ f9 <- mod2 %>%
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
         legend.position = "none",
-        axis.text.y = element_text(size = 10, hjust = 1.1),
+        axis.text.y = element_text(size = 12, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1)) 
+
 f9
 ```
 
 ```{r,include=F,warning=F}
 f9 + 
-  labs(caption = "PCTGDP x N") +
+  labs(caption = "ExpPC x K") +
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
         legend.position = "none",
-        axis.text.y = element_text(size = 13, hjust = 1.1),
+        axis.text.y = element_text(size = 12, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1),
         plot.caption = element_text(size=22)) 
 
@@ -5010,9 +5022,194 @@ Highlights:
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
 \newpage
-### ExpPC x logN
+### logExpPC x logN
 
-There were no studies that had per capita expenditure in the dependent variable and log of lower house size in the treatment variable.
+In this specification, we study the log of per capita expenditure (logExpPC) as a function of the log of lower house size (logN).
+
+```{r}
+# Pooling effects analysis -- logExpPC x logN
+aux <- fulldat %>%
+  filter(indepvar2 == 'logN',
+         depvar2 == 'logExpPC')
+
+mod <- metagen(coef, SE, data=aux, 
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
+mod
+```
+
+And the forest plot:
+
+```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of log lower houses size (logN) on the log of per capita government expenditure (logExpPC)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+f11 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(aes(color = group)) +
+  # Error Bars
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
+
+f11
+```
+
+```{r,include=F,warning=F}
+f11 + 
+  labs(caption = "logExpPC x logN") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fk.png", width = 30, height = 18.75, units = "cm")
+
+```
+
+Highlights:
+
+1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`). **This model is significant at the 10\% confidence level.**
+3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+
+### logExpPC x K
+
+No studies related the log of per capita expenditure with the size of upper house (K).
+
+
+\newpage
+### PCTGDP x N
+
+This model fits the random effects for the percentage of GDP as public expenditure as the main outcome, and the size of lower house as the main treatment variable.
+
+```{r}
+# Pooling effects analysis -- PCTGDP x N
+aux <- fulldat %>%
+  filter(indepvar2 == 'N',
+         depvar2 == 'PCTGDP')
+
+mod <- metagen(coef, SE, data=aux, 
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
+mod
+```
+
+And the forest plot:
+
+```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap="Effect of lower houses size (N) on percentage of public expenditure GDP (PCTGDP)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+f12 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(aes(color = group)) +
+  # Error Bars
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 10, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
+f12
+```
+
+```{r,include=F,warning=F}
+f12 + 
+  labs(caption = "PCTGDP x N") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 13, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fl.png", width = 30, height = 18.75, units = "cm")
+
+```
+
+Highlights:
+
+1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
 ### PCTGDP x logN
 
@@ -5058,193 +5255,6 @@ mod2 <- tibble(
   ungroup()
 
 
-f11 <- mod2 %>%
-  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
-  # Studies coefs
-  geom_point(aes(color = group)) +
-  # Error Bars
-  geom_errorbarh(aes(color = group), height = 0.1) +
-  # Colors
-  scale_color_manual(values = c("#000000", "#8b0000")) + 
-  # X-axis limit
-  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
-  # Y-axis names
-  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
-  # Vertical dashed line
-  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
-  # Labels
-  labs(x = "",
-       y = "") + 
-  # Facet - Separating Studies from Overall Effect
-  facet_grid(group~., scales = "free", space = "free") + 
-  # Theme
-  theme_minimal() %+replace%
-  theme(strip.text.y = element_blank(),
-        legend.position = "none",
-        axis.text.y = element_text(size = 15, hjust = 1.1),
-        axis.text.x = element_text(size = 15, hjust = 1.1)) 
-
-f11
-```
-
-```{r,include=F,warning=F}
-f11 + 
-  labs(caption = "PCTGDP x logN") +
-  theme_minimal() %+replace%
-  theme(strip.text.y = element_blank(),
-        legend.position = "none",
-        axis.text.y = element_text(size = 20, hjust = 1.1),
-        axis.text.x = element_text(size = 15, hjust = 1.1),
-        plot.caption = element_text(size=22)) 
-
-ggsave("./plots/fk.png", width = 30, height = 18.75, units = "cm")
-
-```
-
-Highlights:
-
-1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
-2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
-3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-
-\newpage
-### logExpPC x logN
-
-In this specification, we study the log of per capita expenditure (logExpPC) as a function of the log of lower house size (logN).
-
-```{r}
-# Pooling effects analysis -- logExpPC x logN
-aux <- fulldat %>%
-  filter(indepvar2 == 'logN',
-         depvar2 == 'logExpPC')
-
-mod <- metagen(coef, SE, data=aux, 
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
-mod
-```
-
-And the forest plot:
-
-```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of log lower houses size (logN) on the log of per capita government expenditure (logExpPC)",warning=FALSE}
-mod2 <- tibble(
-  TE = mod$TE,
-  seTE = mod$seTE,
-  studlab = mod$studlab,
-  lower = mod$lower,
-  upper = mod$upper,
-  group = "A") %>%
-  bind_rows(.,
-            aux = tibble(
-              TE = c(mod$TE.random, NA),
-              seTE = c(mod$seTE.random, NA),
-              studlab = c("Overall Effect", "Prediction Interval"),
-              lower = c(mod$lower.random, mod$lower.predict),
-              upper = c(mod$upper.random, mod$upper.predict),
-              group = "B")) %>%
-  group_by(studlab) %>%
-  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
-  ungroup()
-
-f12 <- mod2 %>%
-  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
-  # Studies coefs
-  geom_point(aes(color = group)) +
-  # Error Bars
-  geom_errorbarh(aes(color = group), height = 0.1) +
-  # Colors
-  scale_color_manual(values = c("#000000", "#8b0000")) + 
-  # X-axis limit
-  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
-  # Y-axis names
-  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
-  # Vertical dashed line
-  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
-  # Labels
-  labs(x = "",
-       y = "") + 
-  # Facet - Separating Studies from Overall Effect
-  facet_grid(group~., scales = "free", space = "free") + 
-  # Theme
-  theme_minimal() %+replace%
-  theme(strip.text.y = element_blank(),
-        legend.position = "none",
-        axis.text.y = element_text(size = 15, hjust = 1.1),
-        axis.text.x = element_text(size = 15, hjust = 1.1)) 
-
-f12
-```
-
-```{r,include=F,warning=F}
-f12 + 
-  labs(caption = "logExpPC x logN") +
-  theme_minimal() %+replace%
-  theme(strip.text.y = element_blank(),
-        legend.position = "none",
-        axis.text.y = element_text(size = 15, hjust = 1.1),
-        axis.text.x = element_text(size = 15, hjust = 1.1),
-        plot.caption = element_text(size=22)) 
-
-ggsave("./plots/fl.png", width = 30, height = 18.75, units = "cm")
-
-```
-
-Highlights:
-
-1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
-2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`). **This model is significant at the 10\% confidence level.**
-3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-
-\newpage
-### ExpPC x K
-
-Now we are investigating the upper house size (K). In this model, we investigate the effect of upper house size on expenditure per capita (ExpPC).
-
-```{r}
-# Pooling effects analysis -- ExpPC x K
-aux <- fulldat %>%
-  filter(indepvar2 == 'K',
-         depvar2 == 'ExpPC')
-
-mod <- metagen(coef, SE, data=aux, 
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
-mod
-```
-
-And the forest plot:
-
-```{r, echo=FALSE, fig.width=7, fig.height=4, fig.cap="Effect of upper house size (K) on the per capita government expenditure (ExpPC)",warning=FALSE}
-mod2 <- tibble(
-  TE = mod$TE,
-  seTE = mod$seTE,
-  studlab = mod$studlab,
-  lower = mod$lower,
-  upper = mod$upper,
-  group = "A") %>%
-  bind_rows(.,
-            aux = tibble(
-              TE = c(mod$TE.random, NA),
-              seTE = c(mod$seTE.random, NA),
-              studlab = c("Overall Effect", "Prediction Interval"),
-              lower = c(mod$lower.random, mod$lower.predict),
-              upper = c(mod$upper.random, mod$upper.predict),
-              group = "B")) %>%
-  group_by(studlab) %>%
-  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
-  ungroup()
-
-
 f13 <- mod2 %>%
   ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
   # Studies coefs
@@ -5268,7 +5278,7 @@ f13 <- mod2 %>%
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
         legend.position = "none",
-        axis.text.y = element_text(size = 12, hjust = 1.1),
+        axis.text.y = element_text(size = 15, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1)) 
 
 f13
@@ -5276,11 +5286,11 @@ f13
 
 ```{r,include=F,warning=F}
 f13 + 
-  labs(caption = "ExpPC x K") +
+  labs(caption = "PCTGDP x logN") +
   theme_minimal() %+replace%
   theme(strip.text.y = element_blank(),
         legend.position = "none",
-        axis.text.y = element_text(size = 12, hjust = 1.1),
+        axis.text.y = element_text(size = 20, hjust = 1.1),
         axis.text.x = element_text(size = 15, hjust = 1.1),
         plot.caption = element_text(size=22)) 
 
@@ -5388,9 +5398,6 @@ Highlights:
 2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-### logExpPC x K
-
-No studies related the log of per capita expenditure with the size of upper house (K).
 
 
 ```{r, echo=FALSE, fig.width=20, fig.height=2}
@@ -5448,19 +5455,31 @@ mod <-  rma(yi = coef,
             slab = dat$authoryear)
 
 mod1 <- tibble(
-  estimate = mod[["beta"]],
-  se = mod[["se"]],
-  tval = mod[["zval"]],
-  pval = mod[["pval"]],
-  ci.lb = mod[["ci.lb"]],
-  ci.ub = mod[["ci.ub"]],
+     ` ` = c("Intercept", "Indepvar: N", "Indepvar: logN", "Year", "Published: No",
+          "Elecsys: Non-Majoritarian", "Method: Panel", "AggLevel: States", "Location: World"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  T = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ", 
+              round(mod[["ci.ub"]], digits = 4), ")"),
   model = "PCTGDP"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4)))
+  mutate_if(is.numeric, list(~round(., digits = 4))) %>%
+    mutate(model = gsub(" .*", "", model))
 
-kable(mod1) %>%
-  kable_styling(position = "center")
+kable(mod1, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
   
+collapse_rows_dt <- expand.grid(
+    Country =sprintf('Country with a long name %s',c('A','B')),
+    State =sprintf('State %s',c('a','b')),
+    City =sprintf('City %s',c('1','2')),
+    District =sprintf('District %s',c('1','2'))) %>% 
+  arrange(Country, State, City) %>% 
+  mutate_all(as.character) %>%
+  mutate(C1 =rnorm(n()),
+         C2 =rnorm(n()))
   
 ```
 
@@ -5475,18 +5494,21 @@ mod = permutest(mod, progbar = F)
 mod
 
 mod1_permu <- tibble(
-  estimate = mod[["beta"]],
-  se = mod[["se"]],
-  tval = mod[["zval"]],
-  pval = mod[["pval"]],
-  ci.lb = mod[["ci.lb"]],
-  ci.ub = mod[["ci.ub"]],
+     ` ` = c("Intercept", "Indepvar: N", "Indepvar: logN", "Year", "Published: No",
+          "Elecsys: Non-Majoritarian", "Method: Panel", "AggLevel: States", "Location: World"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  T = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
   model = "PCTGDP - Permutation"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4)))
+  mutate_if(is.numeric, list(~round(., digits = 4))) %>%
+    mutate(model = gsub(" .*", "", model))
 
-kable(mod1_permu) %>%
-  kable_styling(position = "center")
+kable(mod1_permu, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
 
 ```
 
@@ -5512,18 +5534,21 @@ mod <- rma(yi = coef,
             slab = fulldat$authoryear)
 
 mod2 <- tibble(
-  estimate = mod[["beta"]],
-  se = mod[["se"]],
-  tval = mod[["zval"]],
-  pval = mod[["pval"]],
-  ci.lb = mod[["ci.lb"]],
-  ci.ub = mod[["ci.ub"]],
+  ` ` = c("Intercept", "Indepvar: N", "Indepvar: logN", "Year", "Published: No",
+          "Elecsys: Non-Majoritarian", "Method: Panel", "AggLevel: States", "Location: World"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  T = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
   model = "PCTGDP - All coefs"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4)))
+  mutate_if(is.numeric, list(~round(., digits = 4))) %>%
+    mutate(model = gsub(" .*", "", model))
 
-kable(mod2) %>%
-  kable_styling(position = "center")
+kable(mod2, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
 
 ```
 
@@ -5537,18 +5562,21 @@ mod = permutest(mod, progbar = F)
 mod 
 
 mod2_permu <- tibble(
-  estimate = mod[["beta"]],
-  se = mod[["se"]],
-  tval = mod[["zval"]],
-  pval = mod[["pval"]],
-  ci.lb = mod[["ci.lb"]],
-  ci.ub = mod[["ci.ub"]],
+     ` ` = c("Intercept", "Indepvar: N", "Indepvar: logN", "Year", "Published: No",
+          "Elecsys: Non-Majoritarian", "Method: Panel", "AggLevel: States", "Location: World"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  T = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
   model = "PCTGDP - All coefs - Permutation"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4)))
+  mutate_if(is.numeric, list(~round(., digits = 4))) %>%
+    mutate(model = gsub(" .*", "", model))
 
-kable(mod2_permu) %>%
-  kable_styling(position = "center")
+kable(mod2_permu, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
 
 ```
 
@@ -5574,18 +5602,21 @@ mod <-  rma(yi = coef,
             slab = dat$authoryear)
 
 mod3 <- tibble(
-  estimate = mod[["beta"]],
-  se = mod[["se"]],
-  tval = mod[["zval"]],
-  pval = mod[["pval"]],
-  ci.lb = mod[["ci.lb"]],
-  ci.ub = mod[["ci.ub"]],
+  ` ` = c("Intercept", "Indepvar: N", "Year", "Elecsys: Non-Majoritarian", "Method: Panel",
+          "Method: IV", "AggLevel: States"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  T = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
   model = "ExpPC"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4)))
+  mutate_if(is.numeric, list(~round(., digits = 4))) %>%
+    mutate(model = gsub(" .*", "", model))
 
-kable(mod3) %>%
-  kable_styling(position = "center")
+kable(mod3, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
 
 ```
 
@@ -5600,18 +5631,21 @@ mod = permutest(mod, progbar = F)
 mod 
 
 mod3_permu <- tibble(
-  estimate = mod[["beta"]],
-  se = mod[["se"]],
-  tval = mod[["zval"]],
-  pval = mod[["pval"]],
-  ci.lb = mod[["ci.lb"]],
-  ci.ub = mod[["ci.ub"]],
+  ` ` = c("Intercept", "Indepvar: N", "Year", "Elecsys: Non-Majoritarian", "Method: Panel",
+          "Method: IV", "AggLevel: States"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  T = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
   model = "ExpPC - Permutation"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4)))
+  mutate_if(is.numeric, list(~round(., digits = 4))) %>%
+    mutate(model = gsub(" .*", "", model))
 
-kable(mod3_permu) %>%
-  kable_styling(position = "center")
+kable(mod3_permu, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
 
 ```
 
@@ -5636,18 +5670,21 @@ mod <- rma(yi = coef,
             slab = fulldat$authoryear)
 
 mod4 <- tibble(
-  estimate = mod[["beta"]],
-  se = mod[["se"]],
-  tval = mod[["zval"]],
-  pval = mod[["pval"]],
-  ci.lb = mod[["ci.lb"]],
-  ci.ub = mod[["ci.ub"]],
+  ` ` = c("Intercept", "Indepvar: N", "Year", "Elecsys: Non-Majoritarian",
+             "Method: Panel", "Method: IV" ,"AggLevel: States"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  T = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
   model = "ExpPC - All coefs"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4)))
+  mutate_if(is.numeric, list(~round(., digits = 4))) %>%
+    mutate(model = gsub(" .*", "", model))
 
-kable(mod4) %>%
-  kable_styling(position = "center")
+kable(mod4, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
 
 ```
 
@@ -5662,18 +5699,21 @@ mod
 
 
 mod4_permu <- tibble(
-  estimate = mod[["beta"]],
-  se = mod[["se"]],
-  tval = mod[["zval"]],
-  pval = mod[["pval"]],
-  ci.lb = mod[["ci.lb"]],
-  ci.ub = mod[["ci.ub"]],
+  ` ` = c("Intercept", "Indepvar: N", "Year", "Elecsys: Non-Majoritarian",
+             "Method: Panel", "Method: IV" ,"AggLevel: States"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  T = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
   model = "ExpPC - All coefs - Permutation"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4)))
+  mutate_if(is.numeric, list(~round(., digits = 4))) %>%
+    mutate(model = gsub(" .*", "", model))
 
-kable(mod4_permu) %>%
-  kable_styling(position = "center")
+kable(mod4_permu, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
 
 ```
 
@@ -5699,18 +5739,21 @@ mod <-  rma(yi = coef,
 
 
 mod5 <- tibble(
-  estimate = mod[["beta"]],
-  se = mod[["se"]],
-  tval = mod[["zval"]],
-  pval = mod[["pval"]],
-  ci.lb = mod[["ci.lb"]],
-  ci.ub = mod[["ci.ub"]],
+   ` ` = c("Intercept", "Indepvar: N", "Year", "Published: No",
+             "Method: Panel", "AggLevel: States"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  T = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
   model = "logExpPC"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4)))
+  mutate_if(is.numeric, list(~round(., digits = 4))) %>%
+    mutate(model = gsub(" .*", "", model))
 
-kable(mod5) %>%
-  kable_styling(position = "center")
+kable(mod5, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
  
 ```
 
@@ -5725,18 +5768,21 @@ mod = permutest(mod, progbar = F)
 mod
 
 mod5_permu <- tibble(
-  estimate = mod[["beta"]],
-  se = mod[["se"]],
-  tval = mod[["zval"]],
-  pval = mod[["pval"]],
-  ci.lb = mod[["ci.lb"]],
-  ci.ub = mod[["ci.ub"]],
+  ` ` = c("Intercept", "Indepvar: N", "Year", "Published: No",
+             "Method: Panel", "AggLevel: States"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  T = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
   model = "logExpPC - Permutation"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4)))
+  mutate_if(is.numeric, list(~round(., digits = 4))) %>%
+    mutate(model = gsub(" .*", "", model))
 
-kable(mod5_permu) %>%
-  kable_styling(position = "center")
+kable(mod5_permu, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
 
 
 ```
@@ -5760,18 +5806,21 @@ mod <- rma(yi = coef,
             slab = fulldat$authoryear)
 
 mod6 <- tibble(
-  estimate = mod[["beta"]],
-  se = mod[["se"]],
-  tval = mod[["zval"]],
-  pval = mod[["pval"]],
-  ci.lb = mod[["ci.lb"]],
-  ci.ub = mod[["ci.ub"]],
+  ` ` = c("Intercept", "Indepvar: N", "Year", "Published: No",
+             "Method: Panel", "Method: RDD", "AggLevel: States"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  T = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4), ")"),
   model = "logExpPC - All coefs"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4)))
+  mutate_if(is.numeric, list(~round(., digits = 4))) %>%
+    mutate(model = gsub(" .*", "", model))
 
-kable(mod6) %>%
-  kable_styling(position = "center")
+kable(mod6, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
 
 ```
 
@@ -5784,18 +5833,21 @@ mod = permutest(mod, progbar = F)
 mod 
 
 mod6_permu <- tibble(
-  estimate = mod[["beta"]],
-  se = mod[["se"]],
-  tval = mod[["zval"]],
-  pval = mod[["pval"]],
-  ci.lb = mod[["ci.lb"]],
-  ci.ub = mod[["ci.ub"]],
+  ` ` = c("Intercept", "Indepvar: N", "Year", "Published: No",
+             "Method: Panel", "Method: RDD", "AggLevel: States"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  T = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4), ")"),
   model = "logExpPC - All coefs - Permutation"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4)))
+  mutate_if(is.numeric, list(~round(., digits = 4))) %>%
+    mutate(model = gsub(" .*", "", model))
 
-kable(mod6_permu) %>%
-  kable_styling(position = "center")
+kable(mod6_permu, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
 
 
 
@@ -5812,7 +5864,7 @@ With all coefficients, the results of the effect sizes on the Log of Expenditure
 
 ### Summary of Base Models
 
-```{r}
+```{r, echo=F}
 aux = bind_rows(
   mod1,
   mod3,
@@ -5820,8 +5872,8 @@ aux = bind_rows(
 ) %>%
   mutate(model = gsub(" .*", "", model))
 
-kable(aux) %>%
-  kable_styling(position = "center")
+kable(aux, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
 
 ```
 
@@ -5830,6 +5882,12 @@ kable(aux) %>%
 
 
 ```{r,echo=F}
+
+# Table  3  presents  the  meta-regression  results  for  our  restricted  and  extended  samples.   Eachcolumn represents one of the three measures of public spending we discuss in this paper. To reduce the risk of false positives in our analyses, we use permutation tests to calculate significance levelsfor the meta-regressions (Higgins and Thompson 2004).TABLE 3 AROUND HERE: Meta-regression analysis estimating the effect of moderator variables on public expenditure 
+#The first two models show the results for public expenditure per capita.  In both the restrictedand the extended samples, we and that models that use푛as an independent variable tend to detect significantly smaller effects when compared to k. This suggests that an additional member in thelower house has a smaller impact on public spending than a member in the upper house. Moreover,
+#the results for the extended sample point out that recent studies and larger effects than older ones,and that changing the electoral rules from majoritarian to non-majoritarian increases the effects oflegislature size on per capita expenditure.The third and fourth columns use the logarithm of expenditure per capita as the dependentvariable.   No covariate  is statistically  significant in our  smaller sample,  but two  moderators arenegatively associated with the outcome in our larger study pool.  They both refer to estimationmethods.  Studies that employ panel/fixed effects or regression discontinuity designs (RDDs) havelower coeficients for log expenditure per capita if we take OLS as the reference category
+
+
 aux = bind_rows(
   mod1_permu,
   mod3_permu,
@@ -5837,8 +5895,8 @@ aux = bind_rows(
 ) %>%
   mutate(model = gsub(" .*", "", model))
 
-kable(aux) %>%
-  kable_styling(position = "center")
+kable(aux, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
 
 
 ```
@@ -5853,8 +5911,8 @@ aux = bind_rows(
 ) %>%
   mutate(model = gsub(" .*", "", model))
 
-kable(aux) %>%
-  kable_styling(position = "center")
+kable(aux, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
 
 ```
 
@@ -5868,10 +5926,10 @@ aux = bind_rows(
   mod4_permu,
   mod6_permu
 ) %>%
-  mutate(model = gsub(" .*", "", model))
+  mutate(model = gsub(" .*", "", model)) 
 
-kable(aux) %>%
-  kable_styling(position = "center")
+kable(aux, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
 
 ```
 
@@ -5924,18 +5982,21 @@ mod <-  rma(yi = coef,
               test = "knha")
 
 aux <- tibble(
-  estimate = mod[["beta"]],
-  se = mod[["se"]],
-  tval = mod[["zval"]],
-  pval = mod[["pval"]],
-  ci.lb = mod[["ci.lb"]],
-  ci.ub = mod[["ci.ub"]],
-  model = "logExpPC - All coefs - Permutation"
+  ` ` = c("Intercept", "Depvar: PCTGDP", "Depvar: logExpPC", 
+          "Indepvar: N", "Indepvar: logN", "Year", "Published: No",
+           "Elecsys: Non-Majoritarian", "Method: PANEL", "Method: IV", "Method: RDD",
+          "AggLevel: States", "AggLevel: Countries" ,"Location: World"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  T = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")")
 ) %>%
   mutate_if(is.numeric, list(~round(., digits = 4)))
 
-kable(aux) %>%
-  kable_styling(position = "center")
+kable(aux, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
 
 ```
 
@@ -5950,18 +6011,20 @@ mod = permutest(mod, progbar = F)
 
 
 aux <- tibble(
-  estimate = mod[["beta"]],
-  se = mod[["se"]],
-  tval = mod[["zval"]],
-  pval = mod[["pval"]],
-  ci.lb = mod[["ci.lb"]],
-  ci.ub = mod[["ci.ub"]],
-  model = "logExpPC - All coefs - Permutation"
-) %>%
+  ` ` = c("Intercept", "Depvar: PCTGDP", "Depvar: logExpPC", 
+          "Indepvar: N", "Indepvar: logN", "Year", "Published: No",
+           "Elecsys: Non-Majoritarian", "Method: PANEL", "Method: IV", "Method: RDD",
+          "AggLevel: States", "AggLevel: Countries" ,"Location: World"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  T = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")")) %>%
   mutate_if(is.numeric, list(~round(., digits = 4)))
 
-kable(aux) %>%
-  kable_styling(position = "center")
+kable(aux, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
 
 ```
 
@@ -5976,18 +6039,20 @@ mod <- rma(yi = coef,
               test = "knha")
 
 aux <- tibble(
-  estimate = mod[["beta"]],
-  se = mod[["se"]],
-  tval = mod[["zval"]],
-  pval = mod[["pval"]],
-  ci.lb = mod[["ci.lb"]],
-  ci.ub = mod[["ci.ub"]],
-  model = "logExpPC - All coefs - Permutation"
-) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4)))
+  ` ` = c("Intercept", "Depvar: PCTGDP", "Depvar: logExpPC", 
+          "Indepvar: N", "Indepvar: logN", "Year", "Published: No",
+           "Elecsys: Non-Majoritarian", "Method: PANEL", "Method: IV", "Method: RDD",
+          "AggLevel: States", "AggLevel: Countries" ,"Location: World"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  T = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")")) %>%
+  mutate_if(is.numeric, list(~round(., digits = 4))) 
 
-kable(aux) %>%
-  kable_styling(position = "center")
+kable(aux, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
 
 ```
 
@@ -5999,18 +6064,21 @@ summary(mod)
 mod = permutest(mod, progbar = F)
 
 aux <- tibble(
-  estimate = mod[["beta"]],
-  se = mod[["se"]],
-  tval = mod[["zval"]],
-  pval = mod[["pval"]],
-  ci.lb = mod[["ci.lb"]],
-  ci.ub = mod[["ci.ub"]],
-  model = "logExpPC - All coefs - Permutation"
-) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4)))
+    ` ` = c("Intercept", "Depvar: PCTGDP", "Depvar: logExpPC", 
+          "Indepvar: N", "Indepvar: logN", "Year", "Published: No",
+           "Elecsys: Non-Majoritarian", "Method: PANEL", "Method: IV", "Method: RDD",
+          "AggLevel: States", "AggLevel: Countries" ,"Location: World"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  T = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")")) %>%
+  mutate_if(is.numeric, list(~round(., digits = 4))) 
 
-kable(aux) %>%
-  kable_styling(position = "center")
+
+kable(aux, booktabs = T) %>%
+  kable_styling(c("striped", "bordered"), position = "center")
 
 ```
 
