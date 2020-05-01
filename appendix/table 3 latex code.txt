@@ -1,0 +1,103 @@
+
+\begin{longtable}{cccccccccccccc}
+\toprule
+\multicolumn{1}{c}{ } & \multicolumn{1}{c}{ } & \multicolumn{4}{c}{ExpPC} & \multicolumn{4}{c}{logExpPC} & \multicolumn{4}{c}{PCTGDP} \\
+\cmidrule(l{3pt}r{3pt}){3-6} \cmidrule(l{3pt}r{3pt}){7-10} \cmidrule(l{3pt}r{3pt}){11-14}
+ &  & Estimate & SE & T & P-Value & Estimate & SE & T & P-Value & Estimate & SE & T & P-Value\\
+\midrule
+\endfirsthead
+\multicolumn{14}{@{}l}{\textit{(continued)}}\\
+\toprule
+\multicolumn{1}{c}{ } & \multicolumn{1}{c}{ } & \multicolumn{4}{c}{ExpPC} & \multicolumn{4}{c}{logExpPC} & \multicolumn{4}{c}{PCTGDP} \\
+\cmidrule(l{3pt}r{3pt}){3-6} \cmidrule(l{3pt}r{3pt}){7-10} \cmidrule(l{3pt}r{3pt}){11-14}
+ &  & Estimate & SE & T & P-Value & Estimate & SE & T & P-Value & Estimate & SE & T & P-Value\\
+\midrule
+\endhead
+\
+\endfoot
+\bottomrule
+\endlastfoot
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textbf{Base}}\\
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textit{Intercept}}\\
+\hspace{1em}\hspace{1em} &  & -104.0701 & 318.9300 & -0.3263 & 0.7503 & 8.9590 & 47.6441 & 0.1880 & 0.8817 & 7.4330 & 1.7594 & 4.2248 & 0.0517\\
+\cmidrule{2-14}
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textit{Indepvar: N}}\\
+\hspace{1em}\hspace{1em} &  & -2.9238 & 2.0932 & -1.3968 & 0.1900 & 0.1641 & 0.3258 & 0.5037 & 0.7029 & -4.7067 & 1.4637 & -3.2156 & 0.0846\\
+\cmidrule{2-14}
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textit{Indepvar: logN}}\\
+\hspace{1em}\hspace{1em} &  & NA & NA & NA & NA & NA & NA & NA & NA & -0.0094 & 0.0030 & -3.1174 & 0.0893\\
+\cmidrule{2-14}
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textit{Year}}\\
+\hspace{1em}\hspace{1em} &  & 0.0525 & 0.1586 & 0.3308 & 0.7470 & -0.0044 & 0.0237 & -0.1864 & 0.8827 & -0.0003 & 0.0005 & -0.6899 & 0.5615\\
+\cmidrule{2-14}
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textit{Published: No}}\\
+\hspace{1em}\hspace{1em} &  & NA & NA & NA & NA & -0.1520 & 0.1902 & -0.7993 & 0.5707 & -0.0633 & 0.0078 & -8.1139 & 0.0149\\
+\cmidrule{2-14}
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textit{Elecsys: Non-Majoritarian}}\\
+\hspace{1em}\hspace{1em} &  & 0.3458 & 1.5533 & 0.2226 & 0.8279 & NA & NA & NA & NA & -2.0554 & 0.1611 & -12.7621 & 0.0061\\
+\cmidrule{2-14}
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textit{Method: Panel}}\\
+\hspace{1em}\hspace{1em} &  & 1.4571 & 2.2376 & 0.6512 & 0.5283 & 0.2581 & 0.1886 & 1.3680 & 0.4018 & 0.0556 & 0.0071 & 7.7913 & 0.0161\\
+\cmidrule{2-14}
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textit{Method: IV}}\\
+\hspace{1em}\hspace{1em} &  & 1.4936 & 2.6675 & 0.5599 & 0.5868 & NA & NA & NA & NA & NA & NA & NA & NA\\
+\cmidrule{2-14}
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textit{AggLevel: States}}\\
+\hspace{1em}\hspace{1em} &  & -0.0915 & 2.4255 & -0.0377 & 0.9706 & -0.0875 & 0.1901 & -0.4602 & 0.7254 & -4.6992 & 1.4637 & -3.2106 & 0.0848\\
+\cmidrule{2-14}
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textit{Location: World}}\\
+\hspace{1em}\hspace{1em} &  & NA & NA & NA & NA & NA & NA & NA & NA & -4.6959 & 1.4637 & -3.2082 & 0.0850\\
+\cmidrule{1-14}
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textbf{All Coefs}}\\
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textit{Intercept}}\\
+\hspace{1em}\hspace{1em} &  & -296.9072 & 166.6870 & -1.7812 & 0.0806 & -1.5738 & 15.8830 & -0.0991 & 0.9221 & -5.2700 & 5.8694 & -0.8979 & 0.3760\\
+\cmidrule{2-14}
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textit{Indepvar: N}}\\
+\hspace{1em}\hspace{1em} &  & -5.4468 & 0.9692 & -5.6201 & 0.0000 & -0.0088 & 0.1262 & -0.0701 & 0.9448 & -4.6069 & 2.4363 & -1.8909 & 0.0677\\
+\cmidrule{2-14}
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textit{Indepvar: logN}}\\
+\hspace{1em}\hspace{1em} &  & NA & NA & NA & NA & NA & NA & NA & NA & -0.0014 & 0.0048 & -0.2945 & 0.7703\\
+\cmidrule{2-14}
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textit{Year}}\\
+\hspace{1em}\hspace{1em} &  & 0.1503 & 0.0830 & 1.8117 & 0.0757 & 0.0009 & 0.0079 & 0.1187 & 0.9067 & 0.0060 & 0.0027 & 2.2730 & 0.0299\\
+\cmidrule{2-14}
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textit{Published: No}}\\
+\hspace{1em}\hspace{1em} &  & NA & NA & NA & NA & -0.0829 & 0.0728 & -1.1387 & 0.2683 & -0.1130 & 0.0251 & -4.5060 & 0.0001\\
+\cmidrule{2-14}
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textit{Elecsys: Non-Majoritarian}}\\
+\hspace{1em}\hspace{1em} &  & 1.0236 & 0.7701 & 1.3293 & 0.1894 & NA & NA & NA & NA & -2.1629 & 0.1568 & -13.7904 & 0.0000\\
+\cmidrule{2-14}
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textit{Method: Panel}}\\
+\hspace{1em}\hspace{1em} &  & -0.1422 & 0.8136 & -0.1747 & 0.8620 & -0.2436 & 0.0705 & -3.4537 & 0.0025 & 0.1252 & 0.0304 & 4.1232 & 0.0002\\
+\cmidrule{2-14}
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textit{Method: IV}}\\
+\hspace{1em}\hspace{1em} &  & 0.1907 & 0.8223 & 0.2319 & 0.8175 & NA & NA & NA & NA & NA & NA & NA & NA\\
+\cmidrule{2-14}
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textit{AggLevel: States}}\\
+\hspace{1em}\hspace{1em} &  & -0.2008 & 1.0049 & -0.1998 & 0.8424 & -0.0438 & 0.0673 & -0.6505 & 0.5228 & -4.7325 & 2.4361 & -1.9426 & 0.0609\\
+\cmidrule{2-14}
+\addlinespace[0.3em]
+\multicolumn{14}{l}{\textit{Location: World}}\\
+\hspace{1em}\hspace{1em} &  & NA & NA & NA & NA & NA & NA & NA & NA & -4.6443 & 2.4362 & -1.9064 & 0.0656\\*
+\end{longtable}
