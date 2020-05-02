@@ -94,7 +94,7 @@ set.seed(732578) # From random.org
 
 # Needed packages
 pkgs <- c('tidyverse', 'meta', 'metafor', 'readxl',
-          'dmetar', 'knitr', 'gridGraphics', 'gridExtra','ggpubr','kableExtra','magick')
+          'knitr', 'gridGraphics', 'gridExtra','ggpubr','kableExtra','magick')
 
 # Install if not already installed
 installIfNot <- function(x) {
@@ -5823,8 +5823,12 @@ aux = list(mod3, mod5, mod1) %>%
          order = ifelse(` ` == "Elecsys: Non-Majoritarian", 6, order),
          order = ifelse(` ` == "Method: Panel", 7, order),
          order = ifelse(` ` == "Method: IV", 8, order),
-         order = ifelse(` ` == "AggLevel: States", 9, order)
-         ) %>%
+         order = ifelse(` ` == "AggLevel: States", 9, order),
+         pval = ifelse(`P-Value` < 0.05, "*", NA),
+         pval = ifelse(`P-Value` < 0.01, "**", pval),
+         pval = ifelse(`P-Value` < 0.01, "***", pval),
+         pval = ifelse(`P-Value` >= 0.05, " ", pval),
+         `P-Value` = pval) %>%
   arrange(order) %>%
   select(-` 1`, -` 2`, -contains("model"), -order) %>%
   mutate(mod = "Base") %>%
@@ -5844,15 +5848,19 @@ aux2 = list(mod4, mod6, mod2) %>%
          order = ifelse(` ` == "Elecsys: Non-Majoritarian", 6, order),
          order = ifelse(` ` == "Method: Panel", 7, order),
          order = ifelse(` ` == "Method: IV", 8, order),
-         order = ifelse(` ` == "AggLevel: States", 9, order)
-         ) %>%
+         order = ifelse(` ` == "AggLevel: States", 9, order),
+         pval = ifelse(`P-Value` < 0.05, "*", NA),
+         pval = ifelse(`P-Value` < 0.01, "**", pval),
+         pval = ifelse(`P-Value` < 0.01, "***", pval),
+         pval = ifelse(`P-Value` >= 0.05, " ", pval),
+         `P-Value` = pval) %>%
   arrange(order) %>%
   select(-` 1`, -` 2`, -contains("model"), -order) %>%
   mutate(mod = "All Coefs") %>%
   select(mod, everything())
 
 aux <- bind_rows(aux, aux2) %>%
-  select(-contains("CI"),-`T`,-T1,-T2)
+  select(-contains("CI"),-`T`,-T1,-T2,-pval)
 
 ```
 
@@ -5893,11 +5901,11 @@ kable(aux,
       "repeat_header"
       ),
     position = "center",
-    latex_options = c("repeat_header"))
+    latex_options = c("repeat_header")) %>%
+  footnote(general = "Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1")
 
 ```
 \elandscape
-
 
 
 ```{r, echo=F, warning=F,error=F,message=F}
@@ -5924,8 +5932,12 @@ aux = list(mod3_permu, mod5_permu, mod1_permu) %>%
          order = ifelse(` ` == "Elecsys: Non-Majoritarian", 6, order),
          order = ifelse(` ` == "Method: Panel", 7, order),
          order = ifelse(` ` == "Method: IV", 8, order),
-         order = ifelse(` ` == "AggLevel: States", 9, order)
-         ) %>%
+         order = ifelse(` ` == "AggLevel: States", 9, order),
+         pval = ifelse(`P-Value` < 0.05, "*", NA),
+         pval = ifelse(`P-Value` < 0.01, "**", pval),
+         pval = ifelse(`P-Value` < 0.01, "***", pval),
+         pval = ifelse(`P-Value` >= 0.05, " ", pval),
+         `P-Value` = pval) %>%
   arrange(order) %>%
   select(-` 1`, -` 2`, -contains("model"), -order) %>%
   mutate(mod = "Base") %>%
@@ -5945,24 +5957,28 @@ aux2 = list(mod4_permu, mod6_permu, mod2_permu) %>%
          order = ifelse(` ` == "Elecsys: Non-Majoritarian", 6, order),
          order = ifelse(` ` == "Method: Panel", 7, order),
          order = ifelse(` ` == "Method: IV", 8, order),
-         order = ifelse(` ` == "AggLevel: States", 9, order)
-         ) %>%
+         order = ifelse(` ` == "AggLevel: States", 9, order),
+         pval = ifelse(`P-Value` < 0.05, "*", NA),
+         pval = ifelse(`P-Value` < 0.01, "**", pval),
+         pval = ifelse(`P-Value` < 0.01, "***", pval),
+         pval = ifelse(`P-Value` >= 0.05, " ", pval),
+         `P-Value` = pval) %>%
   arrange(order) %>%
   select(-` 1`, -` 2`, -contains("model"), -order) %>%
   mutate(mod = "All Coefs") %>%
   select(mod, everything())
 
 aux <- bind_rows(aux, aux2) %>%
-  select(-contains("CI"),-`T`,-T1,-T2)
+  select(-contains("CI"),-`T`,-T1,-T2,-pval)
 
 ```
+
 
 \blandscape
 
 ## Summary of Results (Permutation)
 ```{r, echo=F, warning=F,error=F,message=F,asis=T}
 kable(aux, 
-      "latex",
       booktabs = T,
       longtable = F,
       align = "c",
@@ -5994,7 +6010,8 @@ kable(aux,
       "repeat_header"
       ),
     position = "center",
-    latex_options = c("repeat_header"))
+    latex_options = c("repeat_header")) %>%
+  footnote(general = "Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1")
 
 ```
 \elandscape
