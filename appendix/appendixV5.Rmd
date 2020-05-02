@@ -3883,66 +3883,50 @@ chisq.test(table(dat$scoef, dat$depvar2), simulate.p.value = T)
 \newpage 
 ### Descriptive Stats of Moderators
 
-```{r, echo=F}
+```{r, echo=F,warning=F,message=F,error=F}
 
-# Table - General
+# Table 2
 
-aux <- dat %>%
-  group_by(depvar2) %>%
-  summarise(n = n(),
-            mean_coef = mean(coef, na.rm = T),
-            median_coef = median(coef, na.rm = T)) %>%
-  mutate(pct = round(n/sum(n, na.rm = T), digits = 2)) %>%
-  select(depvar2, n, pct, mean_coef, median_coef) %>%
-  rename(` ` = depvar2,
-         N = n,
-         Pct = pct,
-         Mean = mean_coef,
-         Median = median_coef)
+dat2 <- dat %>%
+  select(depvar2, indepvar2, published, elecsys2, method,agglevel, location2) %>%
+  rename(Depvar = depvar2,
+         Indepvar = indepvar2,
+         Published = published,
+         "Electoral System" = elecsys2,
+         Method = method,
+         "Aggregate Level" = agglevel,
+         Location = location2)
 
+names <- dat2 %>% 
+  map(table) %>%
+  unlist() %>%
+  names()
 
-kable(aux, 
+aux <- dat2 %>%
+  map_df(~{
+    table(.x) %>%
+      as.data.frame() %>%
+      rename(Moderator = ".x") %>%
+      mutate(Moderator = as.character(Moderator),
+             Pct = paste0(100*(round(Freq/sum(Freq, na.rm = T), digits = 4)), "%"))
+  }) %>%
+  mutate(Moderator = names,
+         Moderator = gsub("\\.", ": ", Moderator),
+         Freq = as.character(Freq)) %>%
+  bind_rows(.,
+            tibble(
+              Moderator = "Year",
+              Freq = paste0(round(mean(dat$year, na.rm = T), digits=2), " (Mean)"),
+              Pct = paste0(as.character(round(median(dat$year, na.rm = T), digits=2)), " (Median)")
+            ))
+
+kable(aux,
       booktabs = T,
       align = "c",
       linesep ='') %>% 
   kable_styling(c("striped","bordered","scale_down"), position = "center")
 
-
-
-```
-
-
-### Descriptive Stats of Moderators by Year
-
-```{r, echo=F}
-
-#Table: by year
-
-aux <- dat %>%
-  group_by(depvar2, year) %>%
-  summarise(n = n(),
-            mean_coef = round(mean(coef, na.rm = T), digits = 3),
-            median_coef = round(median(coef, na.rm = T), digits = 3)) %>%
-  group_by(year) %>%
-  mutate(pct = paste0(100*(round(n/sum(n, na.rm = T), digits = 2)), " %")) %>%
-  select(depvar2, year, n, pct, mean_coef, median_coef) %>%
-  arrange(year) %>%
-  rename(` ` = depvar2,
-         Year = year,
-         N = n,
-         Pct = pct,
-         Mean = mean_coef,
-         Median = median_coef
-         )
-
-
-kable(aux, 
-      booktabs = T,
-      align = "c",
-      linesep ='') %>% 
-  kable_styling(c("striped","bordered","scale_down"), position = "center")
-
-
+rm(dat2,names)
 ```
 
 
@@ -5465,7 +5449,7 @@ mod1 <- tibble(
           "Elecsys: Non-Majoritarian", "Method: Panel", "AggLevel: States", "Location: World"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
-  T = mod[["zval"]],
+  `T` = mod[["zval"]],
   `P-Value` = mod[["pval"]],
   CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ", 
               round(mod[["ci.ub"]], digits = 4), ")"),
@@ -5491,13 +5475,13 @@ mod1_permu <- tibble(
           "Elecsys: Non-Majoritarian", "Method: Panel", "AggLevel: States", "Location: World"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
-  T = mod[["zval"]],
+  `T` = mod[["zval"]],
   `P-Value` = mod[["pval"]],
   CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
               round(mod[["ci.ub"]], digits = 4 ), ")"),
   model = "PCTGDP - Permutation"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4))) 
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
 
 
 ```
@@ -5529,13 +5513,13 @@ mod2 <- tibble(
           "Elecsys: Non-Majoritarian", "Method: Panel", "AggLevel: States", "Location: World"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
-  T = mod[["zval"]],
+  `T` = mod[["zval"]],
   `P-Value` = mod[["pval"]],
   CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
               round(mod[["ci.ub"]], digits = 4 ), ")"),
   model = "PCTGDP - All coefs"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4))) 
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
 
 ```
 
@@ -5553,13 +5537,13 @@ mod2_permu <- tibble(
           "Elecsys: Non-Majoritarian", "Method: Panel", "AggLevel: States", "Location: World"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
-  T = mod[["zval"]],
+  `T` = mod[["zval"]],
   `P-Value` = mod[["pval"]],
   CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
               round(mod[["ci.ub"]], digits = 4 ), ")"),
   model = "PCTGDP - All coefs - Permutation"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4))) 
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
 
 ```
 
@@ -5590,13 +5574,13 @@ mod3 <- tibble(
           "Method: IV", "AggLevel: States"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
-  T = mod[["zval"]],
+  `T` = mod[["zval"]],
   `P-Value` = mod[["pval"]],
   CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
               round(mod[["ci.ub"]], digits = 4 ), ")"),
   model = "ExpPC"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4))) 
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
 
 ```
 
@@ -5615,13 +5599,13 @@ mod3_permu <- tibble(
           "Method: IV", "AggLevel: States"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
-  T = mod[["zval"]],
+  `T` = mod[["zval"]],
   `P-Value` = mod[["pval"]],
   CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
               round(mod[["ci.ub"]], digits = 4 ), ")"),
   model = "ExpPC - Permutation"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4))) 
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
 
 ```
 
@@ -5651,13 +5635,13 @@ mod4 <- tibble(
              "Method: Panel", "Method: IV" ,"AggLevel: States"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
-  T = mod[["zval"]],
+  `T` = mod[["zval"]],
   `P-Value` = mod[["pval"]],
   CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
               round(mod[["ci.ub"]], digits = 4 ), ")"),
   model = "ExpPC - All coefs"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4))) 
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
 
 ```
 
@@ -5676,13 +5660,13 @@ mod4_permu <- tibble(
              "Method: Panel", "Method: IV" ,"AggLevel: States"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
-  T = mod[["zval"]],
+  `T` = mod[["zval"]],
   `P-Value` = mod[["pval"]],
   CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
               round(mod[["ci.ub"]], digits = 4 ), ")"),
   model = "ExpPC - All coefs - Permutation"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4))) 
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
 
 ```
 
@@ -5712,13 +5696,13 @@ mod5 <- tibble(
              "Method: Panel", "AggLevel: States"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
-  T = mod[["zval"]],
+  `T` = mod[["zval"]],
   `P-Value` = mod[["pval"]],
   CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
               round(mod[["ci.ub"]], digits = 4 ), ")"),
   model = "logExpPC"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4))) 
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
 
 ```
 
@@ -5737,13 +5721,13 @@ mod5_permu <- tibble(
              "Method: Panel", "AggLevel: States"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
-  T = mod[["zval"]],
+  `T` = mod[["zval"]],
   `P-Value` = mod[["pval"]],
   CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
               round(mod[["ci.ub"]], digits = 4 ), ")"),
   model = "logExpPC - Permutation"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4))) 
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
 
 mod5_permu %>%
   select(-model) %>%
@@ -5776,13 +5760,13 @@ mod6 <- tibble(
              "Method: Panel", "Method: RDD", "AggLevel: States"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
-  T = mod[["zval"]],
+  `T` = mod[["zval"]],
   `P-Value` = mod[["pval"]],
   CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
               round(mod[["ci.ub"]], digits = 4), ")"),
   model = "logExpPC - All coefs"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4))) 
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
 
 ```
 
@@ -5799,13 +5783,13 @@ mod6_permu <- tibble(
              "Method: Panel", "Method: RDD", "AggLevel: States"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
-  T = mod[["zval"]],
+  `T` = mod[["zval"]],
   `P-Value` = mod[["pval"]],
   CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
               round(mod[["ci.ub"]], digits = 4), ")"),
   model = "logExpPC - All coefs - Permutation"
 ) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4))) 
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
 
 ```
 
@@ -5843,8 +5827,8 @@ aux = list(mod3, mod5, mod1) %>%
          ) %>%
   arrange(order) %>%
   select(-` 1`, -` 2`, -contains("model"), -order) %>%
-  mutate(type = "Base") %>%
-  select(type, everything())
+  mutate(mod = "Base") %>%
+  select(mod, everything())
 
 aux2 = list(mod4, mod6, mod2) %>%
   map(~{
@@ -5864,20 +5848,22 @@ aux2 = list(mod4, mod6, mod2) %>%
          ) %>%
   arrange(order) %>%
   select(-` 1`, -` 2`, -contains("model"), -order) %>%
-  mutate(type = "All Coefs") %>%
-  select(type, everything())
+  mutate(mod = "All Coefs") %>%
+  select(mod, everything())
 
 aux <- bind_rows(aux, aux2) %>%
-  select(-contains("CI"))
+  select(-contains("CI"),-`T`,-T1,-T2)
 
 ```
 
 
 \blandscape
+
+## Summary of Results
 ```{r, echo=F, warning=F,error=F,message=F,asis=T}
 kable(aux, 
       booktabs = T,
-      longtable = T,
+      longtable = F,
       align = "c",
       linesep ='',
       col.names = c(
@@ -5885,26 +5871,21 @@ kable(aux,
         " ",
         "Estimate",
         "SE",
-        "T",
         "P-Value",
         #
         "Estimate",
         "SE",
-        "T",
         "P-Value",
         #
         "Estimate",
         "SE",
-        "T",
         "P-Value"
-      ),
-  caption = "Summary of Models"
-    ) %>% 
+      )) %>% 
   collapse_rows(
-    1:3,
+    1:2,
     row_group_label_position ='stack'
     ) %>%
-  add_header_above(c(" ", " ","ExpPC" = 4, "logExpPC" = 4, "PCTGDP" = 4)) %>%
+  add_header_above(c(" ", " ","ExpPC" = 3, "logExpPC" = 3, "PCTGDP" = 3)) %>%
   kable_styling(
     c("striped",
       "bordered", 
@@ -5916,6 +5897,7 @@ kable(aux,
 
 ```
 \elandscape
+
 
 
 ```{r, echo=F, warning=F,error=F,message=F}
@@ -5946,8 +5928,8 @@ aux = list(mod3_permu, mod5_permu, mod1_permu) %>%
          ) %>%
   arrange(order) %>%
   select(-` 1`, -` 2`, -contains("model"), -order) %>%
-  mutate(type = "Base") %>%
-  select(type, everything())
+  mutate(mod = "Base") %>%
+  select(mod, everything())
 
 aux2 = list(mod4_permu, mod6_permu, mod2_permu) %>%
   map(~{
@@ -5967,20 +5949,22 @@ aux2 = list(mod4_permu, mod6_permu, mod2_permu) %>%
          ) %>%
   arrange(order) %>%
   select(-` 1`, -` 2`, -contains("model"), -order) %>%
-  mutate(type = "All Coefs") %>%
-  select(type, everything())
+  mutate(mod = "All Coefs") %>%
+  select(mod, everything())
 
 aux <- bind_rows(aux, aux2) %>%
-  select(-contains("CI"))
+  select(-contains("CI"),-`T`,-T1,-T2)
 
 ```
 
-
 \blandscape
+
+## Summary of Results (Permutation)
 ```{r, echo=F, warning=F,error=F,message=F,asis=T}
 kable(aux, 
+      "latex",
       booktabs = T,
-      longtable = T,
+      longtable = F,
       align = "c",
       linesep ='',
       col.names = c(
@@ -5988,26 +5972,21 @@ kable(aux,
         " ",
         "Estimate",
         "SE",
-        "T",
         "P-Value",
         #
         "Estimate",
         "SE",
-        "T",
         "P-Value",
         #
         "Estimate",
         "SE",
-        "T",
         "P-Value"
-      ),
-          caption = "Summary of Models (Permutest)"
-    ) %>% 
+      )) %>% 
   collapse_rows(
-    1:3,
+    1:2,
     row_group_label_position ='stack'
     ) %>%
-  add_header_above(c(" ", " ","ExpPC" = 4, "logExpPC" = 4, "PCTGDP" = 4)) %>%
+  add_header_above(c(" ", " ","ExpPC" = 3, "logExpPC" = 3, "PCTGDP" = 3)) %>%
   kable_styling(
     c("striped",
       "bordered", 
@@ -6019,7 +5998,6 @@ kable(aux,
 
 ```
 \elandscape
-
 
 
 
