@@ -2,7 +2,7 @@
 title: "2_preprocessing"
 author: "Umberto Mignozzetti"
 date: "12/25/2019"
-output: html_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -10,6 +10,11 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Adding articles
+
+Teste
+
+Este branch é o segundo.
+
 
 ```{r}
 # Paper 343
