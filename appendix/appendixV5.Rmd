@@ -150,7 +150,8 @@ build_forest <- function(mod, capt, lsize = 22) {
           legend.position = "none",
           axis.text.y = element_text(size = .8*lsize, hjust = 1),
           axis.text.x = element_text(size = .7*lsize, hjust = 1.1),
-          plot.caption = element_text(size=lsize))
+          plot.caption = element_text(size=lsize)) + 
+    theme(panel.grid.major = element_blank())
   return(p)
 }
 ```
@@ -760,7 +761,7 @@ f <- ggarrange(f1, f2, f3, f4, f5, f6, f7,
                ncol = 2, nrow = 4, 
                font.label = list(size=13, face = 'bold'),
                hjust = 0)
-ggsave("./plots/fig.pdf", plot = f, width = 21, height = 29, units = "cm")
+ggsave("./plots/fig3.pdf", plot = f, width = 21, height = 29, units = "cm")
 
 f <- ggarrange(f1, f2, f3, f4, f5, f6, f7, 
                labels = c("ExpPC x N", 
@@ -773,7 +774,7 @@ f <- ggarrange(f1, f2, f3, f4, f5, f6, f7,
                ncol = 3, nrow = 3, 
                font.label = list(size=13, face = 'bold'),
                hjust = 0)
-ggsave("./plots/fig2.pdf", plot = f, width = 29, height = 21, units = "cm")
+ggsave("./plots/fig4.pdf", plot = f, width = 29, height = 21, units = "cm")
 
 
 ```
