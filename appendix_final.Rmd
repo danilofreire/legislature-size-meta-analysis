@@ -1,0 +1,6393 @@
+---
+title: "Appendix"
+author: "Umberto Mignozzetti"
+date: "12/25/2019"
+header_includes:
+- \usepackage{booktabs}
+- \usepackage{pdflscape}
+- \newcommand{\blandscape}{\begin{landscape}}
+- \newcommand{\elandscape}{\end{landscape}}
+output: pdf_document
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r global_options, include=FALSE}
+## Starting
+set.seed(732578) # From random.org
+
+# Needed packages
+pkgs <- c('tidyverse', 'meta', 'metafor', 
+          'readxl', 'compareGroups',
+          'knitr', 'gridGraphics', 'gridExtra',
+          'ggpubr','kableExtra','magick')
+
+# Install if not already installed
+installIfNot <- function(x) {
+  if(x %in% rownames(installed.packages()) == FALSE) 
+    install.packages(x, dependencies = T, repos = "http://cran.us.r-project.org")
+} 
+lapply(pkgs, installIfNot)
+
+# Load packs
+lapply(pkgs, require, character.only = T)
+rm(pkgs, installIfNot)
+
+```
+
+
+## Search criteria
+
+The first step in reviews is to gather a sample of records. This initial procedure is the foundation for the entire meta-analytical process: if the goal is to aggregate all the available data on a given topic, the primary pool must contain all of it. At the same time, the sample should be concise enough to optimise the work flow. Upon selecting the online databases, we attempted to do a "term" search, based on a set of words we scouted from the distributive politics literature we already knew. This search produced oversized databases, of which a large share was completely unrelated to our subject of investigation. The strategy we found to be the most thorough and productive was to select the records that cited Weingast, Shepsle and Johnsen's 1981 paper "The political economy of benefits and costs: A neoclassical approach to distributive politics". Although \href{https://scholar.google.com/}{Google Scholar} reports the article amounts to \href{https://scholar.google.com/scholar?um=1&ie=UTF-8&lr&cites=13117579863846712459}{2,180} citations\footnote{As of May 11\textsuperscript{th}, 2020.}, as of the 21\textsuperscript{st} of November 2019, our search resulted in a total of 2,664 records.
+
+We webscraped the main databases in Social Sciences: \href{https://scholar.google.com/}{Google Scholar} (n = 1001); \href{https://academic.microsoft.com/home}{Microsoft Academic} (n = 927); and
+\href{https://www.scopus.com/}{Scopus} (n = 736). The R script we wrote extracted, to a .csv file, the title, abstract, authors, year, journal of publication, and database from which the record originated. We screened these results with an English language and Article restriction -- meaning, we excluded all records written in other languages and all that were not academic papers, such as book chapters, doctoral theses, etc. We set no restriction to unpublished articles.
+
+Below, you will find the webscrape script:
+
+``` {r, eval = FALSE}
+
+#### INSTALLING PACKAGES ####
+
+install.packages('tidyverse')
+install.packages('rvest')
+install.packages('RSelenium')
+
+
+#### LOADING PACKAGES ####
+
+library(tidyverse)
+library(rvest)
+library(RSelenium)
+
+
+#### SETTING UP SELENIUM ####
+
+# Alternative 1: Setting up Selenium (head)
+rsD <- rsDriver(port = 1114L, browser = c("firefox")) 
+remDr <- rsD$client
+remDr$open()
+
+
+#### Google scholar ####
+
+# site: https://scholar.google.com
+
+remDr$navigate("https://scholar.google.com/
+               scholar?cites=13117579863846712459&as_sdt=2005&sciodt=0,5")
+
+
+articles_weingast <- tibble(
+  value = NA,
+  term = NA,
+  page = NA
+)
+
+k <- 0
+
+for (j in 1:213) { # we had to manually choose the number of pages here; Y.M.M.V.
+
+  Sys.sleep(rpois(1, 5))
+
+  # Getting articles basic information
+  k <- k + 1
+
+  webElem <- remDr$findElement("css", "body")
+
+
+  title <- read_html(remDr$getPageSource()[[1]]) %>%
+    html_nodes(
+      xpath = '//*[contains(concat( " ", @class, " " ),
+      concat( " ", "gs_rt", " " ))]'
+      ) %>%
+    html_text() %>%
+    enframe(name = NULL) %>%
+    rename("title" = "value") %>%
+    mutate(page = k)
+
+  articles_partial <- read_html(remDr$getPageSource()[[1]]) %>%
+    html_nodes(xpath = '//*[contains(concat( " ", @class, " " ), concat( " ", "gs_a", " " ))]') %>%
+    html_text() %>%
+    enframe(name = NULL) %>%
+    bind_rows(
+      tibble(
+        value = "delete",
+        term = NA,
+        page = NA
+      ),
+      .
+    ) %>%
+    bind_cols(., title)
+
+
+  # Binding articles
+  articles_weingast <- bind_rows(articles_weingast, articles_partial)
+
+  # Changing Pages
+  next_button <- remDr$findElement(using = "xpath", "/html/body/div/div[11]/div[2]/div[2]/div[3]/
+                                   div[2]/center/table/tbody/tr/td[12]/a/b")
+  next_button$clickElement()
+
+  # Deleting cookies
+  remDr$deleteAllCookies()
+}
+
+write_csv(articles_weingast, "scholar_weingast_raw.csv")
+
+
+articles_weingast <- articles_weingast %>%
+  select(-term, -page) %>%
+  filter(value != "delete") %>%
+  slice(2:nrow(.)) %>%
+  filter(!grepl("books.google.com", value)) %>%
+  filter(!grepl("BOOK", title)) %>%
+  separate(., value, into = c("author", "value"),
+           sep = " -", remove = T, extra = "merge", fill = "right") %>%
+  separate(., value, into = c("journal", "year"),
+           sep = ",", remove = T, extra = "merge", fill = "right") %>%
+  mutate(
+    year_2 = ifelse(is.na(year), journal, year),
+    journal = ifelse(is.na(year), NA, journal),
+    year = year_2
+  ) %>%
+  select(-year_2) %>%
+  separate(., year, into = c("year", "site"),
+           sep = "-", remove = T, extra = "merge", fill = "right") %>%
+  mutate(
+    year = gsub("[^0-9 ]", "", value),
+    year = gsub("^[0-9]{5,}", "", year),
+    year = gsub("^ {1,}", "", year)
+  ) %>%
+  separate(., year, into = c("year", "junk"),
+           sep = " ", remove = T, extra = "merge", fill = "right") %>%
+  separate(., value, into = c("journal", "value"),
+           sep = "-", remove = T, extra = "merge", fill = "right") %>%
+  mutate(
+    journal_untidy = year,
+    year = gsub("[^0-9 ]", "", year)
+  )
+
+
+articles <- articles %>%
+  na.omit() %>%
+  distinct(., value, .keep_all = T)
+
+
+write_csv(articles, "google_scholar_clean.csv")
+
+
+#### SCOPUS ####
+
+# url: https://www.scopus.com/home.uri
+
+# Scraping Scopus requires a bit more manual labor.
+# You can login on scopus through your university/institution and download the metadata
+#o fthe article(s) you want directly from there.
+# All we need to do after that is scrape the information of
+# every link from the .csv file downloaded previously
+
+scopus <- read_csv("scopus.csv")
+
+
+scopus <- scopus %>%
+  mutate(article = map_chr(Link, ~ {
+    remDr$navigate(.x)
+    read_html(remDr$getPageSource()[[1]]) %>%
+      html_nodes(xpath = '//*[(@id = "abstractSection")]//p') %>%
+      html_text() %>%
+      paste(., collapse = "\r\n")
+  })) %>%
+  mutate(
+    article = gsub(
+      '\r\n\nUse this section.*Topics\n\n\n"',
+      "",
+      article
+    ),
+    article = gsub(
+      "Topics are unique.*onwards.",
+      "",
+      article
+    ),
+    article = gsub(
+      "Use this section.*documents.",
+      "",
+      article
+    ),
+    article = gsub(
+      "Learn more about these Topics",
+      "",
+      article
+    ),
+    article = gsub(
+      ". 20.*, Springer Science\\+Business Media, LLC, part of Springer Nature.",
+      "",
+      article
+    ),
+    article = gsub("\r", "", article),
+    article = gsub("\n", "", article),
+    article = gsub(" {2,}", " ", article),
+    article = gsub(" {3,}", "", article)
+  )
+
+
+
+write_csv(scopus, "scopus_clean.csv")
+
+
+#### Microsoft Academic ####
+
+# url: https://academic.microsoft.com/home
+
+
+articles <- list()
+k <- 0
+remDr$navigate("https://academic.microsoft.com/paper/
+               2076316673/citedby/search?q=The%20Political%
+               20Economy%20of%20Benefits%20and%20Costs%3A%20A%
+               20Neoclassical%20Approach%20to
+               %20Distributive%20Politics&qe=RId%253D2076316673&f=&orderBy=0")
+
+
+# 1) Getting hyperlinks from articles
+for (j in 1:100) {
+  k <- k + 1
+  print(k)
+
+  # Navigating Website
+
+  Sys.sleep(rpois(2, 5))
+
+  # Getting articles' links
+  articles[[k]] <- read_html(remDr$getPageSource()[[1]]) %>%
+    html_nodes(xpath = "//a") %>%
+    html_attr("href") %>%
+    enframe(name = NULL) %>%
+    filter(
+      grepl("paper/", value),
+      !grepl("citedby", value)
+    ) %>%
+    mutate(value = paste0("https://academic.microsoft.com/", value))
+
+  # Changing Page
+  next_page_others <- remDr$findElement(using = "xpath", "/html/body/div/div/div/router-view/router-view/                                        ma-edp-serp/div/div[2]/div/
+  compose/div/div[2]/ma-pager/div/i[2]")
+  next_page_others$clickElement()
+}
+
+
+articles <- articles %>%
+  reduce(bind_rows) %>%
+  distinct(value, .keep_all = T)
+
+
+# 2) Navigating through articles and scraping them
+
+articles_links <- articles %>%
+  mutate(
+    abstract = NA,
+    title = NA,
+    year = NA,
+    journal = NA,
+    authors = NA,
+    tags = NA
+  )
+
+
+for (i in 1:nrow(articles_links)) {
+  remDr$navigate(articles_links$value[i])
+  Sys.sleep(rpois(1, 4))
+
+  articles_links$abstract[i] <- read_html(remDr$getPageSource()[[1]]) %>%
+    html_nodes(., xpath = "//html/body/div/div/div/router-view/compose[1]/
+               div/div/ma-entity-detail-info/compose/div/div/div[1]/p") %>%
+    html_text() %>%
+    paste(., collapse = " ")
+
+  articles_links$title[i] <- read_html(remDr$getPageSource()[[1]]) %>%
+    html_nodes(.,
+               xpath = '//*[contains(concat( " ", @class, " " ),
+               concat( " ", "name", " " ))]') %>%
+    html_text() %>%
+    paste(., collapse = " ")
+
+  articles_links$year[i] <- read_html(remDr$getPageSource()[[1]]) %>%
+    html_nodes(., 
+               xpath = '//*[contains(concat( " ", @class, " " ),
+               concat( " ", "name-section", " " ))]
+               //*[contains(concat( " ", @class, " " ), concat( " ", "year", " " ))]') %>%
+    html_text() %>%
+    paste(., collapse = " ")
+
+  articles_links$journal[i] <- read_html(remDr$getPageSource()[[1]]) %>%
+    html_nodes(., xpath = '//*[contains(concat( " ", @class, " " )
+               , concat( " ", "pub-name", " " ))]') %>%
+    html_text() %>%
+    paste(., collapse = " ")
+
+  articles_links$authors[i] <- read_html(remDr$getPageSource()[[1]]) %>%
+    html_nodes(., xpath = "/html/body/div/div/div/router-view/compose[1]/div/div/
+               ma-entity-detail-info/compose/div/div/div[1]/
+               ma-author-string-collection") %>%
+    html_text() %>%
+    paste(., collapse = " ")
+
+  articles_links$tags[i] <- read_html(remDr$getPageSource()[[1]]) %>%
+    html_nodes(., xpath = "/html/body/div/div/div/router-view/compose[1]/
+               div/div/ma-entity-detail-info/compose/
+               div/div/div[1]/ma-tag-cloud/div") %>%
+    html_text() %>%
+    paste(., collapse = " ")
+}
+
+
+write_csv(articles_links, "microsoft_academic_clean.csv")
+
+```
+
+
+## Article Selection
+
+The selection process was conducted by two authors in three phases. In the first round, we excluded all titles that were obviously unrelated to our topic of investigation. For instance, we curiously found articles about automobile motors amidst our sample. We consider this a preliminary step, since we were not able to eliminate a large number of entries. Thus, we read all abstracts. We chose to maintain those that indicated either government expenditure or legislative structures were central matters. For instance, if the paper sought to identify variables that increased government size, it was maintained. Abstracts that indicated the paper discussed or estimated the impacts of representative institutions, elections, or chamber dynamics, for example, were also included. This allowed us to significantly reduce our sample to 376 records.
+
+In the second phase, we assessed full-texts. To proceed, the paper should (i) conduct a quantitative analysis, (ii) report data on the number of legislators, and (iii) also on public expenditure. If the record was marked as positive for all three, it was maintained. Disagreements in this phase were discussed among the authors, and a third was consulted when needed.
+
+The third phase consisted of filling out tables for each of the remaining 50 articles to systematically evaluate their eligibility. Since government spending and the number of parliamentaries assume the form of different variables, we extracted the coefficients that provided this information in all papers, indicating and defining which variables each author used. By observing what is most commonly used, we could decide which variables we would employ in our analysis. In this phase, we also collected information on whether or not the paper had been published, and if it explicitly discussed the \textit{law of 1/n}. Upon choosing the variables, we excluded the non-conforming studies, arriving at our final sample of 26 articles.
+
+#### Exclusion analysis
+
+We selected the final pool of articles based on two criteria regarding their reported coefficients:
+
+1. Matched treatment variable:
+  + N: Number Legislators Lower House
+  + logN: Log Number Legislators Lower House
+  + K: Number Legislators Upper House
+  
+2. Matched outcome variable:
+  + ExpPC: Expenditure Per Capita
+  + logExpPC: Log Expenditure Per Capita
+  + PCTGDP: Percent GDP Public Expenditure
+
+### Flow Chart
+
+We visually organised the flow of articles across eligibility phases through this diagram\footnote{According to the \href{www.prisma-statement.org/}{PRISMA} statement for reporting meta-analyses and systematic reviews}. The column to the right depicts the amount of articles excluded in each phase, and the one to the left shows the number of records evaluated.
+
+\bigskip
+
+```{tikz tikz-ex, echo=FALSE, cache=FALSE, eval=TRUE, engine.opts = list(template = "tikz2pdf.tex")}
+\usetikzlibrary{shapes.arrows,arrows.meta,positioning,shapes.geometric}
+  \begin{tikzpicture} [node distance = 2.7cm, xshift = 1.5]
+    
+  \footnotesize
+  \linespread{1.0}    
+    
+  \node (ID) [stage, rotate = 90, yshift = 2cm, xshift = 2.5cm] {\normalsize{Identification}}; 
+  
+  \node (SC) [stage, below of = ID, rotate = 90] {\normalsize{Screening}};
+      
+  \node (EL) [stage, below of = SC, rotate = 90] {\normalsize{Eligibility}};
+  
+  \node (INC) [stage2, below of = EL, rotate = 90, xshift = -1.2cm] {\normalsize{Included}};
+      
+  \node (id) [phase, right of = ID, xshift = 1cm] {Records identified through webscraping  \\ \textbf{(n = 2664)}};
+  
+  \node (1st) [exc, right of = id, xshift = 3cm] {Records in languages other than English, book chapters, doctoral theses, and duplicates excluded \\ \textbf{(n = 1220)}};
+  
+  \node (screen) [phase, below of = id] {Records screened \\ \textbf{(n = 1445)}};
+  
+  \node (2nd) [exc, right of = screen, xshift = 3cm] {Records excluded after reading title and abstract \\ \textbf{(n = 1069)}};
+  
+  \node (elig) [phase, below of = screen] {Full-text articles assessed for Eligibility \\ \textbf{(n = 376)}};
+  
+  \node (3rd) [exc, right of = elig, xshift = 3cm] {Non-quantitative studies or records using unrelated variables excluded \\ \textbf{(n = 329)}};
+  
+  \node (inc_1) [phase, below of = elig] {Preliminary included articles \\ \textbf{(n = 47)}};
+  
+  \node (4th) [exc, right of = inc_1, xshift = 3cm] {Articles excluded during analysis due to nonconforming variables \\ \textbf{(n = 21)}};
+  
+\node (inc_2) [phase, below of = inc_1] {Included articles \\ \textbf{(n = 26)}};
+  \draw [arrow] (id) -- (1st);
+  \draw [arrow] (id) -- (screen);
+  \draw [arrow] (screen) -- (2nd);
+  \draw [arrow] (screen) -- (elig);
+  \draw [arrow] (elig) -- (3rd);
+  \draw [arrow] (elig) -- (inc_1);
+  \draw [arrow] (inc_1) -- (4th);
+  \draw [arrow] (inc_1) -- (inc_2);
+  
+ \end{tikzpicture}
+
+
+
+```
+
+
+
+## Meta-analysis dataset
+
+The meta-analytic data is comprised of two datasets. The first dataset has the main coefficients that were reported in the paper. It includes only the most rigorous model from each paper, that is, those estimated with the largest $n$, most control variables, and fixed effects if the authors added them. If the article employed a regression discontinuity design, we chose the coefficient from the optimal bandwidth or from the intermediate one. This sample encompasses 36 estimates, as 10 articles analysed two dependent or independent variables of interest.  Our second sample, in contrast, contains all the 126 effect sizes reported in the 26 papers. 
+
+In the main text, we focus on the results for our restricted sample as we consider them more robust, but the findings are very similar when we use the extended set. Below is the data extraction process for all relevant coefficients in the selected articles. In the \@ref(meta-an) and \@ref(meta-reg) sections of this Appendix, you will find all tests performed in both reduced and full samples. 
+
+```{r, echo=FALSE, include=FALSE}
+
+# Paper 367
+dat <- data.frame(
+  id = 367,
+  published = 'Yes',
+  usemeta = 1,
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Spatially Targeted Government Spending and
+Heterogeneous Constituent Cost Shares',
+  author = 'Bradbury and Stephenson',
+  year = 2009,
+  authoryear = 'Bradbury and Stephenson (2009)',
+  journal = 'The Journal of Private Enterprise',
+  web = 'http://journal.apee.org/index.php?title=Spring2009_6',
+  table = 2,
+  column = 2,
+  indepvar = 'MEMSENATE',
+  indepvar2 = 'K',
+  depvar = 'Total Spending per capita',
+  depvar2 = 'ExpPC',
+  coef = 0.624,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.624/3.10
+)
+
+# Paper 585 K
+dat <- rbind(dat,
+  data.frame(
+  id = 585,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'PANEL',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislative organization and government spending: cross-country evidence',
+  author = 'Bradbury and Crain',
+  year = 2001,
+  authoryear = 'Bradbury and Crain (2001)',
+  journal = 'Journal of Public Economics',
+  web = 'https://doi.org/10.1016/S0047-2727(00)00150-X',
+  table = 2,
+  column = 5,
+  indepvar = 'Upper size',
+  indepvar2 = 'K',
+  depvar = 'Percent of GDP',
+  depvar2 = 'PCTGDP',
+  coef = 0.01262,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.01262/2.12
+))
+
+# Paper 585 K
+dat <- rbind(dat,
+  data.frame(
+  id = 585,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislative organization and government spending: cross-country evidence',
+  author = 'Bradbury and Crain',
+  year = 2001,
+  authoryear = 'Bradbury and Crain (2001)',
+  journal = 'Journal of Public Economics',
+  web = 'https://doi.org/10.1016/S0047-2727(00)00150-X',
+  table = 2,
+  column = 2,
+  indepvar = 'Upper size',
+  indepvar2 = 'K',
+  depvar = 'Percent of GDP',
+  depvar2 = 'PCTGDP',
+  coef = 0.004964,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.004964/2.9
+))
+
+# Paper 585 K
+dat <- rbind(dat,
+  data.frame(
+  id = 585,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislative organization and government spending: cross-country evidence',
+  author = 'Bradbury and Crain',
+  year = 2001,
+  authoryear = 'Bradbury and Crain (2001)',
+  journal = 'Journal of Public Economics',
+  web = 'https://doi.org/10.1016/S0047-2727(00)00150-X',
+  table = 2,
+  column = 3,
+  indepvar = 'Upper size',
+  indepvar2 = 'K',
+  depvar = 'Percent of GDP',
+  depvar2 = 'PCTGDP',
+  coef = -0.01134,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = 0.01134/4.52
+))
+
+# Paper 585 K
+dat <- rbind(dat,
+  data.frame(
+  id = 585,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislative organization and government spending: cross-country evidence',
+  author = 'Bradbury and Crain',
+  year = 2001,
+  authoryear = 'Bradbury and Crain (2001)',
+  journal = 'Journal of Public Economics',
+  web = 'https://doi.org/10.1016/S0047-2727(00)00150-X',
+  table = 2,
+  column = 4,
+  indepvar = 'Upper size',
+  indepvar2 = 'K',
+  depvar = 'Percent of GDP',
+  depvar2 = 'PCTGDP',
+  coef = -0.00559,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = 0.00559/2.39
+))
+
+# Paper 585 N
+dat <- rbind(dat,
+  data.frame(
+  id = 585,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'PANEL',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislative organization and government spending: cross-country evidence',
+  author = 'Bradbury and Crain',
+  year = 2001,
+  authoryear = 'Bradbury and Crain (2001)',
+  journal = 'Journal of Public Economics',
+  web = 'https://doi.org/10.1016/S0047-2727(00)00150-X',
+  table = 2,
+  column = 5,
+  indepvar = 'Lower size',
+  indepvar2 = 'N',
+  depvar = 'Percent of GDP',
+  depvar2 = 'PCTGDP',
+  coef = 0.003627,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.003627/2.51
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 585,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislative organization and government spending: cross-country evidence',
+  author = 'Bradbury and Crain',
+  year = 2001,
+  authoryear = 'Bradbury and Crain (2001)',
+  journal = 'Journal of Public Economics',
+  web = 'https://doi.org/10.1016/S0047-2727(00)00150-X',
+  table = 2,
+  column = 2,
+  indepvar = 'Lower size',
+  indepvar2 = 'N',
+  depvar = 'Percent of GDP',
+  depvar2 = 'PCTGDP',
+  coef = 0.000517,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.000517/0.47
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 585,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislative organization and government spending: cross-country evidence',
+  author = 'Bradbury and Crain',
+  year = 2001,
+  authoryear = 'Bradbury and Crain (2001)',
+  journal = 'Journal of Public Economics',
+  web = 'https://doi.org/10.1016/S0047-2727(00)00150-X',
+  table = 2,
+  column = 3,
+  indepvar = 'Lower size',
+  indepvar2 = 'N',
+  depvar = 'Percent of GDP',
+  depvar2 = 'PCTGDP',
+  coef = 0.016946,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.016946/8.65
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 585,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislative organization and government spending: cross-country evidence',
+  author = 'Bradbury and Crain',
+  year = 2001,
+  authoryear = 'Bradbury and Crain (2001)',
+  journal = 'Journal of Public Economics',
+  web = 'https://doi.org/10.1016/S0047-2727(00)00150-X',
+  table = 2,
+  column = 4,
+  indepvar = 'Lower size',
+  indepvar2 = 'N',
+  depvar = 'Percent of GDP',
+  depvar2 = 'PCTGDP',
+  coef = 0.012337,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.012337/6.65
+))
+
+# Paper 505
+dat <- rbind(dat,
+  data.frame(
+  id = 505,
+  published = 'Yes',
+  usemeta = 1,
+  method = 'IV',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'The Endogeneity of the Initiative: A Comment on Marschall and Ruhil',
+  author = 'Matsusaka',
+  year = 2005,
+  authoryear = 'Matsusaka (2005)',
+  journal = 'State Politics & Policy Quarterly',
+  web = 'https://www.jstor.org/stable/40421558',
+  table = 1,
+  column = 3,
+  indepvar = 'Seats',
+  indepvar2 = 'N',
+  depvar = 'State Government Expenditure per Capita',
+  depvar2 = 'ExpPC',
+  coef = -0.96,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = 0.18
+))
+
+# Paper 448
+dat <- rbind(dat,
+  data.frame(
+  id = 448,
+  published = 'Yes',
+  usemeta = 1,
+  method = 'IV',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Italy',
+  title = 'Legislature size and government spending in Italian regions: Forecasting the effects of a reform',
+  author = 'Fiorino and Ricciuti',
+  year = 2007,
+  authoryear = 'Fiorino and Ricciuti (2007)',
+  journal = 'Public Choice',
+  web = '10.1007/s11127-006-9108-y',
+  table = 4,
+  column = 1,
+  indepvar = 'LEG',
+  indepvar2 = 'N',
+  depvar = 'Per Capita Regional expenditure',
+  depvar2 = 'ExpPC',
+  coef = 0.213,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.018
+))
+
+# Paper 448
+dat <- rbind(dat,
+  data.frame(
+  id = 448,
+  published = 'Yes',
+  usemeta = 0,
+  method = 'IV',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Italy',
+  title = 'Legislature size and government spending in Italian regions: Forecasting the effects of a reform',
+  author = 'Fiorino and Ricciuti',
+  year = 2007,
+  authoryear = 'Fiorino and Ricciuti (2007)',
+  journal = 'Public Choice',
+  web = '10.1007/s11127-006-9108-y',
+  table = 4,
+  column = 2,
+  indepvar = 'LEG',
+  indepvar2 = 'N',
+  depvar = 'Per Capita Regional expenditure',
+  depvar2 = 'ExpPC',
+  coef = 0.229,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.037
+))
+
+# Paper 448
+dat <- rbind(dat,
+  data.frame(
+  id = 448,
+  published = 'Yes',
+  usemeta = 0,
+  method = 'IV',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Italy',
+  title = 'Legislature size and government spending in Italian regions: Forecasting the effects of a reform',
+  author = 'Fiorino and Ricciuti',
+  year = 2007,
+  authoryear = 'Fiorino and Ricciuti (2007)',
+  journal = 'Public Choice',
+  web = '10.1007/s11127-006-9108-y',
+  table = 4,
+  column = 3,
+  indepvar = 'LEG',
+  indepvar2 = 'N',
+  depvar = 'Per Capita Regional expenditure',
+  depvar2 = 'ExpPC',
+  coef = 0.455,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.038
+))
+
+# Paper 448
+dat <- rbind(dat,
+  data.frame(
+  id = 448,
+  published = 'Yes',
+  usemeta = 0,
+  method = 'IV',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Italy',
+  title = 'Legislature size and government spending in Italian regions: Forecasting the effects of a reform',
+  author = 'Fiorino and Ricciuti',
+  year = 2007,
+  authoryear = 'Fiorino and Ricciuti (2007)',
+  journal = 'Public Choice',
+  web = '10.1007/s11127-006-9108-y',
+  table = 4,
+  column = 4,
+  indepvar = 'LEG',
+  indepvar2 = 'N',
+  depvar = 'Per Capita Regional expenditure',
+  depvar2 = 'ExpPC',
+  coef = 0.411,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.049
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 448,
+  published = 'Yes',
+  usemeta = 0,
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Italy',
+  title = 'Legislature size and government spending in Italian regions: Forecasting the effects of a reform',
+  author = 'Fiorino and Ricciuti',
+  year = 2007,
+  authoryear = 'Fiorino and Ricciuti (2007)',
+  journal = 'Public Choice',
+  web = '10.1007/s11127-006-9108-y',
+  table = 3,
+  column = 1,
+  indepvar = 'LEG',
+  indepvar2 = 'N',
+  depvar = 'Per Capita Regional expenditure',
+  depvar2 = 'ExpPC',
+  coef = 0.226,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.053
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 448,
+  published = 'Yes',
+  usemeta = 0,
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Italy',
+  title = 'Legislature size and government spending in Italian regions: Forecasting the effects of a reform',
+  author = 'Fiorino and Ricciuti',
+  year = 2007,
+  authoryear = 'Fiorino and Ricciuti (2007)',
+  journal = 'Public Choice',
+  web = '10.1007/s11127-006-9108-y',
+  table = 3,
+  column = 2,
+  indepvar = 'LEG',
+  indepvar2 = 'N',
+  depvar = 'Per Capita Regional expenditure',
+  depvar2 = 'ExpPC',
+  coef = 0.213,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.317
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 448,
+  published = 'Yes',
+  usemeta = 0,
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Italy',
+  title = 'Legislature size and government spending in Italian regions: Forecasting the effects of a reform',
+  author = 'Fiorino and Ricciuti',
+  year = 2007,
+  authoryear = 'Fiorino and Ricciuti (2007)',
+  journal = 'Public Choice',
+  web = '10.1007/s11127-006-9108-y',
+  table = 3,
+  column = 3,
+  indepvar = 'LEG',
+  indepvar2 = 'N',
+  depvar = 'Per Capita Regional expenditure',
+  depvar2 = 'ExpPC',
+  coef = 0.185,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.305
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 448,
+  published = 'Yes',
+  usemeta = 0,
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Italy',
+  title = 'Legislature size and government spending in Italian regions: Forecasting the effects of a reform',
+  author = 'Fiorino and Ricciuti',
+  year = 2007,
+  authoryear = 'Fiorino and Ricciuti (2007)',
+  journal = 'Public Choice',
+  web = '10.1007/s11127-006-9108-y',
+  table = 3,
+  column = 4,
+  indepvar = 'LEG',
+  indepvar2 = 'N',
+  depvar = 'Per Capita Regional expenditure',
+  depvar2 = 'ExpPC',
+  coef = 0.235,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.336
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 448,
+  published = 'Yes',
+  usemeta = 0,
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Italy',
+  title = 'Legislature size and government spending in Italian regions: Forecasting the effects of a reform',
+  author = 'Fiorino and Ricciuti',
+  year = 2007,
+  authoryear = 'Fiorino and Ricciuti (2007)',
+  journal = 'Public Choice',
+  web = '10.1007/s11127-006-9108-y',
+  table = 3,
+  column = 5,
+  indepvar = 'LEG',
+  indepvar2 = 'N',
+  depvar = 'Per Capita Regional expenditure',
+  depvar2 = 'ExpPC',
+  coef = 0.374,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.064
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 448,
+  published = 'Yes',
+  usemeta = 0,
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Italy',
+  title = 'Legislature size and government spending in Italian regions: Forecasting the effects of a reform',
+  author = 'Fiorino and Ricciuti',
+  year = 2007,
+  authoryear = 'Fiorino and Ricciuti (2007)',
+  journal = 'Public Choice',
+  web = '10.1007/s11127-006-9108-y',
+  table = 3,
+  column = 6,
+  indepvar = 'LEG',
+  indepvar2 = 'N',
+  depvar = 'Per Capita Regional expenditure',
+  depvar2 = 'ExpPC',
+  coef = 0.811,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.181
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 448,
+  published = 'Yes',
+  usemeta = 0,
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Italy',
+  title = 'Legislature size and government spending in Italian regions: Forecasting the effects of a reform',
+  author = 'Fiorino and Ricciuti',
+  year = 2007,
+  authoryear = 'Fiorino and Ricciuti (2007)',
+  journal = 'Public Choice',
+  web = '10.1007/s11127-006-9108-y',
+  table = 3,
+  column = 7,
+  indepvar = 'LEG',
+  indepvar2 = 'N',
+  depvar = 'Per Capita Regional expenditure',
+  depvar2 = 'ExpPC',
+  coef = 0.795,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.176
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 448,
+  published = 'Yes',
+  usemeta = 0,
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Italy',
+  title = 'Legislature size and government spending in Italian regions: Forecasting the effects of a reform',
+  author = 'Fiorino and Ricciuti',
+  year = 2007,
+  authoryear = 'Fiorino and Ricciuti (2007)',
+  journal = 'Public Choice',
+  web = '10.1007/s11127-006-9108-y',
+  table = 3,
+  column = 8,
+  indepvar = 'LEG',
+  indepvar2 = 'N',
+  depvar = 'Per Capita Regional expenditure',
+  depvar2 = 'ExpPC',
+  coef = 0.849,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.238
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 974,
+  published = 'No',
+  usemeta = 1, 
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'Latin America',
+  title = 'Institutional arrangements and fiscal performance: the latin american experience',
+  author = 'Stein, Talvi, and Grisanti',
+  year = 1998,
+  authoryear = 'Stein et al. (1998)',
+  journal = 'NBER Working papers',
+  web = 'https://www.nber.org/papers/w6358.pdf',
+  table = 3,
+  column = 1,
+  indepvar = 'District magnitude',
+  indepvar2 = 'logN',
+  depvar = 'Proportion expenditure GDP',
+  depvar2 = 'PCTGDP',
+  coef = 0.0109,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.0143
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 974,
+  published = 'No',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'Latin America',
+  title = 'Institutional arrangements and fiscal performance: the latin american experience',
+  author = 'Stein, Talvi, and Grisanti',
+  year = 1998,
+  authoryear = 'Stein et al. (1998)',
+  journal = 'NBER Working papers',
+  web = 'https://www.nber.org/papers/w6358.pdf',
+  table = 3,
+  column = 4,
+  indepvar = 'District magnitude',
+  indepvar2 = 'logN',
+  depvar = 'Proportion expenditure GDP',
+  depvar2 = 'PCTGDP',
+  coef = 0.0135,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.0121
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 542,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'PANEL',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Political Parties and the Size of Government in Multiparty Legislatures: Examining Cross-Country and Panel Data Evidence',
+  author = 'Mukherjee',
+  year = 2003,
+  authoryear = 'Mukherjee (2003)',
+  journal = 'Comparative Political Studies',
+  web = 'https://journals.sagepub.com/doi/pdf/10.1177/0010414003254240',
+  table = 7,
+  column = 4,
+  indepvar = 'Seats in Lower Chamber',
+  indepvar2 = 'N',
+  depvar = 'Proportion expenditure GDP',
+  depvar2 = 'PCTGDP',
+  coef = 0.003,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.001
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 542,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Political Parties and the Size of Government in Multiparty Legislatures: Examining Cross-Country and Panel Data Evidence',
+  author = 'Mukherjee',
+  year = 2003,
+  authoryear = 'Mukherjee (2003)',
+  journal = 'Comparative Political Studies',
+  web = 'https://journals.sagepub.com/doi/pdf/10.1177/0010414003254240',
+  table = 7,
+  column = 1,
+  indepvar = 'Seats in Lower Chamber',
+  indepvar2 = 'N',
+  depvar = 'Proportion expenditure GDP',
+  depvar2 = 'PCTGDP',
+  coef = 0.009,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.002
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 542,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Political Parties and the Size of Government in Multiparty Legislatures: Examining Cross-Country and Panel Data Evidence',
+  author = 'Mukherjee',
+  year = 2003,
+  authoryear = 'Mukherjee (2003)',
+  journal = 'Comparative Political Studies',
+  web = 'https://journals.sagepub.com/doi/pdf/10.1177/0010414003254240',
+  table = 7,
+  column = 2,
+  indepvar = 'Seats in Lower Chamber',
+  indepvar2 = 'N',
+  depvar = 'Proportion expenditure GDP',
+  depvar2 = 'PCTGDP',
+  coef = 0.011,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.003
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 542,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Political Parties and the Size of Government in Multiparty Legislatures: Examining Cross-Country and Panel Data Evidence',
+  author = 'Mukherjee',
+  year = 2003,
+  authoryear = 'Mukherjee (2003)',
+  journal = 'Comparative Political Studies',
+  web = 'https://journals.sagepub.com/doi/pdf/10.1177/0010414003254240',
+  table = 7,
+  column = 1,
+  indepvar = 'Seats in Lower Chamber',
+  indepvar2 = 'N',
+  depvar = 'Proportion expenditure GDP',
+  depvar2 = 'PCTGDP',
+  coef = 0.005,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.003
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 542,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Political Parties and the Size of Government in Multiparty Legislatures: Examining Cross-Country and Panel Data Evidence',
+  author = 'Mukherjee',
+  year = 2003,
+  authoryear = 'Mukherjee (2003)',
+  journal = 'Comparative Political Studies',
+  web = 'https://journals.sagepub.com/doi/pdf/10.1177/0010414003254240',
+  table = 6,
+  column = 1,
+  indepvar = 'Seats in Lower Chamber',
+  indepvar2 = 'N',
+  depvar = 'Proportion expenditure GDP',
+  depvar2 = 'PCTGDP',
+  coef = 0.04,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.001
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 542,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Political Parties and the Size of Government in Multiparty Legislatures: Examining Cross-Country and Panel Data Evidence',
+  author = 'Mukherjee',
+  year = 2003,
+  authoryear = 'Mukherjee (2003)',
+  journal = 'Comparative Political Studies',
+  web = 'https://journals.sagepub.com/doi/pdf/10.1177/0010414003254240',
+  table = 6,
+  column = 2,
+  indepvar = 'Seats in Lower Chamber',
+  indepvar2 = 'N',
+  depvar = 'Proportion expenditure GDP',
+  depvar2 = 'PCTGDP',
+  coef = 0.03,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.001
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 542,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Political Parties and the Size of Government in Multiparty Legislatures: Examining Cross-Country and Panel Data Evidence',
+  author = 'Mukherjee',
+  year = 2003,
+  authoryear = 'Mukherjee (2003)',
+  journal = 'Comparative Political Studies',
+  web = 'https://journals.sagepub.com/doi/pdf/10.1177/0010414003254240',
+  table = 6,
+  column = 3,
+  indepvar = 'Seats in Lower Chamber',
+  indepvar2 = 'N',
+  depvar = 'Proportion expenditure GDP',
+  depvar2 = 'PCTGDP',
+  coef = 0.01,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.002
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 542,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Political Parties and the Size of Government in Multiparty Legislatures: Examining Cross-Country and Panel Data Evidence',
+  author = 'Mukherjee',
+  year = 2003,
+  authoryear = 'Mukherjee (2003)',
+  journal = 'Comparative Political Studies',
+  web = 'https://journals.sagepub.com/doi/pdf/10.1177/0010414003254240',
+  table = 6,
+  column = 4,
+  indepvar = 'Seats in Lower Chamber',
+  indepvar2 = 'N',
+  depvar = 'Proportion expenditure GDP',
+  depvar2 = 'PCTGDP',
+  coef = 0.02,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.004
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 886,
+  published = 'No',
+  usemeta = 1, 
+  method = 'OLS',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Brazil',
+  title = 'Electoral systems, legislative fragmentation and public spending: a comparative analysis of brazilian states',
+  author = 'Lledo',
+  year = 2003,
+  authoryear = 'Lledo (2003)',
+  journal = NA,
+  web = 'http://lasa.international.pitt.edu/Lasa2003/LledoVictor.pdf',
+  table = 6,
+  column = 1,
+  indepvar = 'Log (State Legislature Seats)',
+  indepvar2 = 'logN',
+  depvar = 'Primary Spending as a share of GSP',
+  depvar2 = 'PCTGDP',
+  coef = -4.69,
+  scoef = 'N',
+  scoefsig = NA,
+  SE = -4.69/(-1.75)
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 862,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'PANEL',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Switzerland',
+  title = 'Do large cabinets favor large governments? Evidence on the fiscal commons problem for Swiss Cantons',
+  author = 'Schaltegger and Feld',
+  year = 2009,
+  authoryear = 'Schaltegger and Feld (2009)',
+  journal = 'Journal of Public Economics',
+  web = 'https://reader.elsevier.com/reader/sd/pii/S0047272708001138?token=ADB01EB80E554D7E01D74DA0D9E36914B6F3D22121C18EC53B328A4863CE63C5457FC87C6A223E12338FD17437D454BF',
+  table = 6,
+  column = 4,
+  indepvar = 'Seats in Parliament',
+  indepvar2 = 'N',
+  depvar = 'Expenditure per capita',
+  depvar2 = 'ExpPC',
+  coef = 0.001,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.001
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 862,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Switzerland',
+  title = 'Do large cabinets favor large governments? Evidence on the fiscal commons problem for Swiss Cantons',
+  author = 'Schaltegger and Feld',
+  year = 2009,
+  authoryear = 'Schaltegger and Feld (2009)',
+  journal = 'Journal of Public Economics',
+  web = 'https://reader.elsevier.com/reader/sd/pii/S0047272708001138?token=ADB01EB80E554D7E01D74DA0D9E36914B6F3D22121C18EC53B328A4863CE63C5457FC87C6A223E12338FD17437D454BF',
+  table = 6,
+  column = 3,
+  indepvar = 'Seats in Parliament',
+  indepvar2 = 'N',
+  depvar = 'Expenditure per capita',
+  depvar2 = 'ExpPC',
+  coef = -0.001,
+  scoef = 'N',
+  scoefsig = NA,
+  SE = 0.001
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 849,
+  published = 'No',
+  usemeta = 1,
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'Local',
+  location = 'US',
+  title = 'Districts, spillovers, and government overspending',
+  author = 'Baqir',
+  year = 1999,
+  authoryear = 'Baqir (1999)',
+  journal = NA,
+  web = 'http://documents.worldbank.org/curated/en/969221468781782275/pdf/multi-page.pdf',
+  table = 3,
+  column = 3,
+  indepvar = 'Log (Council Size)',
+  indepvar2 = 'logN',
+  depvar = 'Log (Expenduture per capita)',
+  depvar2 = 'logExpPC',
+  coef = 0.302,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.302/7.885
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 849,
+  published = 'No',
+  usemeta = 0,
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'Local',
+  location = 'US',
+  title = 'Districts, spillovers, and government overspending',
+  author = 'Baqir',
+  year = 1999,
+  authoryear = 'Baqir (1999)',
+  journal = NA,
+  web = 'http://documents.worldbank.org/curated/en/969221468781782275/pdf/multi-page.pdf',
+  table = 3,
+  column = 1,
+  indepvar = 'Log (Council Size)',
+  indepvar2 = 'logN',
+  depvar = 'Log (Expenduture per capita)',
+  depvar2 = 'logExpPC',
+  coef = 0.276,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.276/7.185
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 849,
+  published = 'No',
+  usemeta = 0,
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'Local',
+  location = 'US',
+  title = 'Districts, spillovers, and government overspending',
+  author = 'Baqir',
+  year = 1999,
+  authoryear = 'Baqir (1999)',
+  journal = NA,
+  web = 'http://documents.worldbank.org/curated/en/969221468781782275/pdf/multi-page.pdf',
+  table = 3,
+  column = 2,
+  indepvar = 'Log (Council Size)',
+  indepvar2 = 'logN',
+  depvar = 'Log (Expenduture per capita)',
+  depvar2 = 'logExpPC',
+  coef = 0.295,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.302/7.545
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 849,
+  published = 'No',
+  usemeta = 1,
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'Local',
+  location = 'US',
+  title = 'Districts, spillovers, and government overspending',
+  author = 'Baqir',
+  year = 1999,
+  authoryear = 'Baqir (1999)',
+  journal = NA,
+  web = 'http://documents.worldbank.org/curated/en/969221468781782275/pdf/multi-page.pdf',
+  table = 3,
+  column = 6,
+  indepvar = 'Log (Council Size)',
+  indepvar2 = 'logN',
+  depvar = 'Expenditure Share',
+  depvar2 = 'PCTGDP',
+  coef = 2.066,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 2.066/7.014
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 849,
+  published = 'No',
+  usemeta = 0,
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'Local',
+  location = 'US',
+  title = 'Districts, spillovers, and government overspending',
+  author = 'Baqir',
+  year = 1999,
+  authoryear = 'Baqir (1999)',
+  journal = NA,
+  web = 'http://documents.worldbank.org/curated/en/969221468781782275/pdf/multi-page.pdf',
+  table = 3,
+  column = 4,
+  indepvar = 'Log (Council Size)',
+  indepvar2 = 'logN',
+  depvar = 'Expenditure Share',
+  depvar2 = 'PCTGDP',
+  coef = 2.012,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 2.012/6.701
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 849,
+  published = 'No',
+  usemeta = 0,
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'Local',
+  location = 'US',
+  title = 'Districts, spillovers, and government overspending',
+  author = 'Baqir',
+  year = 1999,
+  authoryear = 'Baqir (1999)',
+  journal = NA,
+  web = 'http://documents.worldbank.org/curated/en/969221468781782275/pdf/multi-page.pdf',
+  table = 3,
+  column = 5,
+  indepvar = 'Log (Council Size)',
+  indepvar2 = 'logN',
+  depvar = 'Expenditure Share',
+  depvar2 = 'PCTGDP',
+  coef = 2.468,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 2.468/8.251
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 1415,
+  published = 'No',
+  usemeta = 1, 
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislature size, bicameralism and government spending: evidence from democratic countries',
+  author = 'Ricciuti',
+  year = 2004,
+  authoryear = 'Ricciuti (2004)',
+  journal = NA,
+  web = 'http://www.bemservizi.unito.it/repec/icr/wp2004/Ricciuti20-04.pdf',
+  table = 3,
+  column = 1,
+  indepvar = 'House size',
+  indepvar2 = 'N',
+  depvar = 'Government spending',
+  depvar2 = 'PCTGDP',
+  coef = 0.014,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.012
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 1415,
+  published = 'No',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislature size, bicameralism and government spending: evidence from democratic countries',
+  author = 'Ricciuti',
+  year = 2004,
+  authoryear = 'Ricciuti (2004)',
+  journal = NA,
+  web = 'http://www.bemservizi.unito.it/repec/icr/wp2004/Ricciuti20-04.pdf',
+  table = 3,
+  column = 2,
+  indepvar = 'House size',
+  indepvar2 = 'N',
+  depvar = 'Government spending',
+  depvar2 = 'PCTGDP',
+  coef = -0.011,
+  scoef = 'N',
+  scoefsig = NA,
+  SE = 0.009
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 1415,
+  published = 'No',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislature size, bicameralism and government spending: evidence from democratic countries',
+  author = 'Ricciuti',
+  year = 2004,
+  authoryear = 'Ricciuti (2004)',
+  journal = NA,
+  web = 'http://www.bemservizi.unito.it/repec/icr/wp2004/Ricciuti20-04.pdf',
+  table = 3,
+  column = 5,
+  indepvar = 'House size',
+  indepvar2 = 'N',
+  depvar = 'Government spending',
+  depvar2 = 'PCTGDP',
+  coef = 0.007,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.007
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 1415,
+  published = 'No',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislature size, bicameralism and government spending: evidence from democratic countries',
+  author = 'Ricciuti',
+  year = 2004,
+  authoryear = 'Ricciuti (2004)',
+  journal = NA,
+  web = 'http://www.bemservizi.unito.it/repec/icr/wp2004/Ricciuti20-04.pdf',
+  table = 3,
+  column = 6,
+  indepvar = 'House size',
+  indepvar2 = 'N',
+  depvar = 'Government spending',
+  depvar2 = 'PCTGDP',
+  coef = 0.005,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.009
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 1415,
+  published = 'No',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislature size, bicameralism and government spending: evidence from democratic countries',
+  author = 'Ricciuti',
+  year = 2004,
+  authoryear = 'Ricciuti (2004)',
+  journal = NA,
+  web = 'http://www.bemservizi.unito.it/repec/icr/wp2004/Ricciuti20-04.pdf',
+  table = 3,
+  column = 7,
+  indepvar = 'House size',
+  indepvar2 = 'N',
+  depvar = 'Government spending',
+  depvar2 = 'PCTGDP',
+  coef = 0.005,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.009
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 1415,
+  published = 'No',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislature size, bicameralism and government spending: evidence from democratic countries',
+  author = 'Ricciuti',
+  year = 2004,
+  authoryear = 'Ricciuti (2004)',
+  journal = NA,
+  web = 'http://www.bemservizi.unito.it/repec/icr/wp2004/Ricciuti20-04.pdf',
+  table = 3,
+  column = 10,
+  indepvar = 'House size',
+  indepvar2 = 'N',
+  depvar = 'Government spending',
+  depvar2 = 'PCTGDP',
+  coef = 0.012,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.007
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 1415,
+  published = 'No',
+  usemeta = 1,  
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislature size, bicameralism and government spending: evidence from democratic countries',
+  author = 'Ricciuti',
+  year = 2004,
+  authoryear = 'Ricciuti (2004)',
+  journal = NA,
+  web = 'http://www.bemservizi.unito.it/repec/icr/wp2004/Ricciuti20-04.pdf',
+  table = 3,
+  column = 1,
+  indepvar = 'Senate size',
+  indepvar2 = 'K',
+  depvar = 'Government spending',
+  depvar2 = 'PCTGDP',
+  coef = 0.016,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.012
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 1415,
+  published = 'No',
+  usemeta = 0,  
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislature size, bicameralism and government spending: evidence from democratic countries',
+  author = 'Ricciuti',
+  year = 2004,
+  authoryear = 'Ricciuti (2004)',
+  journal = NA,
+  web = 'http://www.bemservizi.unito.it/repec/icr/wp2004/Ricciuti20-04.pdf',
+  table = 3,
+  column = 2,
+  indepvar = 'Senate size',
+  indepvar2 = 'K',
+  depvar = 'Government spending',
+  depvar2 = 'PCTGDP',
+  coef = 0.021,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.011
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 1415,
+  published = 'No',
+  usemeta = 0,  
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislature size, bicameralism and government spending: evidence from democratic countries',
+  author = 'Ricciuti',
+  year = 2004,
+  authoryear = 'Ricciuti (2004)',
+  journal = NA,
+  web = 'http://www.bemservizi.unito.it/repec/icr/wp2004/Ricciuti20-04.pdf',
+  table = 3,
+  column = 3,
+  indepvar = 'Senate size',
+  indepvar2 = 'K',
+  depvar = 'Government spending',
+  depvar2 = 'PCTGDP',
+  coef = 0.014,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.009
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 1415,
+  published = 'No',
+  usemeta = 0,  
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislature size, bicameralism and government spending: evidence from democratic countries',
+  author = 'Ricciuti',
+  year = 2004,
+  authoryear = 'Ricciuti (2004)',
+  journal = NA,
+  web = 'http://www.bemservizi.unito.it/repec/icr/wp2004/Ricciuti20-04.pdf',
+  table = 3,
+  column = 4,
+  indepvar = 'Senate size',
+  indepvar2 = 'K',
+  depvar = 'Government spending',
+  depvar2 = 'PCTGDP',
+  coef = 0.003,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.006
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 1415,
+  published = 'No',
+  usemeta = 0,  
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislature size, bicameralism and government spending: evidence from democratic countries',
+  author = 'Ricciuti',
+  year = 2004,
+  authoryear = 'Ricciuti (2004)',
+  journal = NA,
+  web = 'http://www.bemservizi.unito.it/repec/icr/wp2004/Ricciuti20-04.pdf',
+  table = 3,
+  column = 6,
+  indepvar = 'Senate size',
+  indepvar2 = 'K',
+  depvar = 'Government spending',
+  depvar2 = 'PCTGDP',
+  coef = 0.03,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.026
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 1415,
+  published = 'No',
+  usemeta = 0,  
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislature size, bicameralism and government spending: evidence from democratic countries',
+  author = 'Ricciuti',
+  year = 2004,
+  authoryear = 'Ricciuti (2004)',
+  journal = NA,
+  web = 'http://www.bemservizi.unito.it/repec/icr/wp2004/Ricciuti20-04.pdf',
+  table = 3,
+  column = 7,
+  indepvar = 'Senate size',
+  indepvar2 = 'K',
+  depvar = 'Government spending',
+  depvar2 = 'PCTGDP',
+  coef = 0.030,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.026
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 1415,
+  published = 'No',
+  usemeta = 0,  
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislature size, bicameralism and government spending: evidence from democratic countries',
+  author = 'Ricciuti',
+  year = 2004,
+  authoryear = 'Ricciuti (2004)',
+  journal = NA,
+  web = 'http://www.bemservizi.unito.it/repec/icr/wp2004/Ricciuti20-04.pdf',
+  table = 3,
+  column = 8,
+  indepvar = 'Senate size',
+  indepvar2 = 'K',
+  depvar = 'Government spending',
+  depvar2 = 'PCTGDP',
+  coef = 0.039,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.021
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 1415,
+  published = 'No',
+  usemeta = 0,  
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislature size, bicameralism and government spending: evidence from democratic countries',
+  author = 'Ricciuti',
+  year = 2004,
+  authoryear = 'Ricciuti (2004)',
+  journal = NA,
+  web = 'http://www.bemservizi.unito.it/repec/icr/wp2004/Ricciuti20-04.pdf',
+  table = 3,
+  column = 9,
+  indepvar = 'Senate size',
+  indepvar2 = 'K',
+  depvar = 'Government spending',
+  depvar2 = 'PCTGDP',
+  coef = 0.0127,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.014
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 1415,
+  published = 'No',
+  usemeta = 0,  
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislature size, bicameralism and government spending: evidence from democratic countries',
+  author = 'Ricciuti',
+  year = 2004,
+  authoryear = 'Ricciuti (2004)',
+  journal = NA,
+  web = 'http://www.bemservizi.unito.it/repec/icr/wp2004/Ricciuti20-04.pdf',
+  table = 3,
+  column = 10,
+  indepvar = 'Senate size',
+  indepvar2 = 'K',
+  depvar = 'Government spending',
+  depvar2 = 'PCTGDP',
+  coef = 0.016,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.012
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 578,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'Local',
+  location = 'US',
+  title = 'Districting and Government Overspending',
+  author = 'Baqir',
+  year = 2002,
+  authoryear = 'Baqir (2002)',
+  journal = 'Public Choice',
+  web = 'https://www.jstor.org/stable/pdf/10.1086/342804.pdf',
+  table = 4,
+  column = 4,
+  indepvar = 'ln(Council Size)',
+  indepvar2 = 'logN',
+  depvar = 'ln(Government expenditure per capita)',
+  depvar2 = 'logExpPC',
+  coef = 0.1127,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.0373
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 578,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'Local',
+  location = 'US',
+  title = 'Districting and Government Overspending',
+  author = 'Baqir',
+  year = 2002,
+  authoryear = 'Baqir (2002)',
+  journal = 'Public Choice',
+  web = 'https://www.jstor.org/stable/pdf/10.1086/342804.pdf',
+  table = 4,
+  column = 1,
+  indepvar = 'ln(Council Size)',
+  indepvar2 = 'logN',
+  depvar = 'ln(Government expenditure per capita)',
+  depvar2 = 'logExpPC',
+  coef = 0.276,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.0384
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 578,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'Local',
+  location = 'US',
+  title = 'Districting and Government Overspending',
+  author = 'Baqir',
+  year = 2002,
+  authoryear = 'Baqir (2002)',
+  journal = 'Public Choice',
+  web = 'https://www.jstor.org/stable/pdf/10.1086/342804.pdf',
+  table = 4,
+  column = 2,
+  indepvar = 'ln(Council Size)',
+  indepvar2 = 'logN',
+  depvar = 'ln(Government expenditure per capita)',
+  depvar2 = 'logExpPC',
+  coef = 0.3021,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.0383
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 578,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'Local',
+  location = 'US',
+  title = 'Districting and Government Overspending',
+  author = 'Baqir',
+  year = 2002,
+  authoryear = 'Baqir (2002)',
+  journal = 'Public Choice',
+  web = 'https://www.jstor.org/stable/pdf/10.1086/342804.pdf',
+  table = 4,
+  column = 3,
+  indepvar = 'ln(Council Size)',
+  indepvar2 = 'logN',
+  depvar = 'ln(Government expenditure per capita)',
+  depvar2 = 'logExpPC',
+  coef = 0.3203,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.0384
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 467,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Institutional constraints on government spending',
+  author = 'Primo',
+  year = 2006,
+  authoryear = 'Primo (2006)',
+  journal = 'Economics and Politics',
+  web = 'https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1468-0343.2006.00171.x',
+  table = 5,
+  column = 4,
+  indepvar = 'Seats in lower chamber',
+  indepvar2 = 'N',
+  depvar = 'Real state and local expenditure per capita',
+  depvar2 = 'ExpPC',
+  coef = -0.82,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = 0.19
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 467,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Institutional constraints on government spending',
+  author = 'Primo',
+  year = 2006,
+  authoryear = 'Primo (2006)',
+  journal = 'Economics and Politics',
+  web = 'https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1468-0343.2006.00171.x',
+  table = 5,
+  column = 1,
+  indepvar = 'Seats in lower chamber',
+  indepvar2 = 'N',
+  depvar = 'Real state and local expenditure per capita',
+  depvar2 = 'ExpPC',
+  coef = -1.7,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = 0.31
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 467,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Institutional constraints on government spending',
+  author = 'Primo',
+  year = 2006,
+  authoryear = 'Primo (2006)',
+  journal = 'Economics and Politics',
+  web = 'https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1468-0343.2006.00171.x',
+  table = 5,
+  column = 2,
+  indepvar = 'Seats in lower chamber',
+  indepvar2 = 'N',
+  depvar = 'Real state and local expenditure per capita',
+  depvar2 = 'ExpPC',
+  coef = -2.37,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = 0.37
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 467,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Institutional constraints on government spending',
+  author = 'Primo',
+  year = 2006,
+  authoryear = 'Primo (2006)',
+  journal = 'Economics and Politics',
+  web = 'https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1468-0343.2006.00171.x',
+  table = 5,
+  column = 3,
+  indepvar = 'Seats in lower chamber',
+  indepvar2 = 'N',
+  depvar = 'Real state and local expenditure per capita',
+  depvar2 = 'ExpPC',
+  coef = -2.03,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = 0.37
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 467,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Institutional constraints on government spending',
+  author = 'Primo',
+  year = 2006,
+  authoryear = 'Primo (2006)',
+  journal = 'Economics and Politics',
+  web = 'https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1468-0343.2006.00171.x',
+  table = 5,
+  column = 4,
+  indepvar = 'Seats in upper chamber',
+  indepvar2 = 'K',
+  depvar = 'Real state and local expenditure per capita',
+  depvar2 = 'ExpPC',
+  coef = 0.97,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.74
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 467,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Institutional constraints on government spending',
+  author = 'Primo',
+  year = 2006,
+  authoryear = 'Primo (2006)',
+  journal = 'Economics and Politics',
+  web = 'https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1468-0343.2006.00171.x',
+  table = 5,
+  column = 1,
+  indepvar = 'Seats in upper chamber',
+  indepvar2 = 'K',
+  depvar = 'Real state and local expenditure per capita',
+  depvar2 = 'ExpPC',
+  coef = 5.9,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 1.64
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 467,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Institutional constraints on government spending',
+  author = 'Primo',
+  year = 2006,
+  authoryear = 'Primo (2006)',
+  journal = 'Economics and Politics',
+  web = 'https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1468-0343.2006.00171.x',
+  table = 5,
+  column = 2,
+  indepvar = 'Seats in upper chamber',
+  indepvar2 = 'K',
+  depvar = 'Real state and local expenditure per capita',
+  depvar2 = 'ExpPC',
+  coef = 5.75,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 1.73
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 467,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Institutional constraints on government spending',
+  author = 'Primo',
+  year = 2006,
+  authoryear = 'Primo (2006)',
+  journal = 'Economics and Politics',
+  web = 'https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1468-0343.2006.00171.x',
+  table = 5,
+  column = 3,
+  indepvar = 'Seats in upper chamber',
+  indepvar2 = 'K',
+  depvar = 'Real state and local expenditure per capita',
+  depvar2 = 'ExpPC',
+  coef = 6.96,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 2.22
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 441,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'The law of k/n: the effect of chamber size on government spending in bicameral legislatures',
+  author = 'Chen and Malhotra',
+  year = 2007,
+  authoryear = 'Chen and Malhotra (2007)',
+  journal = 'American Political Science Review',
+  web = 'https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E794E71F3182DAAEA2DA1328D45FDCC7/S0003055407070566a.pdf',
+  table = 4,
+  column = 1,
+  indepvar = 'Lower chamber size',
+  indepvar2 = 'N',
+  depvar = 'Per capita expenditure',
+  depvar2 = 'ExpPC',
+  coef = -2.04,
+  scoef = 'N',
+  scoefsig = NA,
+  SE = 1.33
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 441,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'The law of k/n: the effect of chamber size on government spending in bicameral legislatures',
+  author = 'Chen and Malhotra',
+  year = 2007,
+  authoryear = 'Chen and Malhotra (2007)',
+  journal = 'American Political Science Review',
+  web = 'https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E794E71F3182DAAEA2DA1328D45FDCC7/S0003055407070566a.pdf',
+  table = 4,
+  column = 1,
+  indepvar = 'Lower chamber size',
+  indepvar2 = 'N',
+  depvar = 'Per capita expenditure',
+  depvar2 = 'ExpPC',
+  coef = -1.40,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = 0.64
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 441,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'The law of k/n: the effect of chamber size on government spending in bicameral legislatures',
+  author = 'Chen and Malhotra',
+  year = 2007,
+  authoryear = 'Chen and Malhotra (2007)',
+  journal = 'American Political Science Review',
+  web = 'https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E794E71F3182DAAEA2DA1328D45FDCC7/S0003055407070566a.pdf',
+  table = 4,
+  column = 1,
+  indepvar = 'Upper chamber size',
+  indepvar2 = 'K',
+  depvar = 'Per capita expenditure',
+  depvar2 = 'ExpPC',
+  coef = 26.09,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 7.45
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 441,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'The law of k/n: the effect of chamber size on government spending in bicameral legislatures',
+  author = 'Chen and Malhotra',
+  year = 2007,
+  authoryear = 'Chen and Malhotra (2007)',
+  journal = 'American Political Science Review',
+  web = 'https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E794E71F3182DAAEA2DA1328D45FDCC7/S0003055407070566a.pdf',
+  table = 3,
+  column = 1,
+  indepvar = 'Upper chamber size',
+  indepvar2 = 'K',
+  depvar = 'Per capita expenditure',
+  depvar2 = 'ExpPC',
+  coef = 8.3,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 2.35
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 441,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'The law of k/n: the effect of chamber size on government spending in bicameral legislatures',
+  author = 'Chen and Malhotra',
+  year = 2007,
+  authoryear = 'Chen and Malhotra (2007)',
+  journal = 'American Political Science Review',
+  web = 'https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E794E71F3182DAAEA2DA1328D45FDCC7/S0003055407070566a.pdf',
+  table = 3,
+  column = 2,
+  indepvar = 'Upper chamber size',
+  indepvar2 = 'K',
+  depvar = 'Per capita expenditure',
+  depvar2 = 'ExpPC',
+  coef = 5.14,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 2.53
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 441,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'The law of k/n: the effect of chamber size on government spending in bicameral legislatures',
+  author = 'Chen and Malhotra',
+  year = 2007,
+  authoryear = 'Chen and Malhotra (2007)',
+  journal = 'American Political Science Review',
+  web = 'https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E794E71F3182DAAEA2DA1328D45FDCC7/S0003055407070566a.pdf',
+  table = 3,
+  column = 3,
+  indepvar = 'Upper chamber size',
+  indepvar2 = 'K',
+  depvar = 'Per capita expenditure',
+  depvar2 = 'ExpPC',
+  coef = 4.78,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 2.9
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 441,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'The law of k/n: the effect of chamber size on government spending in bicameral legislatures',
+  author = 'Chen and Malhotra',
+  year = 2007,
+  authoryear = 'Chen and Malhotra (2007)',
+  journal = 'American Political Science Review',
+  web = 'https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E794E71F3182DAAEA2DA1328D45FDCC7/S0003055407070566a.pdf',
+  table = 4,
+  column = 2,
+  indepvar = 'Upper chamber size',
+  indepvar2 = 'K',
+  depvar = 'Per capita expenditure',
+  depvar2 = 'ExpPC',
+  coef = 20.38,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 6.47
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 441,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'The law of k/n: the effect of chamber size on government spending in bicameral legislatures',
+  author = 'Chen and Malhotra',
+  year = 2007,
+  authoryear = 'Chen and Malhotra (2007)',
+  journal = 'American Political Science Review',
+  web = 'https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E794E71F3182DAAEA2DA1328D45FDCC7/S0003055407070566a.pdf',
+  table = 4,
+  column = 3,
+  indepvar = 'Upper chamber size',
+  indepvar2 = 'K',
+  depvar = 'Per capita expenditure',
+  depvar2 = 'ExpPC',
+  coef = 4.87,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 1.83
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 441,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'The law of k/n: the effect of chamber size on government spending in bicameral legislatures',
+  author = 'Chen and Malhotra',
+  year = 2007,
+  authoryear = 'Chen and Malhotra (2007)',
+  journal = 'American Political Science Review',
+  web = 'https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E794E71F3182DAAEA2DA1328D45FDCC7/S0003055407070566a.pdf',
+  table = 4,
+  column = 4,
+  indepvar = 'Upper chamber size',
+  indepvar2 = 'K',
+  depvar = 'Per capita expenditure',
+  depvar2 = 'ExpPC',
+  coef = 26.75,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 13.21
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 439,
+  published = 'Yes',
+  usemeta = 1,
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Legislative term limits and state spending',
+  author = 'Erler',
+  year = 2007,
+  authoryear = 'Erler (2007)',
+  journal = 'Public Choice',
+  web = 'https://www.jstor.org/stable/27698198',
+  table = 2,
+  column = 1,
+  indepvar = 'Number of seats',
+  indepvar2 = 'N',
+  depvar = 'Expenditure per capita',
+  depvar2 = 'ExpPC',
+  coef = 3.93,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 1.18
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 408,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'Local',
+  location = 'US',
+  title = 'The impact of government structure on local public expenditures',
+  author = 'MacDonald',
+  year = 2008,
+  authoryear = 'MacDonald (2008)',
+  journal = 'Public Choice',
+  web = 'https://link.springer.com/content/pdf/10.1007/s11127-008-9308-8.pdf',
+  table = 5,
+  column = 3,
+  indepvar = 'ln(Council Size)',
+  indepvar2 = 'logN',
+  depvar = 'Log Expenditure per capita',
+  depvar2 = 'logExpPC',
+  coef = 0.136,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.136/2.92
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 408,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'Local',
+  location = 'US',
+  title = 'The impact of government structure on local public expenditures',
+  author = 'MacDonald',
+  year = 2008,
+  authoryear = 'MacDonald (2008)',
+  journal = 'Public Choice',
+  web = 'https://link.springer.com/content/pdf/10.1007/s11127-008-9308-8.pdf',
+  table = 5,
+  column = 1,
+  indepvar = 'ln(Council Size)',
+  indepvar2 = 'logN',
+  depvar = 'Log Expenditure per capita',
+  depvar2 = 'logExpPC',
+  coef = 0.2319,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.2319/4.56
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 408,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'Local',
+  location = 'US',
+  title = 'The impact of government structure on local public expenditures',
+  author = 'MacDonald',
+  year = 2008,
+  authoryear = 'MacDonald (2008)',
+  journal = 'Public Choice',
+  web = 'https://link.springer.com/content/pdf/10.1007/s11127-008-9308-8.pdf',
+  table = 5,
+  column = 2,
+  indepvar = 'ln(Council Size)',
+  indepvar2 = 'logN',
+  depvar = 'Log Expenditure per capita',
+  depvar2 = 'logExpPC',
+  coef = 0.1443,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.1443/2.91
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 408,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'Local',
+  location = 'US',
+  title = 'The impact of government structure on local public expenditures',
+  author = 'MacDonald',
+  year = 2008,
+  authoryear = 'MacDonald (2008)',
+  journal = 'Public Choice',
+  web = 'https://link.springer.com/content/pdf/10.1007/s11127-008-9308-8.pdf',
+  table = 5,
+  column = 4,
+  indepvar = 'ln(Council Size)',
+  indepvar2 = 'logN',
+  depvar = 'Log Expenditure per capita',
+  depvar2 = 'logExpPC',
+  coef = 0.1594,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.1443/3.05
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 408,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'Local',
+  location = 'US',
+  title = 'The impact of government structure on local public expenditures',
+  author = 'MacDonald',
+  year = 2008,
+  authoryear = 'MacDonald (2008)',
+  journal = 'Public Choice',
+  web = 'https://link.springer.com/content/pdf/10.1007/s11127-008-9308-8.pdf',
+  table = 5,
+  column = 5,
+  indepvar = 'ln(Council Size)',
+  indepvar2 = 'logN',
+  depvar = 'Log Expenditure per capita',
+  depvar2 = 'logExpPC',
+  coef = 0.2259,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.2259/4.04
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 288,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'RDD',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Finland',
+  title = 'Does the size of the legislature affect the size of government? evidence from two natural experimentss',
+  author = 'Pettersson-Lidbom',
+  year = 2012,
+  authoryear = 'Pettersson-Lidbom (2012)',
+  journal = 'Journal of Public Economics',
+  web = 'https://reader.elsevier.com/reader/sd/pii/S0047272711001319?token=45100FEA2EACE2CA32B3D4B12207371CDF7382DE23901C13F772F671CD7DF21671CE755BAA419EB3443B138C62CE37B2',
+  table = 3,
+  column = 5,
+  indepvar = 'Council Size',
+  indepvar2 = 'N',
+  depvar = 'Log Expenditure per capita',
+  depvar2 = 'logExpPC',
+  coef = -0.159,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = 0.041
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 288,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'RDD',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Finland',
+  title = 'Does the size of the legislature affect the size of government? evidence from two natural experimentss',
+  author = 'Pettersson-Lidbom',
+  year = 2012,
+  authoryear = 'Pettersson-Lidbom (2012)',
+  journal = 'Journal of Public Economics',
+  web = 'https://reader.elsevier.com/reader/sd/pii/S0047272711001319?token=45100FEA2EACE2CA32B3D4B12207371CDF7382DE23901C13F772F671CD7DF21671CE755BAA419EB3443B138C62CE37B2',
+  table = 3,
+  column = 6,
+  indepvar = 'Council Size',
+  indepvar2 = 'N',
+  depvar = 'Log Expenditure per capita',
+  depvar2 = 'logExpPC',
+  coef = -0.147,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = 0.041
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 288,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'RDD',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Finland',
+  title = 'Does the size of the legislature affect the size of government? evidence from two natural experimentss',
+  author = 'Pettersson-Lidbom',
+  year = 2012,
+  authoryear = 'Pettersson-Lidbom (2012)',
+  journal = 'Journal of Public Economics',
+  web = 'https://reader.elsevier.com/reader/sd/pii/S0047272711001319?token=45100FEA2EACE2CA32B3D4B12207371CDF7382DE23901C13F772F671CD7DF21671CE755BAA419EB3443B138C62CE37B2',
+  table = 3,
+  column = 7,
+  indepvar = 'Council Size',
+  indepvar2 = 'N',
+  depvar = 'Log Expenditure per capita',
+  depvar2 = 'logExpPC',
+  coef = -0.09,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = 0.038
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 288,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'RDD',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Finland',
+  title = 'Does the size of the legislature affect the size of government? evidence from two natural experimentss',
+  author = 'Pettersson-Lidbom',
+  year = 2012,
+  authoryear = 'Pettersson-Lidbom (2012)',
+  journal = 'Journal of Public Economics',
+  web = 'https://reader.elsevier.com/reader/sd/pii/S0047272711001319?token=45100FEA2EACE2CA32B3D4B12207371CDF7382DE23901C13F772F671CD7DF21671CE755BAA419EB3443B138C62CE37B2',
+  table = 3,
+  column = 8,
+  indepvar = 'Council Size',
+  indepvar2 = 'N',
+  depvar = 'Log Expenditure per capita',
+  depvar2 = 'logExpPC',
+  coef = -0.081,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = 0.039
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 288,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'RDD',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Finland',
+  title = 'Does the size of the legislature affect the size of government? evidence from two natural experimentss',
+  author = 'Pettersson-Lidbom',
+  year = 2012,
+  authoryear = 'Pettersson-Lidbom (2012)',
+  journal = 'Journal of Public Economics',
+  web = 'https://reader.elsevier.com/reader/sd/pii/S0047272711001319?token=45100FEA2EACE2CA32B3D4B12207371CDF7382DE23901C13F772F671CD7DF21671CE755BAA419EB3443B138C62CE37B2',
+  table = 3,
+  column = 9,
+  indepvar = 'Council Size',
+  indepvar2 = 'N',
+  depvar = 'Log Expenditure per capita',
+  depvar2 = 'logExpPC',
+  coef = -0.088,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = 0.038
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 288,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Finland',
+  title = 'Does the size of the legislature affect the size of government? evidence from two natural experimentss',
+  author = 'Pettersson-Lidbom',
+  year = 2012,
+  authoryear = 'Pettersson-Lidbom (2012)',
+  journal = 'Journal of Public Economics',
+  web = 'https://reader.elsevier.com/reader/sd/pii/S0047272711001319?token=45100FEA2EACE2CA32B3D4B12207371CDF7382DE23901C13F772F671CD7DF21671CE755BAA419EB3443B138C62CE37B2',
+  table = 3,
+  column = 1,
+  indepvar = 'Council Size',
+  indepvar2 = 'N',
+  depvar = 'Log Expenditure per capita',
+  depvar2 = 'logExpPC',
+  coef = 0.21,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.023
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 288,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'OLS',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Finland',
+  title = 'Does the size of the legislature affect the size of government? evidence from two natural experimentss',
+  author = 'Pettersson-Lidbom',
+  year = 2012,
+  authoryear = 'Pettersson-Lidbom (2012)',
+  journal = 'Journal of Public Economics',
+  web = 'https://reader.elsevier.com/reader/sd/pii/S0047272711001319?token=45100FEA2EACE2CA32B3D4B12207371CDF7382DE23901C13F772F671CD7DF21671CE755BAA419EB3443B138C62CE37B2',
+  table = 3,
+  column = 2,
+  indepvar = 'Council Size',
+  indepvar2 = 'N',
+  depvar = 'Log Expenditure per capita',
+  depvar2 = 'logExpPC',
+  coef = .157,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.037
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 288,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Finland',
+  title = 'Does the size of the legislature affect the size of government? evidence from two natural experimentss',
+  author = 'Pettersson-Lidbom',
+  year = 2012,
+  authoryear = 'Pettersson-Lidbom (2012)',
+  journal = 'Journal of Public Economics',
+  web = 'https://reader.elsevier.com/reader/sd/pii/S0047272711001319?token=45100FEA2EACE2CA32B3D4B12207371CDF7382DE23901C13F772F671CD7DF21671CE755BAA419EB3443B138C62CE37B2',
+  table = 3,
+  column = 3,
+  indepvar = 'Council Size',
+  indepvar2 = 'N',
+  depvar = 'Log Expenditure per capita',
+  depvar2 = 'logExpPC',
+  coef = -0.199,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = 0.04
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 288,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Finland',
+  title = 'Does the size of the legislature affect the size of government? evidence from two natural experimentss',
+  author = 'Pettersson-Lidbom',
+  year = 2012,
+  authoryear = 'Pettersson-Lidbom (2012)',
+  journal = 'Journal of Public Economics',
+  web = 'https://reader.elsevier.com/reader/sd/pii/S0047272711001319?token=45100FEA2EACE2CA32B3D4B12207371CDF7382DE23901C13F772F671CD7DF21671CE755BAA419EB3443B138C62CE37B2',
+  table = 3,
+  column = 4,
+  indepvar = 'Council Size',
+  indepvar2 = 'N',
+  depvar = 'Log Expenditure per capita',
+  depvar2 = 'logExpPC',
+  coef = -0.169,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = 0.041
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 231,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'IV',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Germany',
+  title = 'Coalition governments, cabinet size, and the common pool problem: evidence from the german states',
+  author = 'Baskaran',
+  year = 2013,
+  authoryear = 'Baskaran (2013)',
+  journal = 'European Journal of Political Economy',
+  web = 'https://reader.elsevier.com/reader/sd/pii/S0176268013000773?token=FECF22AE9B176134ACEB47AC0F11ACEFB1EA36D2D73BE992E1471732604540D3DCBD2D4A9CFDE2E44BE0B65C947FA4E3',
+  table = 3,
+  column = 4,
+  indepvar = 'Parliament seats',
+  indepvar2 = 'N',
+  depvar = 'Real Expenditure per capita',
+  depvar2 = 'ExpPC',
+  coef = 0.974,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.974/1.743
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 230,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislatures, Leaders and Leviathans',
+  author = 'Maldonado',
+  year = 2013,
+  authoryear = 'Maldonado (2013)',
+  journal = 'Social Science Quarterly',
+  web = 'https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1540-6237.2012.00895.x',
+  table = 2,
+  column = 2,
+  indepvar = 'Size lower chamber',
+  indepvar2 = 'N',
+  depvar = 'Government Share of GDP',
+  depvar2 = 'PCTGDP',
+  coef = -0.0609,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = 0.0117
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 230,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'OLS',
+  elecsys = 'Mixed',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Countries',
+  location = 'World',
+  title = 'Legislatures, Leaders and Leviathans',
+  author = 'Maldonado',
+  year = 2012,
+  authoryear = 'Maldonado (2012)',
+  journal = 'Social Science Quarterly',
+  web = 'https://onlinelibrary.wiley.com/doi/epdf/10.1111/j.1540-6237.2012.00895.x',
+  table = 2,
+  column = 2,
+  indepvar = 'Size upper chamber',
+  indepvar2 = 'K',
+  depvar = 'Government Share of GDP',
+  depvar2 = 'PCTGDP',
+  coef = -0.04,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = 0.0132
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 220,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'PANEL',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Switzerland',
+  title = 'The impact of within-party and between-party ideological dispersion on fiscal outcomes: evidence from Swiss cantonal parliaments',
+  author = 'Bjedov, Lapointe, and Madiès',
+  year = 2014,
+  authoryear = 'Bjedov et al. (2014)',
+  journal = 'Public Choice',
+  web = 'https://link.springer.com/content/pdf/10.1007/s11127-013-0149-8.pdf',
+  table = 3,
+  column = 1,
+  indepvar = 'Number of seats',
+  indepvar2 = 'N',
+  depvar = 'Spending per capita',
+  depvar2 = 'ExpPC',
+  coef = -0.003,
+  scoef = 'N',
+  scoefsig = NA,
+  SE = 0.01
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 220,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Switzerland',
+  title = 'The impact of within-party and between-party ideological dispersion on fiscal outcomes: evidence from Swiss cantonal parliaments',
+  author = 'Bjedov, Lapointe, and Madiès',
+  year = 2014,
+  authoryear = 'Bjedov et al. (2014)',
+  journal = 'Public Choice',
+  web = 'https://link.springer.com/content/pdf/10.1007/s11127-013-0149-8.pdf',
+  table = 3,
+  column = 3,
+  indepvar = 'Number of seats',
+  indepvar2 = 'N',
+  depvar = 'Spending per capita',
+  depvar2 = 'ExpPC',
+  coef = -0.006,
+  scoef = 'N',
+  scoefsig = NA,
+  SE = 0.01
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 220,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'PANEL',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Switzerland',
+  title = 'The impact of within-party and between-party ideological dispersion on fiscal outcomes: evidence from Swiss cantonal parliaments',
+  author = 'Bjedov, Lapointe, and Madiès',
+  year = 2014,
+  authoryear = 'Bjedov et al. (2014)',
+  journal = 'Public Choice',
+  web = 'https://link.springer.com/content/pdf/10.1007/s11127-013-0149-8.pdf',
+  table = 3,
+  column = 2,
+  indepvar = 'Number of seats',
+  indepvar2 = 'N',
+  depvar = 'Spending (%) GDP',
+  depvar2 = 'PCTGDP',
+  coef = -0.004,
+  scoef = 'N',
+  scoefsig = NA,
+  SE = 0.02
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 220,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Switzerland',
+  title = 'The impact of within-party and between-party ideological dispersion on fiscal outcomes: evidence from Swiss cantonal parliaments',
+  author = 'Bjedov, Lapointe, and Madiès',
+  year = 2014,
+  authoryear = 'Bjedov et al. (2014)',
+  journal = 'Public Choice',
+  web = 'https://link.springer.com/content/pdf/10.1007/s11127-013-0149-8.pdf',
+  table = 3,
+  column = 4,
+  indepvar = 'Number of seats',
+  indepvar2 = 'N',
+  depvar = 'Spending (%) GDP',
+  depvar2 = 'PCTGDP',
+  coef = -0.008,
+  scoef = 'N',
+  scoefsig = NA,
+  SE = 0.02
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 208,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'Local',
+  location = 'US',
+  title = 'Communication in federal politics: universalism, policy uniformity, and the optimal allocation of fiscal authority',
+  author = 'Kessler',
+  year = 2014,
+  authoryear = 'Kessler (2014)',
+  journal = 'Journal of Political Economy',
+  web = 'https://www.jstor.org/stable/pdf/10.1086/676404.pdf?refreqid=excelsior%3A202fbd841dc5514e876482631872251b',
+  table = 2,
+  column = 4,
+  indepvar = 'Council size',
+  indepvar2 = 'N',
+  depvar = 'Spending per capita',
+  depvar2 = 'ExpPC',
+  coef = 0.174,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.085
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 208,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'Local',
+  location = 'US',
+  title = 'Communication in federal politics: universalism, policy uniformity, and the optimal allocation of fiscal authority',
+  author = 'Kessler',
+  year = 2014,
+  authoryear = 'Kessler (2014)',
+  journal = 'Journal of Political Economy',
+  web = 'https://www.jstor.org/stable/pdf/10.1086/676404.pdf?refreqid=excelsior%3A202fbd841dc5514e876482631872251b',
+  table = 2,
+  column = 1,
+  indepvar = 'Council size',
+  indepvar2 = 'N',
+  depvar = 'Spending per capita',
+  depvar2 = 'ExpPC',
+  coef = 0.223,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.052
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 208,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'Local',
+  location = 'US',
+  title = 'Communication in federal politics: universalism, policy uniformity, and the optimal allocation of fiscal authority',
+  author = 'Kessler',
+  year = 2014,
+  authoryear = 'Kessler (2014)',
+  journal = 'Journal of Political Economy',
+  web = 'https://www.jstor.org/stable/pdf/10.1086/676404.pdf?refreqid=excelsior%3A202fbd841dc5514e876482631872251b',
+  table = 2,
+  column = 2,
+  indepvar = 'Council size',
+  indepvar2 = 'N',
+  depvar = 'Spending per capita',
+  depvar2 = 'ExpPC',
+  coef = 0.215,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.061
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 208,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'Local',
+  location = 'US',
+  title = 'Communication in federal politics: universalism, policy uniformity, and the optimal allocation of fiscal authority',
+  author = 'Kessler',
+  year = 2014,
+  authoryear = 'Kessler (2014)',
+  journal = 'Journal of Political Economy',
+  web = 'https://www.jstor.org/stable/pdf/10.1086/676404.pdf?refreqid=excelsior%3A202fbd841dc5514e876482631872251b',
+  table = 2,
+  column = 3,
+  indepvar = 'Council size',
+  indepvar2 = 'N',
+  depvar = 'Spending per capita',
+  depvar2 = 'ExpPC',
+  coef = 0.158,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.054
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 3,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'The law of 1/n revisited: distributive politics, legislature size, and the costs of collective action',
+  author = 'Crowley',
+  year = 2019,
+  authoryear = 'Crowley (2019)',
+  journal = 'Southern Economic Journal',
+  web = 'https://onlinelibrary.wiley.com/doi/epdf/10.1002/soej.12388',
+  table = 2,
+  column = 1,
+  indepvar = 'Upper chamber (senate) seats',
+  indepvar2 = 'K',
+  depvar = 'Per capita total expenditure',
+  depvar2 = 'ExpPC',
+  coef = 8.21,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 4.051
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 3,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'The law of 1/n revisited: distributive politics, legislature size, and the costs of collective action',
+  author = 'Crowley',
+  year = 2019,
+  authoryear = 'Crowley (2019)',
+  journal = 'Southern Economic Journal',
+  web = 'https://onlinelibrary.wiley.com/doi/epdf/10.1002/soej.12388',
+  table = 2,
+  column = 2,
+  indepvar = 'Upper chamber (senate) seats',
+  indepvar2 = 'K',
+  depvar = 'Per capita total expenditure',
+  depvar2 = 'ExpPC',
+  coef = 8.423,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 18.17
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 3,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'The law of 1/n revisited: distributive politics, legislature size, and the costs of collective action',
+  author = 'Crowley',
+  year = 2019,
+  authoryear = 'Crowley (2019)',
+  journal = 'Southern Economic Journal',
+  web = 'https://onlinelibrary.wiley.com/doi/epdf/10.1002/soej.12388',
+  table = 2,
+  column = 3,
+  indepvar = 'Upper chamber (senate) seats',
+  indepvar2 = 'K',
+  depvar = 'Per capita total expenditure',
+  depvar2 = 'ExpPC',
+  coef = 9.594,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 3.804
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 3,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'The law of 1/n revisited: distributive politics, legislature size, and the costs of collective action',
+  author = 'Crowley',
+  year = 2019,
+  authoryear = 'Crowley (2019)',
+  journal = 'Southern Economic Journal',
+  web = 'https://onlinelibrary.wiley.com/doi/epdf/10.1002/soej.12388',
+  table = 2,
+  column = 1,
+  indepvar = 'Lower chamber (senate) seats',
+  indepvar2 = 'N',
+  depvar = 'Per capita total expenditure',
+  depvar2 = 'ExpPC',
+  coef = -0.351,
+  scoef = 'N',
+  scoefsig = NA,
+  SE = 0.745
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 3,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'The law of 1/n revisited: distributive politics, legislature size, and the costs of collective action',
+  author = 'Crowley',
+  year = 2019,
+  authoryear = 'Crowley (2019)',
+  journal = 'Southern Economic Journal',
+  web = 'https://onlinelibrary.wiley.com/doi/epdf/10.1002/soej.12388',
+  table = 2,
+  column = 2,
+  indepvar = 'Lower chamber (senate) seats',
+  indepvar2 = 'N',
+  depvar = 'Per capita total expenditure',
+  depvar2 = 'ExpPC',
+  coef = 5.975,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 2.646
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 3,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'The law of 1/n revisited: distributive politics, legislature size, and the costs of collective action',
+  author = 'Crowley',
+  year = 2019,
+  authoryear = 'Crowley (2019)',
+  journal = 'Southern Economic Journal',
+  web = 'https://onlinelibrary.wiley.com/doi/epdf/10.1002/soej.12388',
+  table = 2,
+  column = 3,
+  indepvar = 'Lower chamber (senate) seats',
+  indepvar2 = 'N',
+  depvar = 'Per capita total expenditure',
+  depvar2 = 'ExpPC',
+  coef = 7.658,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 3.922
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 8,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'RDD',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Local',
+  location = 'Indonesia',
+  title = 'Legislature size, local government expenditure and taxation, and public service access in indonesia',
+  author = 'Lewis',
+  year = 2019,
+  authoryear = 'Lewis (2019)',
+  journal = 'Studies in Comparative International Development',
+  web = 'https://link.springer.com/content/pdf/10.1007/s12116-019-09278-1.pdf',
+  table = 4,
+  column = NA,
+  indepvar = 'Legislature size',
+  indepvar2 = 'N',
+  depvar = 'Log per capita total expenditure',
+  depvar2 = 'logExpPC',
+  coef = -0.174,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = (-0.174+0.245)/1.96
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 42,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Court-ordered redistricting and the law of 1/n',
+  author = 'Lee and Park',
+  year = 2018,
+  authoryear = 'Lee and Park (2018)',
+  journal = 'Public Choice',
+  web = NA,
+  table = 2,
+  column = 1,
+  indepvar = 'Lower',
+  indepvar2 = 'N',
+  depvar = 'Total expenditure per capita',
+  depvar2 = 'ExpPC',
+  coef = -0.851,
+  scoef = 'N',
+  scoefsig = NA,
+  SE = 1.395
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 42,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Court-ordered redistricting and the law of 1/n',
+  author = 'Lee and Park',
+  year = 2018,
+  authoryear = 'Lee and Park (2018)',
+  journal = 'Public Choice',
+  web = NA,
+  table = 2,
+  column = 2,
+  indepvar = 'Lower',
+  indepvar2 = 'N',
+  depvar = 'Total expenditure per capita',
+  depvar2 = 'ExpPC',
+  coef = -1.689,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = 0.697
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 42,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Court-ordered redistricting and the law of 1/n',
+  author = 'Lee and Park',
+  year = 2018,
+  authoryear = 'Lee and Park (2018)',
+  journal = 'Public Choice',
+  web = NA,
+  table = 2,
+  column = 3,
+  indepvar = 'Lower',
+  indepvar2 = 'N',
+  depvar = 'Total expenditure per capita',
+  depvar2 = 'ExpPC',
+  coef = 7.632,
+  scoef = 'N',
+  scoefsig = NA,
+  SE = 2.309
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 42,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Court-ordered redistricting and the law of 1/n',
+  author = 'Lee and Park',
+  year = 2018,
+  authoryear = 'Lee and Park (2018)',
+  journal = 'Public Choice',
+  web = NA,
+  table = 2,
+  column = 1,
+  indepvar = 'Upper',
+  indepvar2 = 'K',
+  depvar = 'Total expenditure per capita',
+  depvar2 = 'ExpPC',
+  coef = 19.74,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 8.406
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 42,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Court-ordered redistricting and the law of 1/n',
+  author = 'Lee and Park',
+  year = 2018,
+  authoryear = 'Lee and Park (2018)',
+  journal = 'Public Choice',
+  web = NA,
+  table = 2,
+  column = 2,
+  indepvar = 'Upper',
+  indepvar2 = 'K',
+  depvar = 'Total expenditure per capita',
+  depvar2 = 'ExpPC',
+  coef = 10.06,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 3.965
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 42,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Court-ordered redistricting and the law of 1/n',
+  author = 'Lee and Park',
+  year = 2018,
+  authoryear = 'Lee and Park (2018)',
+  journal = 'Public Choice',
+  web = NA,
+  table = 2,
+  column = 3,
+  indepvar = 'Upper',
+  indepvar2 = 'K',
+  depvar = 'Total expenditure per capita',
+  depvar2 = 'ExpPC',
+  coef = 9.062,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 20.38
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 82,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'RDD',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Local',
+  location = 'Germany',
+  title = 'The effect of legislature size on public spending: evidence from a regression discontinuity design',
+  author = 'Höhmann',
+  year = 2017,
+  authoryear = 'Höhmann (2017)',
+  journal = 'Public Choice',
+  web = 'https://link.springer.com/content/pdf/10.1007/s11127-017-0484-2.pdf',
+  table = 2,
+  column = 1,
+  indepvar = 'Total number of seats in the legislature',
+  indepvar2 = 'N',
+  depvar = 'Log expenditure per capita',
+  depvar2 = 'logExpPC',
+  coef = -0.03,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = 0.01
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 82,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'RDD',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Local',
+  location = 'Germany',
+  title = 'The effect of legislature size on public spending: evidence from a regression discontinuity design',
+  author = 'Höhmann',
+  year = 2017,
+  authoryear = 'Höhmann (2017)',
+  journal = 'Public Choice',
+  web = 'https://link.springer.com/content/pdf/10.1007/s11127-017-0484-2.pdf',
+  table = 2,
+  column = 2,
+  indepvar = 'Total number of seats in the legislature',
+  indepvar2 = 'N',
+  depvar = 'Log expenditure per capita',
+  depvar2 = 'logExpPC',
+  coef = -0.03,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = 0.01
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 82,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'RDD',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'Local',
+  location = 'Germany',
+  title = 'The effect of legislature size on public spending: evidence from a regression discontinuity design',
+  author = 'Höhmann',
+  year = 2017,
+  authoryear = 'Höhmann (2017)',
+  journal = 'Public Choice',
+  web = 'https://link.springer.com/content/pdf/10.1007/s11127-017-0484-2.pdf',
+  table = 2,
+  column = 3,
+  indepvar = 'Total number of seats in the legislature',
+  indepvar2 = 'N',
+  depvar = 'Log expenditure per capita',
+  depvar2 = 'logExpPC',
+  coef = -0.04,
+  scoef = 'N',
+  scoefsig = 'N',
+  SE = 0.02
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 102,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'PANEL',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Australia',
+  title = 'The price of democracy? political representation structure and per capita expenditure in victorian local government',
+  author = 'Drew and Dollery',
+  year = 2017,
+  authoryear = 'Drew and Dollery (2017)',
+  journal = 'Urban Affairs Review',
+  web = '10.1007/s11127-016-0369-9',
+  table = 2,
+  column = 1,
+  indepvar = 'No. of representatives',
+  indepvar2 = 'N',
+  depvar = 'Ln Expenditure per capita',
+  depvar2 = 'logExpPC',
+  coef = 0.077,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 0.028
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 102,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'PR',
+  elecsys2 = 'Non-Maj',
+  agglevel = 'States',
+  location = 'Australia',
+  title = 'The price of democracy? political representation structure and per capita expenditure in victorian local government',
+  author = 'Drew and Dollery',
+  year = 2017,
+  authoryear = 'Drew and Dollery (2017)',
+  journal = 'Urban Affairs Review',
+  web = '10.1007/s11127-016-0369-9',
+  table = 2,
+  column = 2,
+  indepvar = 'No. of representatives',
+  indepvar2 = 'N',
+  depvar = 'Ln Expenditure per capita',
+  depvar2 = 'logExpPC',
+  coef = 0.031,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 0.022
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 132,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Supermajority rule and bicameral bargaining',
+  author = 'Lee',
+  year = 2016,
+  authoryear = 'Lee (2016)',
+  journal = 'Public Choice',
+  web = 'https://link.springer.com/article/10.1007/s11127-016-0369-9',
+  table = 3,
+  column = 1,
+  indepvar = 'Lower',
+  indepvar2 = 'N',
+  depvar = 'Per capita expenditure',
+  depvar2 = 'ExpPC',
+  coef = 0.0164,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 1.313
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 132,
+  published = 'Yes',
+  usemeta = 1, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Supermajority rule and bicameral bargaining',
+  author = 'Lee',
+  year = 2016,
+  authoryear = 'Lee (2016)',
+  journal = 'Public Choice',
+  web = 'https://link.springer.com/article/10.1007/s11127-016-0369-9',
+  table = 3,
+  column = 1,
+  indepvar = 'Upper',
+  indepvar2 = 'K',
+  depvar = 'Per capita expenditure',
+  depvar2 = 'ExpPC',
+  coef = 38.44,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 19.23
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 132,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Supermajority rule and bicameral bargaining',
+  author = 'Lee',
+  year = 2016,
+  authoryear = 'Lee (2016)',
+  journal = 'Public Choice',
+  web = 'https://link.springer.com/article/10.1007/s11127-016-0369-9',
+  table = 3,
+  column = 2,
+  indepvar = 'Upper',
+  indepvar2 = 'K',
+  depvar = 'Per capita expenditure',
+  depvar2 = 'ExpPC',
+  coef = 37.85,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 17.77
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 132,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Supermajority rule and bicameral bargaining',
+  author = 'Lee',
+  year = 2016,
+  authoryear = 'Lee (2016)',
+  journal = 'Public Choice',
+  web = 'https://link.springer.com/article/10.1007/s11127-016-0369-9',
+  table = 3,
+  column = 3,
+  indepvar = 'Upper',
+  indepvar2 = 'K',
+  depvar = 'Per capita expenditure',
+  depvar2 = 'ExpPC',
+  coef = 25.61,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 13.48
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 132,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Supermajority rule and bicameral bargaining',
+  author = 'Lee',
+  year = 2016,
+  authoryear = 'Lee (2016)',
+  journal = 'Public Choice',
+  web = 'https://link.springer.com/article/10.1007/s11127-016-0369-9',
+  table = 3,
+  column = 4,
+  indepvar = 'Upper',
+  indepvar2 = 'K',
+  depvar = 'Per capita expenditure',
+  depvar2 = 'ExpPC',
+  coef = 5.996,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 13.06
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 132,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Supermajority rule and bicameral bargaining',
+  author = 'Lee',
+  year = 2016,
+  authoryear = 'Lee (2016)',
+  journal = 'Public Choice',
+  web = 'https://link.springer.com/article/10.1007/s11127-016-0369-9',
+  table = 3,
+  column = 5,
+  indepvar = 'Upper',
+  indepvar2 = 'K',
+  depvar = 'Per capita expenditure',
+  depvar2 = 'ExpPC',
+  coef = 25.56,
+  scoef = 'P',
+  scoefsig = 'P',
+  SE = 13.49
+))
+
+dat <- rbind(dat,
+  data.frame(
+  id = 132,
+  published = 'Yes',
+  usemeta = 0, 
+  method = 'PANEL',
+  elecsys = 'Maj',
+  elecsys2 = 'Maj',
+  agglevel = 'States',
+  location = 'US',
+  title = 'Supermajority rule and bicameral bargaining',
+  author = 'Lee',
+  year = 2016,
+  authoryear = 'Lee (2016)',
+  journal = 'Public Choice',
+  web = 'https://link.springer.com/article/10.1007/s11127-016-0369-9',
+  table = 3,
+  column = 6,
+  indepvar = 'Upper',
+  indepvar2 = 'K',
+  depvar = 'Per capita expenditure',
+  depvar2 = 'ExpPC',
+  coef = 4.693,
+  scoef = 'P',
+  scoefsig = NA,
+  SE = 12.35
+))
+
+dat <- dat[order(dat$id),]
+dat <- dat[!is.na(dat$coef),]
+row.names(dat) <- NULL
+levels(dat$elecsys2) <- c('Majoritarian', 'Non-Majoritarian')
+dat$scoef <- factor(as.character(dat$scoef), labels = c('N', 'P'))
+dat$scoefsig <- factor(as.character(dat$scoefsig), labels = c('N', 'P'))
+levels(dat$scoef) <- c('Negative', 'Positive')
+levels(dat$scoefsig) <- c('Negative', 'Positive')
+dat$method <- factor(as.character(dat$method), 
+                     levels = c("OLS", "PANEL", "IV", "RDD"))
+dat$location2 <- as.character(dat$location)
+dat$location2[dat$location2!='World'] = 'Country'
+dat$location2 <- factor(as.character(dat$location2), 
+                     levels = c("Country", "World"))
+dat$agglevel <- factor(as.character(dat$agglevel), 
+                     levels = c("Local", "States", "Countries"))
+fulldat <- dat
+dat <- dat %>%
+  filter(usemeta==1)
+```
+
+## Descriptive statistics
+
+### Study Year
+
+```{r, echo=FALSE, fig.width=7, fig.height=6, fig.cap="Study Year Frequencies"}
+dat %>%
+  ggplot(aes(x = as.factor(year))) + 
+    geom_bar(color = "black") + 
+  labs(x = "",
+       y = "") + 
+  theme_bw()
+```
+
+### Published?
+
+```{r, echo=FALSE, fig.width=7, fig.height=6, fig.cap="Was the study published?"}
+dat %>%
+  ggplot(aes(x = as.factor(published))) + 
+    geom_bar(color = "black") + 
+  labs(x = "Published study?",
+       y = "") + 
+  theme_bw()
+```
+
+### Dependent variables
+
+```{r, echo=FALSE, fig.width=7, fig.height=6, fig.cap="Dependent variables across the law of 1/n studies"}
+dat %>%
+  mutate(depvar2 = factor(depvar2, 
+                          labels = c("Per Capita Expenditure",
+                                     "Percentage GDP Government Expenditure",
+                                     "Log Per Capita Expenditure"))) %>%
+  ggplot(aes(x = depvar2)) +
+    geom_bar(color = "black") + 
+  labs(x = "Dependent Variables",
+       y = "") + 
+  coord_flip() + 
+  theme_bw()
+```
+
+### Independent variables
+
+```{r, echo=FALSE, fig.width=7, fig.height=6, fig.cap="Independent variables across the law of 1/n studies"}
+dat %>%
+  mutate(indepvar2 = factor(indepvar2, labels = c('K (upper house legislators)',
+                                                  'N (lower house legislators)',
+                                                  'Log N'))) %>%
+  ggplot(aes(x = indepvar2)) + 
+    geom_bar(color = "black") + 
+  labs(x = "Independent Variables",
+       y = "") +
+  coord_flip() +
+  theme_bw() 
+```
+
+### Histogram Coefficients
+
+```{r, echo=FALSE}
+dat %>%
+  ggplot(aes(x = coef)) +
+  geom_histogram(bins = 15, color = "black") + 
+  labs(x = "Coefficients") + 
+  theme_bw()
+```
+
+### Histogram Standard Errors
+
+```{r, echo=FALSE}
+dat %>%
+  ggplot(aes(x = SE)) +
+  geom_histogram(bins = 10, color = "black") + 
+  labs(x = "Standard Errors") + 
+  theme_bw()
+```
+
+### Sign Coefficients
+
+```{r, echo=FALSE, fig.width=7, fig.height=6, fig.cap="Coefficient Sign"}
+dat %>%
+  ggplot(aes(x=as.factor(scoef))) + 
+  geom_bar(color = "black") + 
+  labs(x = "Coefficient Sign",
+       y = "") +
+  theme_bw()
+```
+
+### Descriptive Statistics of Moderators
+
+We chose a set of moderators that frequently appear in the literature and may help us interpret our results. We included them in our meta-regressions alongside an indicator for the type of independent variable used in the original study ($n$, log($n$), or $k$). The additional moderators are: 1) electoral system; 2) data aggregation level; 3) estimation method; 4) publication year; 5) paper publication in an academic journal. The table below presents descriptive statistics for these moderators in our selection of articles.
+
+```{r, echo=F,warning=F,message=F}
+fulldat$usemeta2 <- factor(fulldat$usemeta)
+levels(fulldat$usemeta2) <- c('Other Coefficients', 'Main Coefficients')
+aux <- select(fulldat, usemeta2, indepvar2, year, published, 
+              elecsys2, method, agglevel, location2) %>%
+  rename(`Independent Variables` = indepvar2,
+         `Year` = year, 
+         `Published work` = published, 
+         `Electoral system` = elecsys2, 
+         `Estimation method` = method, 
+         `Sampling Aggregation Level` = agglevel, 
+         `Sample Location` = location2)
+
+export2md(descrTable(~.-usemeta2, aux, y = aux$usemeta2, 
+                        show.p.overall = F, show.all = T),
+          caption = "Descriptive Statistics of Moderators")
+```
+
+
+
+### Binomial Tests for Coefficient Signs
+
+A general test of the theory would be to study whether the coefficients are positive or negative. Note that the law of 1/n poses we should have a positive influence of legislature size on expenditure. To test this theory, we run a Binomial One-Proportion Z-test. The test consists in contrasting the number of occurences of positive and negative signs (Binomial trials) against the hypothesis that they were produced with 0.5 percent chance. Note that if this is the case, any detected difference would be a mere XXXX of chance.
+
+For the number of legislators in the lower house (N), the results follow below.
+
+```{r, echo=FALSE}
+aux <- filter(dat, indepvar2=='N')
+binom.test(table(aux$scoef)[2], sum(table(aux$scoef)), p=0.5, alternative = 'greater')
+```
+
+Therefore, the most elementary test we could run, a sign direction test, tells us that the law of 1/n does not hold for our sample. For the log of the number of legislators in the lower house (log(N)), the results follow below.
+
+```{r, echo=FALSE}
+aux <- filter(dat, indepvar2=='logN')
+binom.test(table(aux$scoef)[2], sum(table(aux$scoef)), p=0.5, alternative = 'greater')
+```
+
+For log(N), although most coefficients were negative, there are very few studies, making the Finally, for the number of legislators in the upper house (K), the results follow below.
+
+```{r, echo=FALSE}
+aux <- filter(dat, indepvar2=='K')
+binom.test(table(aux$scoef)[2], sum(table(aux$scoef)), p=0.5, alternative = 'greater')
+```
+
+Here, the law of 1/n holds. However, the effect goes in a direction different from the predicted in the law of k/n paper.
+
+### Electoral system
+
+```{r, echo=FALSE, fig.width=7, fig.height=6, fig.cap="Electoral system"}
+dat %>%
+  ggplot(aes(x=as.factor(elecsys2))) + 
+    geom_bar(color = "black") + 
+  labs(x = "Electoral system",
+       y = "") + 
+  theme_bw()
+```
+
+### Electoral system x Sign Coefficient
+
+```{r, echo=FALSE}
+table(dat$scoef, dat$elecsys2)
+chisq.test(table(dat$scoef, dat$elecsys2), simulate.p.value = T)
+```
+
+### Independent Variable x Sign Coefficient
+
+```{r, echo=FALSE}
+table(dat$scoef, dat$indepvar2)
+chisq.test(table(dat$scoef, dat$indepvar2), simulate.p.value = T)
+```
+
+
+### Dependent variables x Independent variables
+
+```{r, echo=FALSE}
+table(dat$scoef, dat$depvar2)
+chisq.test(table(dat$scoef, dat$depvar2), simulate.p.value = T)
+```
+
+## Meta-analysis {#meta-an}
+
+We combined the three independent (N, logN, and K) with the levels of the three dependent variables (ExpPC, logExpPC, PCTGDP). This formed a 3x3 possibility for our analysis.
+
+
+### ExpPC x N
+
+```{r, echo=FALSE}
+# Pooling effects analysis -- ExpPC x N
+aux <- dat %>%
+  filter(indepvar2 == 'N',
+         depvar2 == 'ExpPC')
+
+mod <- metagen(coef, SE, data=aux, 
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
+mod
+```
+
+And the forest plot:
+
+```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+
+f1 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(aes(color = group)) +
+  # Error Bars
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
+f1
+```
+
+```{r,include=F,warning=F}
+f1 + 
+  labs(caption = "ExpPC x N") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 18, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fa.png", width = 30, height = 18.75, units = "cm")
+
+```
+
+
+Highlights:
+
+1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+
+
+\newpage
+#### Electoral system subgroup analysis
+
+The law of 1/n was created for majoritarian systems. In the theoretical section below, we explain why the argument have potential issues when applied to non-majoritarian electoral systems. We estimated a subgroup analysis using a binary electoral system.
+
+```{r, echo=FALSE, fig.width=8, fig.height=6, fig.cap="Subgroup Analysis of (N) x (ExpPC), controlling by electoral system",warning=FALSE}
+mod <- update(mod, byvar = aux$elecsys2, print.byvar = F)
+
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+
+f1b <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(aes(color = group)) +
+  # Error Bars
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
+
+f1b
+```
+
+Therefore, we can see that the hypothesis that majoritarian systems produce systematic positive effects was disproved. The majoritarian systems in the sample had a random effects model estimate of -0.25, while the random effects model in the non-majoritarian subgroup fitted a value of 0.08. Both are non-significant, but they reassure us that the absense of effect is not caused by pooling multiple types of electoral systems.
+
+
+\newpage
+### ExpPC x logN
+
+There were no studies that had per capita expenditure in the dependent variable and log of lower house size in the treatment variable.
+
+### ExpPC x K
+
+Now we are investigating the upper house size (K). In this model, we investigate the effect of upper house size on expenditure per capita (ExpPC).
+
+```{r}
+# Pooling effects analysis -- ExpPC x K
+aux <- dat %>%
+  filter(indepvar2 == 'K',
+         depvar2 == 'ExpPC')
+
+mod <- metagen(coef, SE, data=aux, 
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
+mod
+```
+
+And the forest plot:
+
+```{r, echo=FALSE, fig.width=7, fig.height=4, fig.cap="Effect of upper house size (K) on the per capita government expenditure (ExpPC)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+
+f2 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(aes(color = group)) +
+  # Error Bars
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
+
+f2
+```
+
+```{r,include=F,warning=F}
+f2 + 
+  labs(caption = "ExpPC x K") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 18, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fb.png", width = 30, height = 18.75, units = "cm")
+
+```
+
+Highlights:
+
+1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+
+\newpage
+### logExpPC x N
+
+This model estimates the Log of Per Capita Expenditure as the dependent variable, and the number of lower house legislators as the treatment variable.
+
+```{r}
+# Pooling effects analysis -- logExpPC x N
+aux <- dat %>%
+  filter(indepvar2 == 'N',
+         depvar2 == 'logExpPC')
+
+mod <- metagen(
+  coef, SE, data=aux, 
+  studlab=paste(authoryear),
+  comb.fixed = FALSE,
+  comb.random = TRUE,
+  method.tau = "REML",
+  hakn = TRUE,
+  prediction = TRUE,
+  sm="SMD"
+  )
+
+mod
+```
+
+And the forest plot:
+
+```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap="Effect of lower houses size (N) on log of per capita expenditure (logExpPC)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+
+f3 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(aes(color = group)) +
+  # Error Bars
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
+
+f3
+```
+
+```{r,include=F,warning=F}
+f3 + 
+  labs(caption = "logExpPC x N") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 18, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fc.png", width = 30, height = 18.75, units = "cm")
+
+```
+
+Highlights:
+
+1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+
+\newpage
+### logExpPC x logN
+
+In this specification, we study the log of per capita expenditure (logExpPC) as a function of the log of lower house size (logN).
+
+```{r}
+# Pooling effects analysis -- logExpPC x logN
+aux <- dat %>%
+  filter(indepvar2 == 'logN',
+         depvar2 == 'logExpPC')
+
+mod <- metagen(coef, SE, data=aux, 
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
+mod
+```
+
+And the forest plot:
+
+```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of log lower houses size (logN) on the log of per capita government expenditure (logExpPC)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+
+f4 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(aes(color = group)) +
+  # Error Bars
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
+
+f4
+```
+
+```{r,include=F,warning=F}
+f4 + 
+  labs(caption = "logExpPC x logN") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 18, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fd.png", width = 30, height = 18.75, units = "cm")
+
+```
+
+Highlights:
+
+1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`). **This model is significant at the 10\% confidence level.**
+3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+
+\newpage
+### logExpPC x K
+
+No studies related the log of per capita expenditure with the size of upper house (K).
+
+### PCTGDP x N
+
+This model fits the random effects for the percentage of GDP as public expenditure as the main outcome, and the size of lower house as the main treatment variable.
+
+```{r}
+# Pooling effects analysis -- PCTGDP x N
+aux <- dat %>%
+  filter(indepvar2 == 'N',
+         depvar2 == 'PCTGDP')
+
+mod <- metagen(coef, SE, data=aux, 
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
+mod
+```
+
+And the forest plot:
+
+```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap="Effect of lower houses size (N) on percentage of public expenditure GDP (PCTGDP)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+f5 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(aes(color = group)) +
+  # Error Bars
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
+f5
+```
+
+```{r,include=F,warning=F}
+f5 + 
+  labs(caption = "PCTGDP x N") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 18, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fe.png", width = 30, height = 18.75, units = "cm")
+
+```
+
+Highlights:
+
+1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+
+\newpage
+### PCTGDP x logN
+
+This meta-regression investigates the percentage of GDP as public expenditure as the dependent variable and the log lower house size (logN) as the treatment variable.
+
+```{r}
+# Pooling effects analysis -- PCTGDP x logN
+aux <- dat %>%
+  filter(indepvar2 == 'logN',
+         depvar2 == 'PCTGDP')
+
+mod <- metagen(
+  coef, SE, data=aux, 
+  studlab=paste(authoryear),
+  comb.fixed = FALSE,
+  comb.random = TRUE,
+  method.tau = "REML",
+  hakn = TRUE,
+  prediction=TRUE,
+  sm="SMD"
+  )
+
+mod
+```
+
+And the forest plot:
+
+```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of log lower houses size (logN) on the GDP share of public expenditure (PCTGDP)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+f6 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(aes(color = group)) +
+  # Error Bars
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
+
+f6
+```
+
+```{r,include=F,warning=F}
+f6 + 
+  labs(caption = "PCTGDP x logN") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 18, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/ff.png", width = 30, height = 18.75, units = "cm")
+
+```
+
+Highlights:
+
+1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+
+\newpage
+### PCTGDP x K
+
+This model looks into the effect of upper house size (K) on the public expenditure share of the GDP (PCTGDP).
+
+```{r}
+# Pooling effects analysis -- PCTGDP x K
+aux <- dat %>%
+  filter(indepvar2 == 'K',
+         depvar2 == 'PCTGDP')
+
+mod <- metagen(coef, SE, data=aux, 
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
+mod
+```
+
+And the forest plot:
+
+```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of upper house size (K) on the public expenditure share of the GDP (PCTGDP)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+
+f7 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(aes(color = group)) +
+  # Error Bars
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
+
+f7
+```
+
+```{r,include=F,warning=F}
+f7 + 
+  labs(caption = "PCTGDP x K") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 18, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fg.png", width = 30, height = 18.75, units = "cm")
+
+```
+
+Highlights:
+
+1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+
+
+\newpage
+```{r,include=F,warning=F}
+blank = ggplot() + 
+  geom_blank() +
+  theme_minimal()
+blank
+ggsave("./plots/zz_blank.png", width = 30, height = 18.75, units = "cm")
+
+plots = list.files(path = "./plots/", pattern = "*.png") %>%
+  map(~{
+    image_read(path = paste0("./plots/", .x)) %>%
+      image_rotate(., 270) %>%
+      image_border(., "#ffffff ", "90x18")
+  })
+```
+
+```{r, echo=FALSE, fig.width=20, fig.height=5, warning=F,message=F}
+
+p_1 = image_append(c(plots[[3]], plots[[2]], plots[[1]]), stack = T)
+p_2 = image_append(c(plots[[6]], plots[[5]], plots[[4]]), stack = T)
+p_3 = image_append(c(plots[[15]],plots[[7]],plots[[15]]), stack = T)
+p_full = image_append(c(p_1, p_2, p_3))
+
+p_full
+
+magick::image_write(p_full,"figure 1.png")
+```
+
+
+\newpage
+## Meta-Analysis (all coefficients) {#full-meta-an}
+
+### ExpPC x N
+
+```{r, echo=FALSE}
+# Pooling effects analysis -- ExpPC x N
+aux <- fulldat %>%
+  filter(indepvar2 == 'N',
+         depvar2 == 'ExpPC')
+
+mod <- metagen(coef, SE, data=aux, 
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
+mod
+```
+
+And the forest plot:
+
+```{r, echo=FALSE, fig.width=12, fig.height=6, fig.cap="Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+f8 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(aes(color = group)) +
+  # Error Bars
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 9, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
+
+f8
+```
+
+```{r,include=F,warning=F}
+f8 + 
+  labs(caption = "ExpPC x N") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fh.png", width = 30, height = 18.75, units = "cm")
+
+```
+
+Highlights:
+
+1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+
+\newpage
+#### Electoral system subgroup analysis
+
+The law of 1/n was created for majoritarian systems. In the theoretical section below, we explain why the argument have potential issues when applied to non-majoritarian electoral systems. We estimated a subgroup analysis using a binary electoral system.
+
+```{r, echo=FALSE, fig.width=8, fig.height=6, fig.cap="Subgroup Analysis of (N) x (ExpPC), controlling by electoral system",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+f8b <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(aes(color = group)) +
+  # Error Bars
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 13, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
+f8b
+```
+
+Therefore, we can see that the hypothesis that majoritarian systems produce systematic positive effects was disproved. The majoritarian systems in the sample had a random effects model estimate of -0.25, while the random effects model in the non-majoritarian subgroup fitted a value of 0.08. Both are non-significant, but they reassure us that the absense of effect is not caused by pooling multiple types of electoral systems.
+
+
+\newpage
+### ExpPC x logN
+
+There were no studies that had per capita expenditure in the dependent variable and log of lower house size in the treatment variable.
+
+
+### ExpPC x K
+
+Now we are investigating the upper house size (K). In this model, we investigate the effect of upper house size on expenditure per capita (ExpPC).
+
+```{r}
+# Pooling effects analysis -- ExpPC x K
+aux <- fulldat %>%
+  filter(indepvar2 == 'K',
+         depvar2 == 'ExpPC')
+
+mod <- metagen(coef, SE, data=aux, 
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
+mod
+```
+
+And the forest plot:
+
+```{r, echo=FALSE, fig.width=7, fig.height=4, fig.cap="Effect of upper house size (K) on the per capita government expenditure (ExpPC)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+
+f9 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(aes(color = group)) +
+  # Error Bars
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 12, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
+
+f9
+```
+
+```{r,include=F,warning=F}
+f9 + 
+  labs(caption = "ExpPC x K") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 12, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fi.png", width = 30, height = 18.75, units = "cm")
+
+```
+
+Highlights:
+
+1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+
+\newpage
+### logExpPC x N
+
+This model estimates the Log of Per Capita Expenditure as the dependent variable, and the number of lower house legislators as the treatment variable.
+
+```{r}
+# Pooling effects analysis -- logExpPC x N
+aux <- fulldat %>%
+  filter(indepvar2 == 'N',
+         depvar2 == 'logExpPC')
+
+mod <- metagen(coef, SE, data=aux, 
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
+mod
+```
+
+And the forest plot:
+
+```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap="Effect of lower houses size (N) on log of per capita expenditure (logExpPC)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+
+f10 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(aes(color = group)) +
+  # Error Bars
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 13, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
+
+f10
+```
+
+```{r,include=F,warning=F}
+f10 + 
+  labs(caption = "logExpPC x N") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fj.png", width = 30, height = 18.75, units = "cm")
+
+```
+
+Highlights:
+
+1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+
+\newpage
+### logExpPC x logN
+
+In this specification, we study the log of per capita expenditure (logExpPC) as a function of the log of lower house size (logN).
+
+```{r}
+# Pooling effects analysis -- logExpPC x logN
+aux <- fulldat %>%
+  filter(indepvar2 == 'logN',
+         depvar2 == 'logExpPC')
+
+mod <- metagen(coef, SE, data=aux, 
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
+mod
+```
+
+And the forest plot:
+
+```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of log lower houses size (logN) on the log of per capita government expenditure (logExpPC)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+f11 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(aes(color = group)) +
+  # Error Bars
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
+
+f11
+```
+
+```{r,include=F,warning=F}
+f11 + 
+  labs(caption = "logExpPC x logN") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fk.png", width = 30, height = 18.75, units = "cm")
+
+```
+
+Highlights:
+
+1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`). **This model is significant at the 10\% confidence level.**
+3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+
+### logExpPC x K
+
+No studies related the log of per capita expenditure with the size of upper house (K).
+
+
+\newpage
+### PCTGDP x N
+
+This model fits the random effects for the percentage of GDP as public expenditure as the main outcome, and the size of lower house as the main treatment variable.
+
+```{r}
+# Pooling effects analysis -- PCTGDP x N
+aux <- fulldat %>%
+  filter(indepvar2 == 'N',
+         depvar2 == 'PCTGDP')
+
+mod <- metagen(coef, SE, data=aux, 
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
+mod
+```
+
+And the forest plot:
+
+```{r, echo=FALSE, fig.width=8, fig.height=3, fig.cap="Effect of lower houses size (N) on percentage of public expenditure GDP (PCTGDP)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+f12 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(aes(color = group)) +
+  # Error Bars
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 10, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
+f12
+```
+
+```{r,include=F,warning=F}
+f12 + 
+  labs(caption = "PCTGDP x N") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 13, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fl.png", width = 30, height = 18.75, units = "cm")
+
+```
+
+Highlights:
+
+1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+
+### PCTGDP x logN
+
+This meta-regression investigates the percentage of GDP as public expenditure as the dependent variable and the log lower house size (logN) as the treatment variable.
+
+```{r}
+# Pooling effects analysis -- PCTGDP x logN
+aux <- fulldat %>%
+  filter(indepvar2 == 'logN',
+         depvar2 == 'PCTGDP')
+
+mod <- metagen(coef, SE, data=aux, 
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
+mod
+```
+
+And the forest plot:
+
+```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of log lower houses size (logN) on the GDP share of public expenditure (PCTGDP)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+
+f13 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(aes(color = group)) +
+  # Error Bars
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
+
+f13
+```
+
+```{r,include=F,warning=F}
+f13 + 
+  labs(caption = "PCTGDP x logN") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 20, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fm.png", width = 30, height = 18.75, units = "cm")
+
+```
+
+Highlights:
+
+1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+
+### PCTGDP x K
+
+This model looks into the effect of upper house size (K) on the public expenditure share of the GDP (PCTGDP).
+
+```{r}
+# Pooling effects analysis -- PCTGDP x K
+aux <- fulldat %>%
+  filter(indepvar2 == 'K',
+         depvar2 == 'PCTGDP')
+
+mod <- metagen(coef, SE, data=aux, 
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
+mod
+```
+
+And the forest plot:
+
+```{r, echo=FALSE, fig.width=8, fig.height=4, fig.cap="Effect of upper house size (K) on the public expenditure share of the GDP (PCTGDP)",warning=FALSE}
+mod2 <- tibble(
+  TE = mod$TE,
+  seTE = mod$seTE,
+  studlab = mod$studlab,
+  lower = mod$lower,
+  upper = mod$upper,
+  group = "A") %>%
+  bind_rows(.,
+            aux = tibble(
+              TE = c(mod$TE.random, NA),
+              seTE = c(mod$seTE.random, NA),
+              studlab = c("Overall Effect", "Prediction Interval"),
+              lower = c(mod$lower.random, mod$lower.predict),
+              upper = c(mod$upper.random, mod$upper.predict),
+              group = "B")) %>%
+  group_by(studlab) %>%
+  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+  ungroup()
+
+
+f14 <- mod2 %>%
+  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
+  # Studies coefs
+  geom_point(aes(color = group)) +
+  # Error Bars
+  geom_errorbarh(aes(color = group), height = 0.1) +
+  # Colors
+  scale_color_manual(values = c("#000000", "#8b0000")) + 
+  # X-axis limit
+  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
+  # Y-axis names
+  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
+  # Vertical dashed line
+  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
+  # Labels
+  labs(x = "",
+       y = "") + 
+  # Facet - Separating Studies from Overall Effect
+  facet_grid(group~., scales = "free", space = "free") + 
+  # Theme
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1)) 
+
+f14
+```
+
+```{r,include=F,warning=F}
+f14 + 
+  labs(caption = "PCTGDP x K") +
+  theme_minimal() %+replace%
+  theme(strip.text.y = element_blank(),
+        legend.position = "none",
+        axis.text.y = element_text(size = 15, hjust = 1.1),
+        axis.text.x = element_text(size = 15, hjust = 1.1),
+        plot.caption = element_text(size=22)) 
+
+ggsave("./plots/fn.png", width = 30, height = 18.75, units = "cm")
+
+```
+
+Highlights:
+
+1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+
+
+```{r, echo=FALSE, fig.width=20, fig.height=2}
+
+p_1 = image_append(c(plots[[10]], plots[[9]], plots[[8]]), stack = T)
+p_2 = image_append(c(plots[[13]], plots[[12]], plots[[11]]), stack = T)
+p_3 = image_append(c(plots[[15]],plots[[14]],plots[[15]]), stack = T)
+p_full = image_append(c(p_1, p_2, p_3))
+
+p_full
+
+magick::image_write(p_full,"figure 2.png")
+```
+
+## Meta-regressions {#meta-reg}
+
+### Meta-regressions for Expenditure as a Percentage of the GDP
+
+```{r, echo=F, warning=F}
+mod <-  rma(yi = coef, 
+              sei = SE, 
+              data = dat, 
+              method = "REML", 
+              mods = ~indepvar2+year+published+elecsys2+method+agglevel+location2, 
+              test = "knha",
+            subset = dat$depvar2=='PCTGDP',
+            slab = dat$authoryear)
+
+mod1 <- tibble(
+     ` ` = c("Intercept", "Indepvar: N", "Indepvar: logN", "Year", "Published: No",
+          "Elecsys: Non-Majoritarian", "Method: Panel", "AggLevel: States", "Location: World"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  `T` = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ", 
+              round(mod[["ci.ub"]], digits = 4), ")"),
+  model = "PCTGDP"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 4)))
+
+
+```
+
+```{r}
+summary(mod)
+```
+
+As we have considerable heterogeneity in our sample, we run a permutation test to ensure the validity of our estimates. The results follow below.
+
+```{r, echo=FALSE}
+mod <- permutest(mod, progbar = F)
+mod
+
+mod1_permu <- tibble(
+     ` ` = c("Intercept", "Indepvar: N", "Indepvar: logN", "Year", "Published: No",
+          "Elecsys: Non-Majoritarian", "Method: Panel", "AggLevel: States", "Location: World"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  `T` = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
+  model = "PCTGDP - Permutation"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
+
+
+```
+
+
+We have the following results for the meta-regressions of Expenditure Per Capita:
+
+1. Compared with `K`, models with `N` and `logN` find significantly negative coefficients.
+2. Year has null effect.
+3. Unpublished papers tend to have higher coefficients than published papers.
+4. Passing from `Majoritarian` to `Non-Majoritarian`, decreases significantly the effects found in our models.
+5. In terms of the modeling, passing from `OLS` to `PANEL` increases the detected effects.
+6. When passing from `Local` to `State` or `World` levels, it decreases the detected effect size.
+
+Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
+
+```{r, echo=F, warning=F}
+mod <- rma(yi = coef, 
+              sei = SE, 
+              data = fulldat, 
+              method = "REML", 
+              mods = ~ indepvar2+year+published+elecsys2+method+agglevel+location2, 
+              test = "knha",
+            subset = fulldat$depvar2=='PCTGDP',
+            slab = fulldat$authoryear)
+
+mod2 <- tibble(
+  ` ` = c("Intercept", "Indepvar: N", "Indepvar: logN", "Year", "Published: No",
+          "Elecsys: Non-Majoritarian", "Method: Panel", "AggLevel: States", "Location: World"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  `T` = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
+  model = "PCTGDP - All coefs"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
+
+```
+
+```{r}
+summary(mod)
+```
+
+```{r, echo=FALSE}
+
+mod <- permutest(mod, progbar = F)
+mod 
+
+mod2_permu <- tibble(
+     ` ` = c("Intercept", "Indepvar: N", "Indepvar: logN", "Year", "Published: No",
+          "Elecsys: Non-Majoritarian", "Method: Panel", "AggLevel: States", "Location: World"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  `T` = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
+  model = "PCTGDP - All coefs - Permutation"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
+
+```
+
+
+For all the coefficients, we have the following results:
+
+1. Compared with `K`, models with `N` and `logN` tend to have significantly negative coefficients.
+2. Year has a positive effect: the younger the publication, the higher the detected coefficient.
+3. Unpublished papers tend to have higher coefficients than published papers.
+4. Passing from `Majoritarian` to `Non-Majoritarian`, decreases significantly the effects found in our models.
+5. In terms of the modeling, passing from `OLS` to `PANEL` increases the detected effects.
+6. When passing from `Local` to `State` or `World` levels, it decreases the detected effect size.
+
+### Meta-regressions for Expenditure Per Capita
+
+```{r, echo=F, warning=F}
+mod <-  rma(yi = coef, 
+              sei = SE, 
+              data = dat, 
+              method = "REML", 
+              mods = ~indepvar2+year+published+elecsys2+method+agglevel+location2, 
+              test = "knha",
+            subset = dat$depvar2=='ExpPC',
+            slab = dat$authoryear)
+
+mod3 <- tibble(
+  ` ` = c("Intercept", "Indepvar: N", "Year", "Elecsys: Non-Majoritarian", "Method: Panel",
+          "Method: IV", "AggLevel: States"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  `T` = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
+  model = "ExpPC"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
+
+```
+
+```{r}
+summary(mod)
+```
+
+As we have considerable heterogeneity in our sample, we run a permutation test to ensure the validity of our estimates. The results follow below.
+
+```{r, echo=FALSE}
+mod <- permutest(mod, progbar = F)
+mod 
+
+mod3_permu <- tibble(
+  ` ` = c("Intercept", "Indepvar: N", "Year", "Elecsys: Non-Majoritarian", "Method: Panel",
+          "Method: IV", "AggLevel: States"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  `T` = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
+  model = "ExpPC - Permutation"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
+
+```
+
+
+We have the following results for the meta-regressions of Expenditure Per Capita:
+
+1. Compared with `K`, models with `N` tend to detect significantly smaller effects.
+2. Year has null effect.
+3. Passing the electoral rules from `Majoritarian` to `Non-Majoritarian`, increases significantly the per capita expenditure found in our models.
+4. In terms of the modeling, passing from `OLS` to `PANEL` or `IV` increases the detected effects.
+5. When passing from `Local` to `State` level, decreases the detected effects.
+
+Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
+
+```{r, echo=F, warning=F}
+mod <- rma(yi = coef, 
+              sei = SE, 
+              data = fulldat, 
+              method = "REML", 
+              mods = ~ indepvar2+year+published+elecsys2+method+agglevel+location2, 
+              test = "knha",
+            subset = fulldat$depvar2=='ExpPC',
+            slab = fulldat$authoryear)
+
+mod4 <- tibble(
+  ` ` = c("Intercept", "Indepvar: N", "Year", "Elecsys: Non-Majoritarian",
+             "Method: Panel", "Method: IV" ,"AggLevel: States"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  `T` = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
+  model = "ExpPC - All coefs"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
+
+```
+
+```{r}
+summary(mod)
+```
+
+```{r, echo=FALSE}
+
+mod <- permutest(mod, progbar = F)
+mod
+
+
+mod4_permu <- tibble(
+  ` ` = c("Intercept", "Indepvar: N", "Year", "Elecsys: Non-Majoritarian",
+             "Method: Panel", "Method: IV" ,"AggLevel: States"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  `T` = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
+  model = "ExpPC - All coefs - Permutation"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
+
+```
+
+With all coefficients, the results of the effect sizes on the Expenditure Per Capita Regressions are the following:
+
+1. Compared with `K`, models with `N` tend to detect significantly smaller effects.
+2. Year has now a positive effect on coefficient sizes.
+3. Passing the electoral rules from `Majoritarian` to `Non-Majoritarian`, increases significantly the effects on per capita expenditure found in our models.
+4. In terms of the modeling, passing from `OLS` to `PANEL` decreases the detected effects.
+5. All other coeffients were not significant.
+
+### Meta-regressions for the Log of Expenditure Per Capita
+
+```{r, echo=F, warning=F}
+mod <-  rma(yi = coef, 
+              sei = SE, 
+              data = dat, 
+              method = "REML", 
+              mods = ~indepvar2+year+published+elecsys2+method+agglevel+location2, 
+              test = "knha",
+            subset = dat$depvar2=='logExpPC',
+            slab = dat$authoryear)
+
+
+mod5 <- tibble(
+   ` ` = c("Intercept", "Indepvar: N", "Year", "Published: No",
+             "Method: Panel", "AggLevel: States"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  `T` = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
+  model = "logExpPC"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
+
+```
+
+```{r}
+summary(mod)
+```
+
+As we have considerable heterogeneity in our sample, we run a permutation test to ensure the validity of our estimates. The results follow below.
+
+```{r, echo=FALSE}
+mod <- permutest(mod, progbar = F)
+mod
+
+mod5_permu <- tibble(
+  ` ` = c("Intercept", "Indepvar: N", "Year", "Published: No",
+             "Method: Panel", "AggLevel: States"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  `T` = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
+  model = "logExpPC - Permutation"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
+
+mod5_permu %>%
+  select(-model) %>%
+  kable(booktabs = T,align = "c",linesep ='') %>%
+  kable_styling(c("striped","bordered","scale_down"), position = "center")
+
+
+```
+
+We have the following results for the meta-regressions of Log of Expenditure Per Capita:
+
+1. Unpublished papers report a significantly higher coefficient.
+2. In terms of the modeling, passing from `OLS` to `PANEL` increases the detected effects.
+3. All other coefficients remained insignificant.
+
+Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
+
+```{r, echo=F, warning=F}
+mod <- rma(yi = coef, 
+              sei = SE, 
+              data = fulldat, 
+              method = "REML", 
+              mods = ~ indepvar2+year+published+elecsys2+method+agglevel+location2, 
+              test = "knha",
+            subset = fulldat$depvar2=='logExpPC',
+            slab = fulldat$authoryear)
+
+mod6 <- tibble(
+  ` ` = c("Intercept", "Indepvar: N", "Year", "Published: No",
+             "Method: Panel", "Method: RDD", "AggLevel: States"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  `T` = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4), ")"),
+  model = "logExpPC - All coefs"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
+
+```
+
+```{r}
+summary(mod)
+```
+
+```{r, echo=FALSE}
+mod <- permutest(mod, progbar = F)
+
+mod6_permu <- tibble(
+  ` ` = c("Intercept", "Indepvar: N", "Year", "Published: No",
+             "Method: Panel", "Method: RDD", "AggLevel: States"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  `T` = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4), ")"),
+  model = "logExpPC - All coefs - Permutation"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 3))) 
+
+```
+
+With all coefficients, the results of the effect sizes on the Log of Expenditure Per Capita Regressions are the following:
+
+1. In terms of the modeling, passing from `OLS` to `PANEL` or `RDD` decreases the detected effects.
+2. All other coefficients remained insignificant.
+
+
+```{r, echo=F, warning=F,error=F,message=F}
+coefs <- tibble(
+  ` ` = c("Intercept", "Indepvar: N","Indepvar: logN", "Year", "Published: No", "Elecsys: Non-Majoritarian",
+    "Method: Panel", "Method: IV", "Method: RDD", "AggLevel: States", "Location: World"))
+
+aux = list(mod3, mod5, mod1) %>%
+  map(~{
+    left_join(coefs, .x) %>%
+      mutate(model = ifelse(is.na(model), model[1], model)) 
+  }) %>%
+  reduce(bind_cols) %>%
+  mutate(
+         order = ifelse(` ` == "Intercept", 1, NA),
+         order = ifelse(` ` == "Indepvar: N", 2, order),
+         order = ifelse(` ` == "Indepvar: logN", 3, order),
+         order = ifelse(` ` == "Year", 4, order),
+         order = ifelse(` ` == "Published: No", 5, order),
+         order = ifelse(` ` == "Elecsys: Non-Majoritarian", 6, order),
+         order = ifelse(` ` == "Method: Panel", 7, order),
+         order = ifelse(` ` == "Method: IV", 8, order),
+         order = ifelse(` ` == "Method: RDD", 9, order),
+         order = ifelse(` ` == "AggLevel: States", 10, order),
+         order = ifelse(` ` == "Location: World", 11, order)) %>%
+  filter(` ` != "Method: RDD") %>%
+  arrange(order) %>%
+  mutate_at(vars(contains("Value")), list(
+    ~(ifelse(is.na(.), " ", ifelse(. < 0.001, "***",
+                       ifelse(. < 0.01, "**",
+                              ifelse(. < 0.05, "*", 
+                                     ifelse(. >= 0.05, " ", 
+                                            ifelse(is.na(.), " ", .))))))))) %>%
+  mutate_at(vars(contains("Estimate") | contains("SE")),
+            list(~(ifelse(is.na(.), " ", .)))) %>%
+  select(-` 1`, -` 2`, -contains("model"), -order) %>%
+  mutate(mod = "Base") %>%
+  select(mod, everything())
+
+aux2 = list(mod4, mod6, mod2) %>%
+  map(~{
+    left_join(coefs, .x) %>%
+      mutate(model = ifelse(is.na(model), model[1], model)) 
+  }) %>%
+  reduce(bind_cols) %>%
+  mutate(
+         order = ifelse(` ` == "Intercept", 1, NA),
+         order = ifelse(` ` == "Indepvar: N", 2, order),
+         order = ifelse(` ` == "Indepvar: logN", 3, order),
+         order = ifelse(` ` == "Year", 4, order),
+         order = ifelse(` ` == "Published: No", 5, order),
+         order = ifelse(` ` == "Elecsys: Non-Majoritarian", 6, order),
+         order = ifelse(` ` == "Method: Panel", 7, order),
+         order = ifelse(` ` == "Method: IV", 8, order),
+         order = ifelse(` ` == "Method: RDD", 9, order),
+         order = ifelse(` ` == "AggLevel: States", 10, order),
+         order = ifelse(` ` == "Location: World", 11, order)) %>%
+  arrange(order) %>%
+  mutate_at(vars(contains("Value")), list(
+    ~(ifelse(is.na(.), " ", ifelse(. < 0.001, "***",
+                       ifelse(. < 0.01, "**",
+                              ifelse(. < 0.05, "*", 
+                                     ifelse(. >= 0.05, " ", 
+                                            ifelse(is.na(.), " ", .))))))))) %>%
+  mutate_at(vars(contains("Estimate") | contains("SE")),
+            list(~ifelse(is.na(.), " ", .))) %>%
+  select(-` 1`, -` 2`, -contains("model"), -order) %>%
+  mutate(mod = "All Coefs") %>%
+  select(mod, everything())
+
+aux <- bind_rows(aux, aux2) %>%
+  select(-contains("CI"),-`T`,-T1,-T2)
+
+```
+
+\blandscape
+
+## Summary of Results
+
+```{r, echo=F, warning=F,error=F,message=F,asis=T}
+kable(aux, 
+      booktabs = T,
+      longtable = F,
+      align = "c",
+      linesep ='',
+      col.names = c(
+        " ",
+        " ",
+        "Estimate",
+        "SE",
+        "P-Value",
+        #
+        "Estimate",
+        "SE",
+        "Signif",
+        #
+        "Estimate",
+        "SE",
+        "Signif"
+      )) %>% 
+  collapse_rows(
+    1:2,
+    row_group_label_position ='stack'
+    ) %>%
+  add_header_above(c(" ", " ","ExpPC" = 3, "logExpPC" = 3, "PCTGDP" = 3)) %>%
+  kable_styling(
+    c("striped",
+      "bordered", 
+      "scale_down",
+      "repeat_header"
+      ),
+    position = "center",
+    latex_options = c("repeat_header")) %>%
+  footnote(general = "Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1")
+
+```
+\elandscape
+
+```{r, echo=F, warning=F,error=F,message=F}
+coefs <- tibble(
+  ` ` = c("Intercept", "Indepvar: N","Indepvar: logN", "Year", "Published: No", "Elecsys: Non-Majoritarian",
+    "Method: Panel", "Method: IV", "Method: RDD", "AggLevel: States", "Location: World")
+)
+
+aux = list(mod3_permu, mod5_permu, mod1_permu) %>%
+  map(~{
+    left_join(coefs, .x) %>%
+      mutate(model = ifelse(is.na(model), model[1], model)) 
+  }) %>%
+  reduce(bind_cols) %>%
+  mutate(
+         order = ifelse(` ` == "Intercept", 1, NA),
+         order = ifelse(` ` == "Indepvar: N", 2, order),
+         order = ifelse(` ` == "Indepvar: logN", 3, order),
+         order = ifelse(` ` == "Year", 4, order),
+         order = ifelse(` ` == "Published: No", 5, order),
+         order = ifelse(` ` == "Elecsys: Non-Majoritarian", 6, order),
+         order = ifelse(` ` == "Method: Panel", 7, order),
+         order = ifelse(` ` == "Method: IV", 8, order),
+         order = ifelse(` ` == "Method: RDD", 9, order),
+         order = ifelse(` ` == "AggLevel: States", 10, order),
+         order = ifelse(` ` == "Location: World", 11, order)) %>%
+  arrange(order) %>%
+  filter(` ` != "Method: RDD") %>%
+  mutate_at(vars(contains("Value")), list(
+    ~(ifelse(is.na(.), " ", ifelse(. < 0.001, "***",
+                       ifelse(. < 0.01, "**",
+                              ifelse(. < 0.05, "*", 
+                                     ifelse(. >= 0.05, " ", 
+                                            ifelse(is.na(.), " ", .))))))))) %>%
+  mutate_at(vars(contains("Estimate") | contains("SE")),
+            list(~ifelse(is.na(.), " ", .))) %>%
+  select(-` 1`, -` 2`, -contains("model"), -order) %>%
+  mutate(mod = "Base") %>%
+  select(mod, everything())
+
+aux2 = list(mod4_permu, mod6_permu, mod2_permu) %>%
+  map(~{
+    left_join(coefs, .x) %>%
+      mutate(model = ifelse(is.na(model), model[1], model)) 
+  }) %>%
+  reduce(bind_cols) %>%
+  mutate(order = ifelse(` ` == "Intercept", 1, NA),
+         order = ifelse(` ` == "Indepvar: N", 2, order),
+         order = ifelse(` ` == "Indepvar: logN", 3, order),
+         order = ifelse(` ` == "Year", 4, order),
+         order = ifelse(` ` == "Published: No", 5, order),
+         order = ifelse(` ` == "Elecsys: Non-Majoritarian", 6, order),
+         order = ifelse(` ` == "Method: Panel", 7, order),
+         order = ifelse(` ` == "Method: IV", 8, order),
+         order = ifelse(` ` == "Method: RDD", 9, order),
+         order = ifelse(` ` == "AggLevel: States", 10, order),
+         order = ifelse(` ` == "Location: World", 11, order)) %>%
+  arrange(order) %>%
+  mutate_at(vars(contains("Value")), list(
+    ~(ifelse(is.na(.), " ", ifelse(. < 0.001, "***",
+                       ifelse(. < 0.01, "**",
+                              ifelse(. < 0.05, "*", 
+                                     ifelse(. >= 0.05, " ", 
+                                            ifelse(is.na(.), " ", .))))))))) %>%
+  mutate_at(vars(contains("Estimate") | contains("SE")),
+            list(~ifelse(is.na(.), " ", .))) %>%
+  select(-` 1`, -` 2`, -contains("model"), -order) %>%
+  mutate(mod = "All Coefs") %>%
+  select(mod, everything())
+
+aux <- bind_rows(aux, aux2) %>%
+  select(-contains("CI"),-`T`,-T1,-T2)
+
+```
+
+
+\blandscape
+## Summary of Results (Permutation)
+```{r, echo=F, warning=F,error=F,message=F,asis=T}
+kable(aux, 
+      booktabs = T,
+      longtable = F,
+      align = "c",
+      linesep ='',
+      col.names = c(
+        " ",
+        " ",
+        "Estimate",
+        "SE",
+        "Signif",
+        #
+        "Estimate",
+        "SE",
+        "Signif",
+        #
+        "Estimate",
+        "SE",
+        "Signif"
+      )) %>% 
+  collapse_rows(
+    1:2,
+    row_group_label_position ='stack'
+    ) %>%
+  add_header_above(c(" ", " ","ExpPC" = 3, "logExpPC" = 3, "PCTGDP" = 3)) %>%
+  kable_styling(
+    c("striped",
+      "bordered", 
+      "scale_down",
+      "repeat_header"
+      ),
+    position = "center",
+    latex_options = c("repeat_header")) %>%
+  footnote(general = "Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1")
+
+```
+\elandscape
+
+
+
+\newpage
+## Theory of Meta Analysis
+
+
+There are two main estimators for conducting meta analysis: fixed effects and random effects models. The fixed effects model assumes that there is one true effect in reality, and that all estimates are an attempt to uncover this true effect. The random effects model, on the other hand, assumes that there are a distribution of true effects, that vary based on sample and tests characteristics.
+
+In this paper, we use the random effects model. The empirical papers testing the law of 1/n are very diverse. We tried to capture some of this diversity by considering the main dependent and independent variables separately, but they have at least three other important sources of dispersion:
+
+1. **Subjects**: Counties, Municipalities, States, Provinces, Countries.
+2. **Electoral systems**: Majoritarian, PR, Mixed.
+3. **Modeling strategies**: Panel data, Standard OLS, IV, RDD.
+
+These sources of heterogeneity have two implications. First, it makes our estimates very disperse. The heterogeneity tests are all but one significant. When the sample sizes are large enough, we removed more heterogeneous studies, but we still had considerable dispersion in our estimates. Second, the amount of heterogeneity makes fixed effects estimates unrealistic and bised. Thus, we opt for random effects model.
+
+Let each study having an effect of $T_i$. In a random effects model, we can decompose this effect in two components, the true effect that the study with the same specifications as $i$ come from, $\theta_i$, and a within-study error $\varepsilon_i$:
+
+\[
+T_i \ = \ \theta_i + \varepsilon_i
+\]
+
+And the random effects model assumes that the $\theta_i$ varies from study to study, having a true parameter $\mu$, plus a between-study error, $\xi_i$:
+
+\[
+T_i \ = \ \mu + \xi_i + \varepsilon_i
+\]
+
+And the random effects model estimates the parameter $\mu$, under the challenge of estimating both the within-and-between-study sampling errors.
+
+In all empirical estimates, we use the package `meta`, and the package `dmetar`, described in (Doing Meta-Analysis with R)[https://bookdown.org/MathiasHarrer/Doing_Meta_Analysis_in_R/random.html]. To empirically implement the random effects model, we need to choose a method to estimate the true effect size variance, $\tau^2$, which in our formulation, represents the variance of $\xi_i$. We selected the **Restricted Maximum Likelihood Estimator**, as the literature regards it as more precise when we have continuous measures, such as we have on our data (link)[https://www.ncbi.nlm.nih.gov/pubmed/26332144].
+
+## Robustness: Full model meta-regressions combined {#full-meta-reg}
+
+In this section, we aggregate all the coefficients and run a multivariate meta-regression, controlling by:
+
+1. The type of the dependent variable in the study (expenditure per capita, log of the expenditure per capita, and share of government expenditure in the GDP)
+2. The type of the independent variable in the stydy (N, K, log of N);
+3. The electoral system (Majoritarian, Proportional Representation, and Mixed).
+
+The results follow below, and show null effect for all variables, including the intercept.
+
+```{r, echo=F, warning=F}
+mod <-  rma(yi = coef, 
+              sei = SE, 
+              data = dat, 
+              method = "REML", 
+              mods = ~ depvar2+indepvar2+year+published+elecsys2+method+agglevel+location2, 
+              test = "knha")
+```
+
+```{r}
+summary(mod)
+```
+
+As we have considerable heterogeneity in our sample, we run a permutation test to ensure the validity of our estimates. The results follow below.
+
+```{r, echo=FALSE}
+permutest(mod, progbar = F)
+```
+
+In the main text, we selected the coefficients based on the regressions that had most observations and that presented a full model (with fixed effects or intermediate bandwidth in RDD). Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
+
+```{r, echo=F, warning=F}
+mod <- rma(yi = coef, 
+              sei = SE, 
+              data = fulldat, 
+              method = "REML", 
+              mods = ~ depvar2+indepvar2+year+published+elecsys2+method+agglevel+location2, 
+              test = "knha")
+```
+
+```{r}
+summary(mod)
+```
+
+```{r}
+permutest(mod, progbar = F)
+```
+
