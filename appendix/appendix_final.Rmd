@@ -774,7 +774,7 @@ Highlights:
 
 ```{r, echo=FALSE, fig.width=20, fig.height=5, warning=F}
 f <- ggarrange(f1, f3, f5, 
-               f4, f6, ggplot() + theme_void(),
+               f4, f6,
                f2, f7,
                ncol = 3, nrow = 3, 
                hjust = 0, align = 'hv')
