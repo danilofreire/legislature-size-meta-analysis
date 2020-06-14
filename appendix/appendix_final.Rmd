@@ -62,6 +62,9 @@ lapply(pkgs, installIfNot)
 lapply(pkgs, require, character.only = T)
 rm(pkgs, installIfNot)
 
+# Load datasets
+load('../dataset/dataCoefs.RData')
+
 # Build plot function for forest plots
 build_forest <- function(mod, capt, lsize = 22, ttl = NULL) {
   # Build dataset for plot
@@ -76,9 +79,12 @@ build_forest <- function(mod, capt, lsize = 22, ttl = NULL) {
               aux = tibble(
                 TE = c(mod$TE.random, NA),
                 seTE = c(mod$seTE.random, NA),
-                studlab = c("Overall Effect", "Prediction Interval"),
-                lower = c(mod$lower.random, mod$lower.predict),
-                upper = c(mod$upper.random, mod$upper.predict),
+                studlab = c("Overall Effect", 
+                            "Prediction Interval"),
+                lower = c(mod$lower.random, 
+                          mod$lower.predict),
+                upper = c(mod$upper.random,
+                          mod$upper.predict),
                 group = "B")) %>%
     group_by(studlab) %>%
     mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
@@ -92,11 +98,13 @@ build_forest <- function(mod, capt, lsize = 22, ttl = NULL) {
     ggplot(aes(y = reorder(studlab2,TE), 
                x = TE, xmin = lower, xmax = upper)) +
     geom_point(aes(color = group)) +
-    geom_errorbarh(aes(color = group), height = 0.1) +
+    geom_errorbarh(aes(color = group), 
+                   height = 0.1) +
     scale_color_manual(values = c("#000000", "#8b0000")) +
-    scale_x_continuous(limits=c(-1.1*limg, 1.1*limg)) +
+    scale_x_continuous(limits = c(-1.1*limg, 1.1*limg)) +
     scale_y_discrete(
-      labels = function(x) str_replace(x, "_[0-9]*$", "")) + 
+      labels = function(x) 
+        str_replace(x, "_[0-9]*$", "")) + 
     geom_vline(xintercept=0, 
                color="#000000", linetype="dashed") +
     labs(x = "",
@@ -204,10 +212,6 @@ We visually organised the flow of articles across eligibility phases through thi
 The meta-analytic data is comprised of two datasets. The first dataset has the main coefficients that were reported in the paper. It includes only the most rigorous model from each paper, that is, those estimated with the largest $n$, most control variables, and fixed effects if the authors added them. If the article employed a regression discontinuity design, we chose the coefficient from the optimal bandwidth or from the intermediate one. This sample encompasses 36 estimates, as 10 articles analysed two dependent or independent variables of interest. Our second sample, in contrast, contains all the 126 effect sizes reported in the 26 papers. 
 
 In the main text, we focus on the results for our restricted sample as we consider them more robust, but the findings are very similar when we use the extended set. Below is the data extraction process for all relevant coefficients in the selected articles. In the \@ref(meta-an) and \@ref(meta-reg) sections of this Appendix, you will find all tests performed in both reduced and full samples. 
-
-```{r, echo=FALSE, include=FALSE}
-load('../dataset/dataCoefs.RData')
-```
 
 # Descriptive statistics
 
@@ -378,9 +382,12 @@ aux <- select(fulldat, usemeta2, indepvar2, year, published,
          `Sampling Aggregation Level` = agglevel, 
          `Sample Location` = location2)
 
-export2md(descrTable(~.-usemeta2, aux, y = aux$usemeta2, 
-                        show.p.overall = F, show.all = T),
-          caption = "Descriptive Statistics of Moderators")
+#export2md(descrTable(~.-usemeta2, aux, y = aux$usemeta2,
+#                     show.p.overall = F, show.all = T),
+#          caption = "Descriptive Statistics of Moderators")
+
+descrTable(~.-usemeta2, aux, y = aux$usemeta2,
+           show.p.overall = F, show.all = T)
 ```
 
 # Binomial Tests for Coefficient Signs
@@ -427,7 +434,7 @@ Under the null hypothesis of $p=0.5$, we find that `r as.numeric(table(aux$scoef
 
 We combined the three independent ($N$, $\log(N)$, and $K$) with the levels of the three dependent variables (Expenditure Per Capita, Log of Expenditure Per Capita, Expenditure as a Percentage of the GDP). This formed a 3x3 possibility for our analysis.
 
-## Per Capita Expenditure x N
+## Lower House Size and Expenditure per Capita
 
 ```{r, echo=FALSE}
 # Pooling effects analysis -- ExpPC x N
@@ -524,13 +531,13 @@ Therefore, we can see that the hypothesis that majoritarian systems produce syst
 
 \newpage
 
-## Per Capita Expenditure x Log of Lower House Size
+## Log Lower House Size and Expenditure per Capita
 
 There were no studies that had per capita expenditure in the dependent variable and log of lower house size in the treatment variable.
 
 \newpage
 
-## Per Capita Expenditure x Size of the Upper House
+## Upper House Size and Expenditure per Capita
 
 Now we are investigating the upper house size (K). In this model, we investigate the effect of upper house size on expenditure per capita (ExpPC).
 
@@ -569,7 +576,7 @@ Highlights:
 
 \newpage
 
-## Log of Expenditure Per Capita x Size of the Lower House
+## Lower House Size and Log Expenditure Per Capita
 
 This model estimates the Log of Per Capita Expenditure as the dependent variable, and the number of lower house legislators as the treatment variable.
 
@@ -611,7 +618,7 @@ Highlights:
 
 \newpage
 
-## Log of Expenditure Per Capita x Log of Lower House Size
+## Log of Lower House Size and Log of Expenditure Per Capita
 
 In this specification, we study the log of per capita expenditure (logExpPC) as a function of the log of lower house size (logN).
 
@@ -650,11 +657,11 @@ Highlights:
 
 \newpage
 
-## Log of Expenditure Per Capita x Size of Upper House
+## Log of Upper House Size and Log of Expenditure Per Capita
 
 No studies related the log of per capita expenditure with the size of upper house (K).
 
-## Expenditure as a Percentage of the GDP x Lower House Size
+## Lower House Size and Expenditure as Percentage of GDP
 
 This model fits the random effects for the percentage of GDP as public expenditure as the main outcome, and the size of lower house as the main treatment variable.
 
@@ -692,7 +699,8 @@ Highlights:
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
 \newpage
-## Expenditure as a Percentage of the GDP x Log of Lower House Size
+
+## Log Lower House Size and Expenditure as Percentage of GDP
 
 This meta-regression investigates the percentage of GDP as public expenditure as the dependent variable and the log lower house size (logN) as the treatment variable.
 
@@ -733,7 +741,8 @@ Highlights:
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
 \newpage
-## Expenditure as a Percentage of the GDP x Upper House Size
+
+## Upper House Size and Expenditure as Percentage of GDP
 
 This model looks into the effect of upper house size (K) on the public expenditure share of the GDP (PCTGDP).
 
@@ -791,7 +800,7 @@ ggsave("./plots/fig2.pdf", plot = f, width = 35, height = 25, units = "cm")
 
 # Meta-Analysis (all coefficients) {#full-meta-an}
 
-## ExpPC x N
+## Lower House Size and Expenditure Per Capita
 
 ```{r, echo=FALSE, warning=F}
 # Pooling effects analysis -- ExpPC x N
@@ -878,11 +887,11 @@ f8b
 Therefore, we can see that the hypothesis that majoritarian systems produce systematic positive effects was disproved. The majoritarian systems in the sample had a random effects model estimate of -0.25, while the random effects model in the non-majoritarian subgroup fitted a value of 0.08. Both are non-significant, but they reassure us that the absense of effect is not caused by pooling multiple types of electoral systems.
 
 \newpage
-## ExpPC x logN
+## Log of Lower House Size and Expenditure Per Capita
 
 There were no studies that had per capita expenditure in the dependent variable and log of lower house size in the treatment variable.
 
-## ExpPC x K
+## Upper House Size and Expenditure Per Capita
 
 Now we are investigating the upper house size (K). In this model, we investigate the effect of upper house size on expenditure per capita (ExpPC).
 
@@ -916,7 +925,7 @@ Highlights:
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
 \newpage
-## logExpPC x N
+## Lower House Size and Log of Expenditure Per Capita
 
 This model estimates the Log of Per Capita Expenditure as the dependent variable, and the number of lower house legislators as the treatment variable.
 
@@ -950,7 +959,7 @@ Highlights:
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
 \newpage
-## logExpPC x logN
+## Log of Lower House Size and Log of Expenditure Per Capita
 
 In this specification, we study the log of per capita expenditure (logExpPC) as a function of the log of lower house size (logN).
 
@@ -983,13 +992,13 @@ Highlights:
 2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`). **This model is significant at the 10\% confidence level.**
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-## logExpPC x K
+## Upper House Size and Log of Expenditure Per Capita
 
 No studies related the log of per capita expenditure with the size of upper house (K).
 
 \newpage
 
-## PCTGDP x N
+## Lower House Size and Expenditure as Percentage of GDP
 
 This model fits the random effects for the percentage of GDP as public expenditure as the main outcome, and the size of lower house as the main treatment variable.
 
@@ -1022,7 +1031,7 @@ Highlights:
 2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-## PCTGDP x logN
+## Log of Lower House Size and Expenditure as Percentage of GDP
 
 This meta-regression investigates the percentage of GDP as public expenditure as the dependent variable and the log lower house size (logN) as the treatment variable.
 
@@ -1055,7 +1064,7 @@ Highlights:
 2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-## PCTGDP x K
+## Upper House Size and Expenditure as Percentage of GDP
 
 This model looks into the effect of upper house size (K) on the public expenditure share of the GDP (PCTGDP).
 
@@ -1103,8 +1112,15 @@ mod <-  rma(yi = coef,
             slab = dat$authoryear)
 
 mod1 <- tibble(
-     ` ` = c("Intercept", "Indepvar: N", "Indepvar: logN", "Year", "Published: No",
-          "Elecsys: Non-Majoritarian", "Method: Panel", "AggLevel: States", "Location: World"),
+     ` ` = c("Intercept", 
+             "Indepvar: N", 
+             "Indepvar: logN", 
+             "Year", 
+             "Published: No",
+             "Elecsys: Non-Majoritarian", 
+             "Method: Panel", 
+             "AggLevel: States", 
+             "Location: World"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1127,8 +1143,15 @@ mod <- permutest(mod, progbar = F)
 mod
 
 mod1_permu <- tibble(
-     ` ` = c("Intercept", "Indepvar: N", "Indepvar: logN", "Year", "Published: No",
-          "Elecsys: Non-Majoritarian", "Method: Panel", "AggLevel: States", "Location: World"),
+     ` ` = c("Intercept", 
+             "Indepvar: N", 
+             "Indepvar: logN", 
+             "Year", 
+             "Published: No", 
+             "Elecsys: Non-Majoritarian", 
+             "Method: Panel", 
+             "AggLevel: States", 
+             "Location: World"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1162,8 +1185,15 @@ mod <- rma(yi = coef,
             slab = fulldat$authoryear)
 
 mod2 <- tibble(
-  ` ` = c("Intercept", "Indepvar: N", "Indepvar: logN", "Year", "Published: No",
-          "Elecsys: Non-Majoritarian", "Method: Panel", "AggLevel: States", "Location: World"),
+  ` ` = c("Intercept", 
+          "Indepvar: N", 
+          "Indepvar: logN", 
+          "Year", 
+          "Published: No",
+          "Elecsys: Non-Majoritarian", 
+          "Method: Panel", 
+          "AggLevel: States", 
+          "Location: World"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1184,8 +1214,15 @@ mod <- permutest(mod, progbar = F)
 mod 
 
 mod2_permu <- tibble(
-     ` ` = c("Intercept", "Indepvar: N", "Indepvar: logN", "Year", "Published: No",
-          "Elecsys: Non-Majoritarian", "Method: Panel", "AggLevel: States", "Location: World"),
+     ` ` = c("Intercept", 
+             "Indepvar: N", 
+             "Indepvar: logN", 
+             "Year", 
+             "Published: No",
+             "Elecsys: Non-Majoritarian", 
+             "Method: Panel", 
+             "AggLevel: States", 
+             "Location: World"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1394,8 +1431,13 @@ mod <- rma(yi = coef,
             slab = fulldat$authoryear)
 
 mod6 <- tibble(
-  ` ` = c("Intercept", "Indepvar: N", "Year", "Published: No",
-             "Method: Panel", "Method: RDD", "AggLevel: States"),
+  ` ` = c("Intercept", 
+          "Indepvar: N", 
+          "Year", 
+          "Published: No",
+          "Method: Panel", 
+          "Method: RDD", 
+          "AggLevel: States"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1415,8 +1457,13 @@ summary(mod)
 mod <- permutest(mod, progbar = F)
 
 mod6_permu <- tibble(
-  ` ` = c("Intercept", "Indepvar: N", "Year", "Published: No",
-             "Method: Panel", "Method: RDD", "AggLevel: States"),
+  ` ` = c("Intercept", 
+          "Indepvar: N", 
+          "Year", 
+          "Published: No",
+          "Method: Panel", 
+          "Method: RDD", 
+          "AggLevel: States"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1435,8 +1482,17 @@ With all coefficients, the results of the effect sizes on the Log of Expenditure
 
 ```{r, echo=F, warning=F, error=F, message=F}
 coefs <- tibble(
-  ` ` = c("Intercept", "Indepvar: N","Indepvar: logN", "Year", "Published: No", "Elecsys: Non-Majoritarian",
-    "Method: Panel", "Method: IV", "Method: RDD", "AggLevel: States", "Location: World"))
+  ` ` = c("Intercept", 
+          "Indepvar: N",
+          "Indepvar: logN", 
+          "Year", 
+          "Published: No", 
+          "Elecsys: Non-Majoritarian",
+          "Method: Panel", 
+          "Method: IV", 
+          "Method: RDD", 
+          "AggLevel: States", 
+          "Location: World"))
 
 aux = list(mod3, mod5, mod1) %>%
   map(~{
@@ -1550,8 +1606,17 @@ kable(aux,
 
 ```{r, echo=F, warning=F,error=F,message=F}
 coefs <- tibble(
-  ` ` = c("Intercept", "Indepvar: N","Indepvar: logN", "Year", "Published: No", "Elecsys: Non-Majoritarian",
-    "Method: Panel", "Method: IV", "Method: RDD", "AggLevel: States", "Location: World")
+  ` ` = c("Intercept", 
+          "Indepvar: N",
+          "Indepvar: logN", 
+          "Year", 
+          "Published: No", 
+          "Elecsys: Non-Majoritarian",
+          "Method: Panel", 
+          "Method: IV", 
+          "Method: RDD", 
+          "AggLevel: States", 
+          "Location: World")
 )
 
 aux = list(mod3_permu, mod5_permu, mod1_permu) %>%
@@ -1662,7 +1727,7 @@ kable(aux,
 \elandscape
 \newpage
 
-# The theory behind the Meta Analysis
+# The Theory behind the Meta Analysis
 
 There are two main estimators for conducting meta analysis: fixed effects and random effects models. The fixed effects model assumes that there is one true effect in reality, and that all estimates are an attempt to uncover this true effect. The random effects model, on the other hand, assumes that there are a distribution of true effects, that vary based on sample and tests characteristics.
 
@@ -1740,7 +1805,7 @@ permutest(mod, progbar = F)
 
 # Auxiliary functions
 
-## Graph functions code
+## Function for generate the Meta-Analytic Figures
 
 This function is for building a forest plot using `ggplot2` from meta analysis dataset.
 

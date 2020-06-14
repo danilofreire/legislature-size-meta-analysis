@@ -7,9 +7,11 @@ $if(fontfamily)$
 $else$
 \usepackage{libertine}
 $endif$
+
 % This is a nice mathfont, it fits well with Libertine
 % Comment the line if you want to use a different one
 \usepackage[libertine]{newtxmath}
+
 % The default monofont 
 % Again, comment the line below if you want to change it
 \usepackage[scaled=.95]{inconsolata}
@@ -32,6 +34,8 @@ $endif$
 
 % Dots in toc
 \renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+\newcommand{\blandscape}{\begin{landscape}}
+\newcommand{\elandscape}{\end{landscape}}
 
 % Colours
 \usepackage[usenames,dvipsnames]{xcolor}
