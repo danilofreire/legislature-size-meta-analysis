@@ -1807,7 +1807,7 @@ permutest(mod, progbar = F)
 
 ## Function for generate the Meta-Analytic Figures
 
-This function is for building a forest plot using `ggplot2` from meta analysis dataset.
+This function receives the meta-analysis results and build a forest plot using `ggplot2`.
 
 ```{r, eval = FALSE}
 # Build plot function for forest plots
