@@ -277,21 +277,6 @@ dat %>%
   theme_bw()
 ```
 
-## Geographical Location
-
-The geographical location also varies considerably in the sample. In our sampled papers, `r as.numeric(table(unique(select(dat, id, location2))$location2)[1])` studied a given country, while `r as.numeric(table(unique(select(dat, id, location2))$location2)[2])` used a cross-country design, with more than one country.
-
-```{r, echo=FALSE, fig.width=7, fig.height=6, fig.cap="Geographical Location"}
-dat %>%
-  select(id, location2) %>%
-  unique() %>%
-  ggplot(aes(x=as.factor(location2))) + 
-    geom_bar(color = "black") + 
-  labs(x = "Geographical Location",
-       y = "") + 
-  theme_bw()
-```
-
 ## Dependent variables
 
 The outcome variables included in the paper were:
@@ -373,14 +358,13 @@ We chose a set of moderators that frequently appear in the literature and may he
 fulldat$usemeta2 <- factor(fulldat$usemeta)
 levels(fulldat$usemeta2) <- c('Other Coefficients', 'Main Coefficients')
 aux <- select(fulldat, usemeta2, indepvar2, year, published, 
-              elecsys2, method, agglevel, location2) %>%
+              elecsys2, method, agglevel) %>%
   rename(`Independent Variables` = indepvar2,
          `Year` = year, 
          `Published work` = published, 
          `Electoral system` = elecsys2, 
          `Estimation method` = method, 
-         `Sampling Aggregation Level` = agglevel, 
-         `Sample Location` = location2)
+         `Sampling Aggregation Level` = agglevel)
 
 #export2md(descrTable(~.-usemeta2, aux, y = aux$usemeta2,
 #                     show.p.overall = F, show.all = T),
@@ -1106,7 +1090,7 @@ mod <-  rma(yi = coef,
               sei = SE, 
               data = dat, 
               method = "REML", 
-              mods = ~indepvar2+year+published+elecsys2+method+agglevel+location2, 
+              mods = ~indepvar2+year+published+elecsys2+method+agglevel, 
               test = "knha",
             subset = dat$depvar2=='PCTGDP',
             slab = dat$authoryear)
@@ -1119,8 +1103,7 @@ mod1 <- tibble(
              "Published: No",
              "Elecsys: Non-Majoritarian", 
              "Method: Panel", 
-             "AggLevel: States", 
-             "Location: World"),
+             "AggLevel: States"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1150,8 +1133,7 @@ mod1_permu <- tibble(
              "Published: No", 
              "Elecsys: Non-Majoritarian", 
              "Method: Panel", 
-             "AggLevel: States", 
-             "Location: World"),
+             "AggLevel: States"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1179,7 +1161,7 @@ mod <- rma(yi = coef,
               sei = SE, 
               data = fulldat, 
               method = "REML", 
-              mods = ~ indepvar2+year+published+elecsys2+method+agglevel+location2, 
+              mods = ~ indepvar2+year+published+elecsys2+method+agglevel, 
               test = "knha",
             subset = fulldat$depvar2=='PCTGDP',
             slab = fulldat$authoryear)
@@ -1192,8 +1174,7 @@ mod2 <- tibble(
           "Published: No",
           "Elecsys: Non-Majoritarian", 
           "Method: Panel", 
-          "AggLevel: States", 
-          "Location: World"),
+          "AggLevel: States"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1221,8 +1202,7 @@ mod2_permu <- tibble(
              "Published: No",
              "Elecsys: Non-Majoritarian", 
              "Method: Panel", 
-             "AggLevel: States", 
-             "Location: World"),
+             "AggLevel: States"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1250,14 +1230,19 @@ mod <-  rma(yi = coef,
               sei = SE, 
               data = dat, 
               method = "REML", 
-              mods = ~indepvar2+year+published+elecsys2+method+agglevel+location2, 
+              mods = ~indepvar2+year+published+elecsys2+method+agglevel, 
               test = "knha",
             subset = dat$depvar2=='ExpPC',
             slab = dat$authoryear)
 
 mod3 <- tibble(
-  ` ` = c("Intercept", "Indepvar: N", "Year", "Elecsys: Non-Majoritarian", "Method: Panel",
-          "Method: IV", "AggLevel: States"),
+  ` ` = c("Intercept", 
+          "Indepvar: N", 
+          "Year", 
+          "Elecsys: Non-Majoritarian", 
+          "Method: Panel",
+          "Method: IV", 
+          "AggLevel: States"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1280,8 +1265,13 @@ mod <- permutest(mod, progbar = F)
 mod 
 
 mod3_permu <- tibble(
-  ` ` = c("Intercept", "Indepvar: N", "Year", "Elecsys: Non-Majoritarian", "Method: Panel",
-          "Method: IV", "AggLevel: States"),
+  ` ` = c("Intercept", 
+          "Indepvar: N", 
+          "Year", 
+          "Elecsys: Non-Majoritarian", 
+          "Method: Panel",
+          "Method: IV", 
+          "AggLevel: States"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1308,14 +1298,19 @@ mod <- rma(yi = coef,
               sei = SE, 
               data = fulldat, 
               method = "REML", 
-              mods = ~ indepvar2+year+published+elecsys2+method+agglevel+location2, 
+              mods = ~ indepvar2+year+published+elecsys2+method+agglevel, 
               test = "knha",
             subset = fulldat$depvar2=='ExpPC',
             slab = fulldat$authoryear)
 
 mod4 <- tibble(
-  ` ` = c("Intercept", "Indepvar: N", "Year", "Elecsys: Non-Majoritarian",
-             "Method: Panel", "Method: IV" ,"AggLevel: States"),
+  ` ` = c("Intercept", 
+          "Indepvar: N", 
+          "Year", 
+          "Elecsys: Non-Majoritarian",
+          "Method: Panel", 
+          "Method: IV" ,
+          "AggLevel: States"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1336,8 +1331,13 @@ mod <- permutest(mod, progbar = F)
 mod
 
 mod4_permu <- tibble(
-  ` ` = c("Intercept", "Indepvar: N", "Year", "Elecsys: Non-Majoritarian",
-             "Method: Panel", "Method: IV" ,"AggLevel: States"),
+  ` ` = c("Intercept", 
+          "Indepvar: N", 
+          "Year", 
+          "Elecsys: Non-Majoritarian",
+          "Method: Panel", 
+          "Method: IV", 
+          "AggLevel: States"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1364,14 +1364,18 @@ mod <- rma(yi = coef,
               sei = SE, 
               data = dat, 
               method = "REML", 
-              mods = ~indepvar2+year+published+elecsys2+method+agglevel+location2, 
+              mods = ~indepvar2+year+published+elecsys2+method+agglevel, 
               test = "knha",
             subset = dat$depvar2=='logExpPC',
             slab = dat$authoryear)
 
 mod5 <- tibble(
-   ` ` = c("Intercept", "Indepvar: N", "Year", "Published: No",
-             "Method: Panel", "AggLevel: States"),
+   ` ` = c("Intercept", 
+           "Indepvar: N", 
+           "Year", 
+           "Published: No",
+           "Method: Panel",
+           "AggLevel: States"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1394,8 +1398,12 @@ mod <- permutest(mod, progbar = F)
 mod
 
 mod5_permu <- tibble(
-  ` ` = c("Intercept", "Indepvar: N", "Year", "Published: No",
-             "Method: Panel", "AggLevel: States"),
+  ` ` = c("Intercept", 
+          "Indepvar: N", 
+          "Year", 
+          "Published: No",
+          "Method: Panel", 
+          "AggLevel: States"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1425,7 +1433,7 @@ mod <- rma(yi = coef,
               sei = SE, 
               data = fulldat, 
               method = "REML", 
-              mods = ~ indepvar2+year+published+elecsys2+method+agglevel+location2, 
+              mods = ~ indepvar2+year+published+elecsys2+method+agglevel, 
               test = "knha",
             subset = fulldat$depvar2=='logExpPC',
             slab = fulldat$authoryear)
@@ -1491,8 +1499,7 @@ coefs <- tibble(
           "Method: Panel", 
           "Method: IV", 
           "Method: RDD", 
-          "AggLevel: States", 
-          "Location: World"))
+          "AggLevel: States"))
 
 aux = list(mod3, mod5, mod1) %>%
   map(~{
@@ -1510,8 +1517,7 @@ aux = list(mod3, mod5, mod1) %>%
          order = ifelse(` ` == "Method: Panel", 7, order),
          order = ifelse(` ` == "Method: IV", 8, order),
          order = ifelse(` ` == "Method: RDD", 9, order),
-         order = ifelse(` ` == "AggLevel: States", 10, order),
-         order = ifelse(` ` == "Location: World", 11, order)) %>%
+         order = ifelse(` ` == "AggLevel: States", 10, order)) %>%
   filter(` ` != "Method: RDD") %>%
   arrange(order) %>%
   mutate_at(vars(contains("Value")), list(
@@ -1542,8 +1548,7 @@ aux2 = list(mod4, mod6, mod2) %>%
          order = ifelse(` ` == "Method: Panel", 7, order),
          order = ifelse(` ` == "Method: IV", 8, order),
          order = ifelse(` ` == "Method: RDD", 9, order),
-         order = ifelse(` ` == "AggLevel: States", 10, order),
-         order = ifelse(` ` == "Location: World", 11, order)) %>%
+         order = ifelse(` ` == "AggLevel: States", 10, order)) %>%
   arrange(order) %>%
   mutate_at(vars(contains("Value")), list(
     ~(ifelse(is.na(.), " ", ifelse(. < 0.001, "***",
@@ -1615,8 +1620,7 @@ coefs <- tibble(
           "Method: Panel", 
           "Method: IV", 
           "Method: RDD", 
-          "AggLevel: States", 
-          "Location: World")
+          "AggLevel: States")
 )
 
 aux = list(mod3_permu, mod5_permu, mod1_permu) %>%
@@ -1635,8 +1639,7 @@ aux = list(mod3_permu, mod5_permu, mod1_permu) %>%
          order = ifelse(` ` == "Method: Panel", 7, order),
          order = ifelse(` ` == "Method: IV", 8, order),
          order = ifelse(` ` == "Method: RDD", 9, order),
-         order = ifelse(` ` == "AggLevel: States", 10, order),
-         order = ifelse(` ` == "Location: World", 11, order)) %>%
+         order = ifelse(` ` == "AggLevel: States", 10, order)) %>%
   arrange(order) %>%
   filter(` ` != "Method: RDD") %>%
   mutate_at(vars(contains("Value")), list(
@@ -1666,8 +1669,7 @@ aux2 = list(mod4_permu, mod6_permu, mod2_permu) %>%
          order = ifelse(` ` == "Method: Panel", 7, order),
          order = ifelse(` ` == "Method: IV", 8, order),
          order = ifelse(` ` == "Method: RDD", 9, order),
-         order = ifelse(` ` == "AggLevel: States", 10, order),
-         order = ifelse(` ` == "Location: World", 11, order)) %>%
+         order = ifelse(` ` == "AggLevel: States", 10, order)) %>%
   arrange(order) %>%
   mutate_at(vars(contains("Value")), list(
     ~(ifelse(is.na(.), " ", ifelse(. < 0.001, "***",
@@ -1770,7 +1772,7 @@ mod <-  rma(yi = coef,
               sei = SE, 
               data = dat, 
               method = "REML", 
-              mods = ~ depvar2+indepvar2+year+published+elecsys2+method+agglevel+location2, 
+              mods = ~ depvar2+indepvar2+year+published+elecsys2+method+agglevel, 
               test = "knha")
 ```
 
@@ -1791,7 +1793,7 @@ mod <- rma(yi = coef,
               sei = SE, 
               data = fulldat, 
               method = "REML", 
-              mods = ~ depvar2+indepvar2+year+published+elecsys2+method+agglevel+location2, 
+              mods = ~ depvar2+indepvar2+year+published+elecsys2+method+agglevel, 
               test = "knha")
 ```
 
