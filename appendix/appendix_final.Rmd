@@ -129,21 +129,21 @@ build_forest <- function(mod, capt, lsize = 22, ttl = NULL) {
 }
 ```
 
-# Search criteria
+# Search Criteria
 
-The first step in reviews is to gather a sample of records. This initial procedure is the foundation for the entire meta-analytical process: if the goal is to aggregate all the available data on a given topic, the primary pool must contain all of it. At the same time, the sample should be concise enough to optimise the work flow. Upon selecting the online databases, we attempted to do a "term" search, based on a set of words we scouted from the distributive politics literature we already knew. This search produced oversized databases, of which a large share was completely unrelated to our subject of investigation. The strategy we found to be the most thorough and productive was to select the records that cited Weingast, Shepsle and Johnsen's 1981 paper "The political economy of benefits and costs: A neoclassical approach to distributive politics". Although \href{https://scholar.google.com/}{Google Scholar} reports the article amounts to \href{https://scholar.google.com/scholar?um=1&ie=UTF-8&lr&cites=13117579863846712459}{2,180} citations\footnote{As of May 11\textsuperscript{th}, 2020.}, as of the 21\textsuperscript{st} of November 2019, our search resulted in a total of 2,664 records.
+The first step in reviews is to gather a sample of records. This initial procedure is the foundation for the entire meta-analytical process: if the goal is to aggregate all the available data on a given topic, the primary pool must encompass all of it. At the same time, the sample should be concise enough to optimise the work flow. Upon selecting the online databases, we attempted to do a "term" search, based on a set of words we scouted from the distributive politics literature we already knew. This search produced oversized databases, of which a large share was completely unrelated to our subject of investigation. The strategy we found to be the most thorough and productive was to select the records that cited Weingast, Shepsle and Johnsen's 1981 paper "The political economy of benefits and costs: A neoclassical approach to distributive politics". Although \href{https://scholar.google.com/}{Google Scholar} reports the article amounts to \href{https://scholar.google.com/scholar?um=1&ie=UTF-8&lr&cites=13117579863846712459}{2,180} citations\footnote{As of May 11\textsuperscript{th}, 2020.}, as of the 21\textsuperscript{st} of November 2019, our search resulted in a total of 2,664 records.
 
 We webscraped the main databases in Social Sciences: \href{https://scholar.google.com/}{Google Scholar} (n = 1001); \href{https://academic.microsoft.com/home}{Microsoft Academic} (n = 927); and \href{https://www.scopus.com/}{Scopus} (n = 736). The R script we wrote extracted, to a CSV file, the title, abstract, authors, year, journal of publication, and database from which the record originated. We screened these results with an English language and Article restriction -- meaning, we excluded all records written in other languages and all that were not academic papers, such as book chapters, doctoral theses, etc. We set no restriction to unpublished articles.
 
 # Article Selection
 
-The selection process was conducted by two authors in three phases. In the first round, we excluded all titles that were obviously unrelated to our topic of investigation. For instance, we curiously found articles about automobile motors amidst our sample. We consider this a preliminary step, since we were not able to eliminate a large number of entries. Thus, we read all abstracts. We chose to maintain those that indicated either government expenditure or legislative structures were central matters. For instance, if the paper sought to identify variables that increased government size, it was maintained. Abstracts that indicated the paper discussed or estimated the impacts of representative institutions, elections, or chamber dynamics, for example, were also included. This allowed us to significantly reduce our sample to 376 records.
+The selection process was conducted by two authors in three phases. In the first round, we excluded all titles that were obviously unrelated to our topic. For instance, we curiously found articles about automobile motors amidst our sample. We consider this a preliminary step, since we were not able to eliminate a large number of entries. Thus, we read all abstracts. We chose to maintain those that indicated either government expenditure or legislative structures were central matters. For instance, if the paper sought to identify variables that increased government size, it was maintained. Abstracts that indicated the paper discussed or estimated the impacts of representative institutions, elections, or chamber dynamics, for example, were also included. This allowed us to significantly reduce our sample to 376 records.
 
 In the second phase, we assessed full-texts. To proceed, the paper should (i) conduct a quantitative analysis, (ii) report data on the number of legislators, and (iii) also on public expenditure. If the record was marked as positive for all three, it was maintained. Disagreements in this phase were discussed among the authors, and a third was consulted when needed.
 
 The third phase consisted of filling out tables for each of the remaining 50 articles to systematically evaluate their eligibility. Since government spending and the number of parliamentaries assume the form of different variables, we extracted the coefficients that provided this information in all papers, indicating and defining which variables each author used. By observing what is most commonly used, we could decide which variables we would employ in our analysis. In this phase, we also collected information on whether or not the paper had been published, and if it explicitly discussed the \textit{law of 1/n}. Upon choosing the variables, we excluded the non-conforming studies, arriving at our final sample of 26 articles.
 
-## Exclusion analysis
+## Exclusion Analysis
 
 We selected the final pool of articles based on two criteria regarding their reported coefficients:
 
@@ -207,13 +207,13 @@ We visually organised the flow of articles across eligibility phases through thi
  \end{tikzpicture}
 ```
 
-# Meta-analysis dataset
+# Meta-Analysis Dataset
 
-The meta-analytic data is comprised of two datasets. The first dataset has the main coefficients that were reported in the paper. It includes only the most rigorous model from each paper, that is, those estimated with the largest $n$, most control variables, and fixed effects if the authors added them. If the article employed a regression discontinuity design, we chose the coefficient from the optimal bandwidth or from the intermediate one. This sample encompasses 36 estimates, as 10 articles analysed two dependent or independent variables of interest. Our second sample, in contrast, contains all the 126 effect sizes reported in the 26 papers. 
+The meta-analytic data is comprised of two datasets. The first has the main coefficients that were reported in the paper. It includes only the most rigorous model from each paper, that is, those estimated with the largest $n$, most control variables, and fixed effects if the authors added them. If the article employed a regression discontinuity design, we chose the coefficient from the optimal bandwidth or from the intermediate one. This sample encompasses 36 estimates, as 10 articles analysed two dependent or independent variables of interest. Our second sample, in contrast, contains all the 126 effect sizes reported in the 26 papers. 
 
-In the main text, we focus on the results for our restricted sample as we consider them more robust, but the findings are very similar when we use the extended set. Below is the data extraction process for all relevant coefficients in the selected articles. In the \@ref(meta-an) and \@ref(meta-reg) sections of this Appendix, you will find all tests performed in both reduced and full samples. 
+In the main text, we focus on the results for our restricted sample as we consider them more robust, but the findings are very similar when we use the extended set. Below is the data extraction process for all relevant coefficients in the selected articles. In the Meta-Analysis and Meta-Regressions sections of this Appendix, you will find all tests performed in both reduced and full samples. 
 
-# Descriptive statistics
+# Descriptive Statistics
 
 In this section, we present the descriptive statistics for our meta-analytic sample. We focus in the following paper characteristics: study year, whether the paper has been published or not, the three dependent variables of interest, the three independent variables of interest, and a few statistics about the coefficients. We also add a descriptive statistics table, similar to the one in the main paper.
 
@@ -242,14 +242,14 @@ dat %>%
   unique() %>%
   ggplot(aes(x = as.factor(published))) + 
     geom_bar(color = "black") + 
-  labs(x = "Published study?",
+  labs(x = "Published Study?",
        y = "") + 
   theme_bw()
 ```
 
-## Electoral system
+## Electoral System
 
-There are many differences in the papers relative to the research design. One remarkable difference is the application of the theory, that was build with majoritarian systems in mind, in non-majoritarian democracies. In our sample, `r as.numeric(table(unique(select(dat, id, elecsys2))$elecsys2)[1])` of the papers study *Majoritarian* systems while `r as.numeric(table(unique(select(dat, id, elecsys2))$elecsys2)[2])` study *Non-Majoritarian* electoral systems.\footnote{Note that the argument for working in a non-majoritarian system, we need to assume that despite the fact that politicians are able to campaign in every place in the district, the votes are geographycally concentrated. The concentration facilitates politicians to use pork-barrel project to captivate their electoral supporters.}
+There are many differences in the papers relative to the research design. One remarkable difference is the application of the theory, that was build with majoritarian systems in mind, to non-majoritarian democracies. In our sample, `r as.numeric(table(unique(select(dat, id, elecsys2))$elecsys2)[1])` of the papers study *Majoritarian* systems while `r as.numeric(table(unique(select(dat, id, elecsys2))$elecsys2)[2])` study *Non-Majoritarian* electoral systems.\footnote{Note that the argument for working in a non-majoritarian system, we need to assume that despite the fact that politicians are able to campaign in every place in the district, the votes are geographycally concentrated. The concentration facilitates politicians to use pork-barrel project to captivate their electoral supporters.}
 
 ```{r, echo=FALSE, fig.width=7, fig.height=6, fig.cap="Electoral Systems"}
 dat %>%
@@ -277,7 +277,7 @@ dat %>%
   theme_bw()
 ```
 
-## Dependent variables
+## Dependent Variables
 
 The outcome variables included in the paper were:
 
@@ -301,7 +301,7 @@ dat %>%
   theme_bw()
 ```
 
-## Independent variables
+## Independent Variables
 
 Most of papers in our meta-analytic sample study the number of legislators in the lower house (`r as.numeric(table(unique(select(dat, id, indepvar2))$indepvar2)[2])`). The second most frequent independent variable is the number of legislators in the upper house (`r as.numeric(table(unique(select(dat, id, indepvar2))$indepvar2)[1])`). Finally, the minority of papers study the Natural Log of the number of legislators in the lower house (`r as.numeric(table(unique(select(dat, id, indepvar2))$indepvar2)[3])`). Some papers had multiple coefficients, and thus the total number of coefficients is 36, while the number of papers is only 26.
 
@@ -382,7 +382,7 @@ The law of 1/n poses we should have a positive influence of legislature size on 
 
 As we are taking an agnostic approach, we acknowledge that either the law of 1/n ($p>0.5$), or the reverse law of 1/n ($p<0.5$), could be true. In this case, the alternative hypothesis is $p\neq 0.5$. To perform this test, we run binomial tests in R, using the function `binom.test(.)`.
 
-This test has at least two advantages. First, it is robust to the design of the paper. As papers select different types of journals, countries, samples, and other characteristics, this increases the heterogeneity. This test ignores the design discrepancies and focus on the overall effect. Second, this test has the advantage of be simple and straightfoward. It requires very few assumption and has a direct statistical formulation. The disadvantage is that we can extract more information with meta-regressions.
+This test has two advantages. First, it is robust to the design of the paper. As papers select different types of journals, countries, samples, and other characteristics, this increases the heterogeneity. This test ignores the design discrepancies and focus on the overall effect. Second, this test has the advantage of be simple and straightfoward. It requires very few assumption and has a direct statistical formulation. The disadvantage is that we can extract more information with meta-regressions.
 
 For the number of legislators in the lower house ($N$), the results follow below.
 
@@ -414,7 +414,7 @@ aux2
 
 Under the null hypothesis of $p=0.5$, we find that `r as.numeric(table(aux$scoef)[2])` studies, out of `r sum(table(aux$scoef))`, had positive sign. The chance of a distribution with $p=0.5$ generate this sample is equal to p-value = `r round(as.numeric(aux2$p.value), 3)`. Therefore, we `r ifelse(as.numeric(aux2$p.value)<0.1, 'accept', 'reject')` the hypothesis that $p \neq 0.5$. This is the only test that presents evidence of an association between the legislature size and expenditure.
 
-# Meta-analysis {#meta-an}
+# Meta-Analysis
 
 We combined the three independent ($N$, $\log(N)$, and $K$) with the levels of the three dependent variables (Expenditure Per Capita, Log of Expenditure Per Capita, Expenditure as a Percentage of the GDP). This formed a 3x3 possibility for our analysis.
 
@@ -449,13 +449,13 @@ f1 <- build_forest(mod, NULL, lsize = 15, ttl = 'Lower House Size\nand Expenditu
 
 Highlights:
 
-1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
-2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
 \newpage
 
-### Electoral system subgroup analysis
+### Electoral System Subgroup Analysis
 
 The law of 1/n was created for majoritarian systems. In the theoretical section below, we explain why the argument have potential issues when applied to non-majoritarian electoral systems. We estimated a subgroup analysis using a binary electoral system.
 
@@ -523,7 +523,7 @@ There were no studies that had per capita expenditure in the dependent variable 
 
 ## Upper House Size and Expenditure per Capita
 
-Now we are investigating the upper house size (K). In this model, we investigate the effect of upper house size on expenditure per capita (ExpPC).
+Now, we look into the upper house size (K). In this model, we investigate the effect of upper house size on expenditure per capita (ExpPC).
 
 ```{r}
 # Pooling effects analysis -- ExpPC x K
@@ -554,8 +554,8 @@ f2 <- build_forest(mod, NULL, 15, ttl = 'Upper House Size\nand Expenditure Per C
 
 Highlights:
 
-1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
-2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
 \newpage
@@ -596,8 +596,8 @@ f3 <- build_forest(mod, NULL, 15, ttl = 'Lower House Size\nand Log Expenditure P
 
 Highlights:
 
-1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
-2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
 \newpage
@@ -635,8 +635,8 @@ f4  <- build_forest(mod, NULL, 15, ttl = 'Log of Lower House Size\nand Log of Ex
 
 Highlights:
 
-1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
-2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`). **This model is significant at the 10\% confidence level.**
+1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`). **This model is significant at the 10\% confidence level.**
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
 \newpage
@@ -644,6 +644,8 @@ Highlights:
 ## Log of Upper House Size and Log of Expenditure Per Capita
 
 No studies related the log of per capita expenditure with the size of upper house (K).
+
+\newpage
 
 ## Lower House Size and Expenditure as Percentage of GDP
 
@@ -678,15 +680,15 @@ f5 <- build_forest(mod, NULL, 15, ttl = 'Lower House Size\nand Expenditure as Pe
 
 Highlights:
 
-1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
-2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
 \newpage
 
 ## Log Lower House Size and Expenditure as Percentage of GDP
 
-This meta-regression investigates the percentage of GDP as public expenditure as the dependent variable and the log lower house size (logN) as the treatment variable.
+This model investigates the percentage of GDP as public expenditure as the dependent variable and the log lower house size (logN) as the treatment variable.
 
 ```{r}
 # Pooling effects analysis -- PCTGDP x logN
@@ -720,8 +722,8 @@ f6 <- build_forest(mod, NULL, 15, ttl = 'Log Lower House Size\nand Expenditure a
 
 Highlights:
 
-1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
-2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
 \newpage
@@ -759,8 +761,8 @@ f7 <- build_forest(mod, NULL, 15, ttl = 'Upper House Size\nand Expenditure as Pe
 
 Highlights:
 
-1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
-2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
 \newpage
@@ -782,7 +784,7 @@ ggsave("./plots/fig2.pdf", plot = f, width = 35, height = 25, units = "cm")
 
 \newpage
 
-# Meta-Analysis (all coefficients) {#full-meta-an}
+# Meta-Analysis (All Coefficients)
 
 ## Lower House Size and Expenditure Per Capita
 
@@ -805,18 +807,18 @@ mod
 
 And the forest plot:
 
-```{r, echo=FALSE, fig.width=12, fig.height=6, fig.cap="Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)",warning=FALSE}
+```{r, echo=FALSE, fig.width=12, fig.height=6, fig.cap="Effect of Lower House Size (N) on Per Capita Expenditure (ExpPC)",warning=FALSE}
 build_forest(mod, NULL)
 ```
 
 Highlights:
 
-1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
-2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
 \newpage
-### Electoral system subgroup analysis
+### Electoral System Subgroup Analysis
 
 The law of 1/n was created for majoritarian systems. In the theoretical section below, we explain why the argument have potential issues when applied to non-majoritarian electoral systems. We estimated a subgroup analysis using a binary electoral system.
 
@@ -904,8 +906,8 @@ build_forest(mod, NULL)
 
 Highlights:
 
-1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
-2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
 \newpage
@@ -938,8 +940,8 @@ build_forest(mod, NULL)
 
 Highlights:
 
-1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
-2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
 \newpage
@@ -976,6 +978,8 @@ Highlights:
 2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`). **This model is significant at the 10\% confidence level.**
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
+\newpage
+
 ## Upper House Size and Log of Expenditure Per Capita
 
 No studies related the log of per capita expenditure with the size of upper house (K).
@@ -1011,8 +1015,8 @@ build_forest(mod, NULL)
 
 Highlights:
 
-1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
-2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
 ## Log of Lower House Size and Expenditure as Percentage of GDP
@@ -1044,8 +1048,8 @@ build_forest(mod, NULL)
 
 Highlights:
 
-1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
-2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
 ## Upper House Size and Expenditure as Percentage of GDP
@@ -1077,13 +1081,13 @@ build_forest(mod, NULL)
 
 Highlights:
 
-1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
-2. The Random effects modem SMD estimated is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
+1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
+2. The Random effects modem SMD estimated is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-# Meta-regressions {#meta-reg}
+# Meta-Regressions
 
-## Meta-regressions for Expenditure as a Percentage of the GDP
+## Meta-Regressions for Expenditure as a Percentage of the GDP
 
 ```{r, echo=F, warning=F}
 mod <-  rma(yi = coef, 
@@ -1145,7 +1149,7 @@ mod1_permu <- tibble(
   mutate_if(is.numeric, list(~round(., digits = 3))) 
 ```
 
-We have the following results for the meta-regressions of Expenditure Per Capita:
+We have the following results for the meta-regressions of Expenditure as a Percentage of GDP:
 
 1. Compared with `K`, models with `N` and `logN` find significantly negative coefficients.
 2. Year has null effect.
@@ -1219,11 +1223,11 @@ For all the coefficients, we have the following results:
 1. Compared with `K`, models with `N` and `logN` tend to have significantly negative coefficients.
 2. Year has a positive effect: the younger the publication, the higher the detected coefficient.
 3. Unpublished papers tend to have higher coefficients than published papers.
-4. Passing from `Majoritarian` to `Non-Majoritarian`, decreases significantly the effects found in our models.
+4. Passing from `Majoritarian` to `Non-Majoritarian` significantly decreases the effects found in our models.
 5. In terms of the modeling, passing from `OLS` to `PANEL` increases the detected effects.
-6. When passing from `Local` to `State` or `World` levels, it decreases the detected effect size.
+6. Passing from `Local` to `State` or `World` levels decreases the detected effect size.
 
-## Meta-regressions for Expenditure Per Capita
+## Meta-Regressions for Expenditure Per Capita
 
 ```{r, echo=F, warning=F}
 mod <-  rma(yi = coef, 
@@ -1349,11 +1353,11 @@ mod4_permu <- tibble(
   mutate_if(is.numeric, list(~round(., digits = 3)))
 ```
 
-With all coefficients, the results of the effect sizes on the Expenditure Per Capita Regressions are the following:
+With all coefficients, the results of the effect sizes on the Expenditure Per Capita regressions are the following:
 
 1. Compared with `K`, models with `N` tend to detect significantly smaller effects.
 2. Year has now a positive effect on coefficient sizes.
-3. Passing the electoral rules from `Majoritarian` to `Non-Majoritarian`, increases significantly the effects on per capita expenditure found in our models.
+3. Passing electoral rules from `Majoritarian` to `Non-Majoritarian` significantly increases the effects on per capita expenditure found in our models.
 4. In terms of the modeling, passing from `OLS` to `PANEL` decreases the detected effects.
 5. All other coeffients were not significant.
 
@@ -1422,7 +1426,7 @@ mod5_permu %>%
 
 We have the following results for the meta-regressions of Log of Expenditure Per Capita:
 
-1. Unpublished papers report a significantly higher coefficient.
+1. Unpublished papers report significantly higher coefficients.
 2. In terms of the modeling, passing from `OLS` to `PANEL` increases the detected effects.
 3. All other coefficients remained insignificant.
 
@@ -1729,7 +1733,7 @@ kable(aux,
 \elandscape
 \newpage
 
-# The Theory behind the Meta Analysis
+# The Theory Behind the Meta Analysis
 
 There are two main estimators for conducting meta analysis: fixed effects and random effects models. The fixed effects model assumes that there is one true effect in reality, and that all estimates are an attempt to uncover this true effect. The random effects model, on the other hand, assumes that there are a distribution of true effects, that vary based on sample and tests characteristics.
 
@@ -1739,9 +1743,9 @@ In this paper, we use the random effects model. The empirical papers testing the
 2. **Electoral systems**: Majoritarian, PR, Mixed.
 3. **Modeling strategies**: Panel data, Standard OLS, IV, RDD.
 
-These sources of heterogeneity have two implications. First, it makes our estimates very disperse. The heterogeneity tests are all but one significant. When the sample sizes are large enough, we removed more heterogeneous studies, but we still had considerable dispersion in our estimates. Second, the amount of heterogeneity makes fixed effects estimates unrealistic and bised. Thus, we opt for random effects model.
+These sources of heterogeneity have two implications. First, they make our estimates very disperse. All but one of our heterogeneity tests are significant. When the sample sizes are large enough, we removed more heterogeneous studies, but we still had considerable dispersion in our estimates. Second, the amount of heterogeneity makes fixed effects estimates unrealistic and biased. Thus, we opt for random effects model.
 
-Let each study having an effect of $T_i$. In a random effects model, we can decompose this effect in two components, the true effect that the study with the same specifications as $i$ come from, $\theta_i$, and a within-study error $\varepsilon_i$:
+Let each study having an effect of $T_i$. In a random effects model, we can decompose this effect in two components, the true effect that the study with the same specifications as $i$ comes from, $\theta_i$, and a within-study error $\varepsilon_i$:
 
 \[
 T_i \ = \ \theta_i + \varepsilon_i
@@ -1757,12 +1761,12 @@ And the random effects model estimates the parameter $\mu$, under the challenge 
 
 In all empirical estimates, we use the package `meta`, and the package `dmetar`, described in (Doing Meta-Analysis with R)[https://bookdown.org/MathiasHarrer/Doing_Meta_Analysis_in_R/random.html]. To empirically implement the random effects model, we need to choose a method to estimate the true effect size variance, $\tau^2$, which in our formulation, represents the variance of $\xi_i$. We selected the **Restricted Maximum Likelihood Estimator**, as the literature regards it as more precise when we have continuous measures, such as we have on our data (link)[https://www.ncbi.nlm.nih.gov/pubmed/26332144].
 
-# Robustness: Full model meta-regressions combined {#full-meta-reg}
+# Robustness: Full model Meta-Regressions Combined 
 
 In this section, we aggregate all the coefficients and run a multivariate meta-regression, controlling by:
 
 1. The type of the dependent variable in the study (expenditure per capita, log of the expenditure per capita, and share of government expenditure in the GDP)
-2. The type of the independent variable in the stydy (N, K, log of N);
+2. The type of the independent variable in the stydy ($N$, $K$, $log (N)$);
 3. The electoral system (Majoritarian, Proportional Representation, and Mixed).
 
 The results follow below, and show null effect for all variables, including the intercept.
@@ -1805,11 +1809,11 @@ summary(mod)
 permutest(mod, progbar = F)
 ```
 
-# Auxiliary functions
+# Auxiliary Functions
 
-## Function for generate the Meta-Analytic Figures
+## Function to Generate Meta-Analytic Figures
 
-This function receives the meta-analysis results and build a forest plot using `ggplot2`.
+This function receives the meta-analysis results and builds a forest plot using `ggplot2`.
 
 ```{r, eval = FALSE}
 # Build plot function for forest plots
@@ -1871,7 +1875,7 @@ build_forest <- function(mod, capt, lsize = 22, ttl = NULL) {
 }
 ```
 
-## Webscraping code
+## Webscraping Code
 
 ```{r, eval = FALSE}
 #### PACKAGES CONFIGURATION ####
