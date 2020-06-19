@@ -1,11 +1,8 @@
 ##################################################################
 ## Script: Building the Dataset for Distributive Politics Paper ##
-## Authors: Alptekin, Freire, Mignozzetti and Roman             ##
-## Last Modified: May 20, 2020                                  ##
+## Authors: Alptekin, Freire, Mignozzetti, and Roman            ##
+## Last Modified: Jun 19, 2020                                  ##
 ##################################################################
-
-## Starting
-set.seed(732578) # From random.org
 
 # Needed packages
 pkgs <- c('tidyverse')
@@ -3632,6 +3629,8 @@ dat$location2 <- factor(as.character(dat$location2),
                         levels = c("Country", "World"))
 dat$agglevel <- factor(as.character(dat$agglevel), 
                        levels = c("Local", "States", "Countries"))
+dat$agglevel2 <- dat$agglevel
+levels(dat$agglevel2) = c("Country", "Country", "Cross-Country")
 fulldat <- dat
 dat <- dat %>%
   filter(usemeta == 1)

@@ -263,21 +263,6 @@ dat %>%
   theme_bw()
 ```
 
-## Aggregation Level
-
-The aggregation level is also an important characteristic of the empirical tests of the _law of 1/n_. While the original model was built to explain the dynamics of majoritarian countries, the theory has been tested at the municipal, county, states, and country levels. In our sample, `r as.numeric(table(unique(select(dat, id, agglevel))$agglevel)[1])` analysed data from the *local* level (municipalities and counties), `r as.numeric(table(unique(select(dat, id, agglevel))$agglevel)[2])` studied the *state* (or Provincial) level, and `r as.numeric(table(unique(select(dat, id, agglevel))$agglevel)[3])` used *country* level data.
-
-```{r, fig.width=4, fig.height=3, fig.cap="Sample Aggregate Level", cache=TRUE}
-dat %>%
-  select(id, agglevel) %>%
-  unique() %>%
-  ggplot(aes(x=as.factor(agglevel))) +
-    geom_bar(color = "black") +
-  labs(x = "Sample Aggregate Level",
-       y = "") +
-  theme_bw()
-```
-
 ## Dependent Variables
 
 The outcome variables included in the paper are:
@@ -368,13 +353,12 @@ We chose a set of moderators that frequently appear in the literature and may he
 fulldat$usemeta2 <- factor(fulldat$usemeta)
 levels(fulldat$usemeta2) <- c("Other Coefficients", "Main Coefficients")
 aux <- select(fulldat, usemeta2, indepvar2, year, published,
-              elecsys2, method, agglevel) %>%
+              elecsys2, method) %>%
   rename(`Independent Variables` = indepvar2,
          `Year` = year,
          `Published work` = published,
          `Electoral system` = elecsys2,
-         `Estimation method` = method,
-         `Sampling Aggregation Level` = agglevel)
+         `Estimation method` = method)
 
 descrTable(~.-usemeta2, aux, y = aux$usemeta2,
            show.p.overall = F, show.all = T)
@@ -1117,7 +1101,7 @@ mod <-  rma(yi = coef,
               sei = SE,
               data = dat,
               method = "REML",
-              mods = ~indepvar2+year+published+elecsys2+method+agglevel,
+              mods = ~indepvar2+year+published+elecsys2+method,
               test = "knha",
             subset = dat$depvar2=='PCTGDP',
             slab = dat$authoryear)
@@ -1129,8 +1113,7 @@ mod1 <- tibble(
              "Year",
              "Published: No",
              "Elecsys: Non-Majoritarian",
-             "Method: Panel",
-             "AggLevel: States"),
+             "Method: Panel"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1159,8 +1142,7 @@ mod1_permu <- tibble(
              "Year",
              "Published: No",
              "Elecsys: Non-Majoritarian",
-             "Method: Panel",
-             "AggLevel: States"),
+             "Method: Panel"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1179,7 +1161,7 @@ We have the following results for the meta-regressions of Expenditure as a Perce
 3. Unpublished papers tend to have higher coefficients than published papers.
 4. Passing from `Majoritarian` to `Non-Majoritarian`, decreases significantly the effects found in our models.
 5. In terms of modelling, passing from `OLS` to `PANEL` increases the detected effects.
-6. When passing from `Local` to `State` or `Country` levels, it decreases the detected effect size.
+6. When passing from `Country` to `Cross-Country`, it has no effect on the estimated coefficients.
 
 Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
 
@@ -1188,7 +1170,7 @@ mod <- rma(yi = coef,
               sei = SE,
               data = fulldat,
               method = "REML",
-              mods = ~ indepvar2+year+published+elecsys2+method+agglevel,
+              mods = ~ indepvar2+year+published+elecsys2+method,
               test = "knha",
             subset = fulldat$depvar2=='PCTGDP',
             slab = fulldat$authoryear)
@@ -1200,8 +1182,7 @@ mod2 <- tibble(
           "Year",
           "Published: No",
           "Elecsys: Non-Majoritarian",
-          "Method: Panel",
-          "AggLevel: States"),
+          "Method: Panel"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1228,8 +1209,7 @@ mod2_permu <- tibble(
              "Year",
              "Published: No",
              "Elecsys: Non-Majoritarian",
-             "Method: Panel",
-             "AggLevel: States"),
+             "Method: Panel"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1248,7 +1228,6 @@ For all the coefficients, we have the following results:
 3. Unpublished papers tend to have higher coefficients than published papers.
 4. Passing from `Majoritarian` to `Non-Majoritarian` significantly decreases the effects found in our models.
 5. In terms of the modeling, passing from `OLS` to `PANEL` increases the detected effects.
-6. Passing from `Local` to `State` or `World` levels decreases the detected effect size.
 
 ## Meta-Regressions for Expenditure Per Capita
 
@@ -1257,10 +1236,11 @@ mod <-  rma(yi = coef,
               sei = SE,
               data = dat,
               method = "REML",
-              mods = ~indepvar2+year+published+elecsys2+method+agglevel,
+              mods = ~indepvar2+year+published+elecsys2+method,
               test = "knha",
             subset = dat$depvar2=='ExpPC',
-            slab = dat$authoryear)
+            slab = dat$authoryear,
+            control=list(maxiter=1000))
 
 mod3 <- tibble(
   ` ` = c("Intercept",
@@ -1268,8 +1248,7 @@ mod3 <- tibble(
           "Year",
           "Elecsys: Non-Majoritarian",
           "Method: Panel",
-          "Method: IV",
-          "AggLevel: States"),
+          "Method: IV"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1296,8 +1275,7 @@ mod3_permu <- tibble(
           "Year",
           "Elecsys: Non-Majoritarian",
           "Method: Panel",
-          "Method: IV",
-          "AggLevel: States"),
+          "Method: IV"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1315,7 +1293,6 @@ We have the following results for the meta-regressions of Expenditure Per Capita
 2. Year has null effect.
 3. `Majoritarian`, when compared to `Non-Majoritarian` electoral systems, significantly increase per capita expenditure.
 4. In terms of the modeling, passing from `OLS` to `PANEL` or `IV` increases the detected effects.
-5. When passing from `Local` to `State` level, the detected effects decrease.
 
 We also run the meta-regressions adding all coefficients in the papers. The results follow below:
 
@@ -1324,7 +1301,7 @@ mod <- rma(yi = coef,
               sei = SE,
               data = fulldat,
               method = "REML",
-              mods = ~ indepvar2+year+published+elecsys2+method+agglevel,
+              mods = ~ indepvar2+year+published+elecsys2+method,
               test = "knha",
             subset = fulldat$depvar2=='ExpPC',
             slab = fulldat$authoryear)
@@ -1335,8 +1312,7 @@ mod4 <- tibble(
           "Year",
           "Elecsys: Non-Majoritarian",
           "Method: Panel",
-          "Method: IV" ,
-          "AggLevel: States"),
+          "Method: IV"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1362,8 +1338,7 @@ mod4_permu <- tibble(
           "Year",
           "Elecsys: Non-Majoritarian",
           "Method: Panel",
-          "Method: IV",
-          "AggLevel: States"),
+          "Method: IV"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1390,7 +1365,7 @@ mod <- rma(yi = coef,
               sei = SE,
               data = dat,
               method = "REML",
-              mods = ~indepvar2+year+published+elecsys2+method+agglevel,
+              mods = ~indepvar2+year+published+elecsys2+method,
               test = "knha",
             subset = dat$depvar2=='logExpPC',
             slab = dat$authoryear)
@@ -1400,8 +1375,7 @@ mod5 <- tibble(
            "Indepvar: N",
            "Year",
            "Published: No",
-           "Method: Panel",
-           "AggLevel: States"),
+           "Method: Panel"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1428,8 +1402,7 @@ mod5_permu <- tibble(
           "Indepvar: N",
           "Year",
           "Published: No",
-          "Method: Panel",
-          "AggLevel: States"),
+          "Method: Panel"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1459,7 +1432,7 @@ mod <- rma(yi = coef,
               sei = SE,
               data = fulldat,
               method = "REML",
-              mods = ~ indepvar2+year+published+elecsys2+method+agglevel,
+              mods = ~ indepvar2+year+published+elecsys2+method,
               test = "knha",
             subset = fulldat$depvar2=='logExpPC',
             slab = fulldat$authoryear)
@@ -1470,8 +1443,7 @@ mod6 <- tibble(
           "Year",
           "Published: No",
           "Method: Panel",
-          "Method: RDD",
-          "AggLevel: States"),
+          "Method: RDD"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1496,8 +1468,7 @@ mod6_permu <- tibble(
           "Year",
           "Published: No",
           "Method: Panel",
-          "Method: RDD",
-          "AggLevel: States"),
+          "Method: RDD"),
   Estimate = mod[["beta"]],
   SE = mod[["se"]],
   `T` = mod[["zval"]],
@@ -1524,8 +1495,7 @@ coefs <- tibble(
           "Elecsys: Non-Majoritarian",
           "Method: Panel",
           "Method: IV",
-          "Method: RDD",
-          "AggLevel: States"))
+          "Method: RDD"))
 
 aux = list(mod3, mod5, mod1) %>%
   map(~{
@@ -1542,8 +1512,7 @@ aux = list(mod3, mod5, mod1) %>%
          order = ifelse(` ` == "Elecsys: Non-Majoritarian", 6, order),
          order = ifelse(` ` == "Method: Panel", 7, order),
          order = ifelse(` ` == "Method: IV", 8, order),
-         order = ifelse(` ` == "Method: RDD", 9, order),
-         order = ifelse(` ` == "AggLevel: States", 10, order)) %>%
+         order = ifelse(` ` == "Method: RDD", 9, order)) %>%
   filter(` ` != "Method: RDD") %>%
   arrange(order) %>%
   mutate_at(vars(contains("Value")), list(
@@ -1573,8 +1542,7 @@ aux2 = list(mod4, mod6, mod2) %>%
          order = ifelse(` ` == "Elecsys: Non-Majoritarian", 6, order),
          order = ifelse(` ` == "Method: Panel", 7, order),
          order = ifelse(` ` == "Method: IV", 8, order),
-         order = ifelse(` ` == "Method: RDD", 9, order),
-         order = ifelse(` ` == "AggLevel: States", 10, order)) %>%
+         order = ifelse(` ` == "Method: RDD", 9, order)) %>%
   arrange(order) %>%
   mutate_at(vars(contains("Value")), list(
     ~(ifelse(is.na(.), " ", ifelse(. < 0.001, "***",
@@ -1608,7 +1576,7 @@ mod <-  rma(yi = coef,
               sei = SE,
               data = dat,
               method = "REML",
-              mods = ~ depvar2+indepvar2+year+published+elecsys2+method+agglevel,
+              mods = ~ depvar2+indepvar2+year+published+elecsys2+method,
               test = "knha")
 ```
 
@@ -1629,7 +1597,7 @@ mod <- rma(yi = coef,
               sei = SE,
               data = fulldat,
               method = "REML",
-              mods = ~ depvar2+indepvar2+year+published+elecsys2+method+agglevel,
+              mods = ~ depvar2+indepvar2+year+published+elecsys2+method,
               test = "knha")
 ```
 
