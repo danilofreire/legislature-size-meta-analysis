@@ -14,7 +14,7 @@ $endif$
 
 % The default monofont 
 % Again, comment the line below if you want to change it
-\usepackage[scaled=.95]{inconsolata}
+\usepackage[scaled=.85]{inconsolata}
 
 % Add the following packages to support kableExtra
 \usepackage{booktabs}
