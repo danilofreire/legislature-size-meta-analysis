@@ -33,7 +33,7 @@ output:
 
 [^mignozzetti]: School of International Relations, Fundação Getulio Vargas, São Paulo, SP, Brazil and Wilf Family Department of Politics, NYU, NY, USA, <umberto.mig@nyu.edu>, <http://umbertomig.com>.
 
-[^roman]: Research Associate, Department of International Relations, Getulio Vargas Foundation, Brazil, <catarinamroman@gmail.com>.
+[^roman]: Research Associate, School of International Relations, Fundação Getulio Vargas, São Paulo, SP, Brazil, <catarinamroman@gmail.com>.
 
 ```{r, include=FALSE}
 # Knitr options
@@ -250,7 +250,7 @@ dat %>%
 
 ## Electoral System
 
-Our study selection differs considerably in regards to research design. One remarkable difference is that several authors apply the logics of the _law of 1/n_, which was build with majoritarian systems in mind, to non-majoritarian democracies. In our sample, `r as.numeric(table(unique(select(dat, id, elecsys2))$elecsys2)[1])` of the papers study *Majoritarian* systems while `r as.numeric(table(unique(select(dat, id, elecsys2))$elecsys2)[2])` study *Non-Majoritarian* electoral systems.\footnote{Note that the argument for working in a non-majoritarian system, we need to assume that despite the fact that politicians are able to campaign in every place in the district, the votes are geographically concentrated. The concentration facilitates politicians to use pork-barrel projects to captivate their electoral supporters.}
+Our study selection differs considerably in regards to research design. One remarkable difference is that several authors apply the logics of the _law of 1/n_, which was built with majoritarian systems in mind, to non-majoritarian democracies. In our sample, `r as.numeric(table(unique(select(dat, id, elecsys2))$elecsys2)[1])` of the papers study *Majoritarian* systems while `r as.numeric(table(unique(select(dat, id, elecsys2))$elecsys2)[2])` study *Non-Majoritarian* electoral systems.\footnote{Note that the argument for working in a non-majoritarian system, we need to assume that despite the fact that politicians are able to campaign in every place in the district, the votes are geographically concentrated. The concentration facilitates politicians to use pork-barrel projects to captivate their electoral supporters.}
 
 ```{r, fig.width=4, fig.height=3, fig.cap="Electoral Systems", cache=TRUE}
 dat %>%
@@ -265,7 +265,7 @@ dat %>%
 
 ## Aggregation Level
 
-The aggregation level is also an important characteristic of the empirical tests of the _law of 1/n_. While the original model was build to explain the dynamics of majoritarian countries, the theory has been tested at the municipal, county, states, and country levels. In our sample, `r as.numeric(table(unique(select(dat, id, agglevel))$agglevel)[1])` analysed data from the *local* level (municipalities and counties), `r as.numeric(table(unique(select(dat, id, agglevel))$agglevel)[2])` studied the *state* (or Provincial) level, and `r as.numeric(table(unique(select(dat, id, agglevel))$agglevel)[3])` used *country* level data.
+The aggregation level is also an important characteristic of the empirical tests of the _law of 1/n_. While the original model was built to explain the dynamics of majoritarian countries, the theory has been tested at the municipal, county, states, and country levels. In our sample, `r as.numeric(table(unique(select(dat, id, agglevel))$agglevel)[1])` analysed data from the *local* level (municipalities and counties), `r as.numeric(table(unique(select(dat, id, agglevel))$agglevel)[2])` studied the *state* (or Provincial) level, and `r as.numeric(table(unique(select(dat, id, agglevel))$agglevel)[3])` used *country* level data.
 
 ```{r, fig.width=4, fig.height=3, fig.cap="Sample Aggregate Level", cache=TRUE}
 dat %>%
@@ -1313,11 +1313,11 @@ We have the following results for the meta-regressions of Expenditure Per Capita
 
 1. Compared with `K`, models with `N` tend to detect significantly smaller effects.
 2. Year has null effect.
-3. Passing the electoral rules from `Majoritarian` to `Non-Majoritarian`, increases significantly the per capita expenditure found in our models.
+3. `Majoritarian`, when compared to `Non-Majoritarian` electoral systems, significantly increase per capita expenditure.
 4. In terms of the modeling, passing from `OLS` to `PANEL` or `IV` increases the detected effects.
-5. When passing from `Local` to `State` level, decreases the detected effects.
+5. When passing from `Local` to `State` level, the detected effects decrease.
 
-Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
+We also run the meta-regressions adding all coefficients in the papers. The results follow below:
 
 ```{r, warning=F, cache=T}
 mod <- rma(yi = coef,
@@ -1379,7 +1379,7 @@ With all coefficients, the results of the effect sizes on the Expenditure Per Ca
 
 1. Compared with `K`, models with `N` tend to detect significantly smaller effects.
 2. Year has now a positive effect on coefficient sizes.
-3. Passing electoral rules from `Majoritarian` to `Non-Majoritarian` significantly increases the effects on per capita expenditure found in our models.
+3. `Majoritarian`, when compared to `Non-Majoritarian` electoral systems, significantly increase per capita expenditure.
 4. In terms of the modeling, passing from `OLS` to `PANEL` decreases the detected effects.
 5. All other coeffients were not significant.
 
@@ -1595,13 +1595,13 @@ aux <- bind_rows(aux, aux2) %>%
 
 # Robustness: Full Model Meta-Regressions Combined
 
-In this section, we aggregate all the coefficients and run a multivariate meta-regression, controlling by:
+In this section, we aggregate all the coefficients and run a multivariate meta-regression, controlling for:
 
 1. The type of the dependent variable in the study (expenditure per capita, log of the expenditure per capita, and share of government expenditure in the GDP)
-2. The type of the independent variable in the stydy ($N$, $K$, $log (N)$);
+2. The type of the independent variable in the study ($N$, $K$, $log (N)$);
 3. The electoral system (Majoritarian, Proportional Representation, and Mixed).
 
-The results follow below, and show null effect for all variables, including the intercept.
+The results follow below, and show null effects for all variables, including the intercept.
 
 ```{r, warning=F, cache=T}
 mod <-  rma(yi = coef,
@@ -1622,7 +1622,7 @@ As we have considerable heterogeneity in our sample, we run a permutation test t
 permutest(mod, progbar = F)
 ```
 
-In the main text, we selected the coefficients based on the regressions that had most observations and that presented a full model (with fixed effects or intermediate bandwidth in RDD). Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
+In the main text, we selected coefficients based on the regressions that had most observations and presented a full model (with fixed effects or intermediate bandwidth in RDD). We also run the meta-regressions adding all coefficients in the papers. The results follow below:
 
 ```{r, warning=F, cache=T}
 mod <- rma(yi = coef,
