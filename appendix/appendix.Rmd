@@ -1193,7 +1193,7 @@ We have the following results for the meta-regressions of Expenditure as a Perce
 5. In terms of modelling, passing from `OLS` to `PANEL` increases the detected effects.
 6. When passing from `Country` to `Cross-Country`, it has no effect on the estimated coefficients.
 
-Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
+Below we also run the meta-regressions adding all coefficients in the papers. 
 
 ```{r, warning=F, cache=T}
 mod <- rma(yi = coef,
@@ -1455,7 +1455,7 @@ We have the following results for the meta-regressions of Log of Expenditure Per
 2. In terms of the modeling, passing from `OLS` to `PANEL` increases the detected effects.
 3. All other coefficients remained insignificant.
 
-Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
+Below we also run the meta-regressions adding all coefficients in the papers. 
 
 ```{r, warning=F, cache=T}
 mod <- rma(yi = coef,
@@ -1491,6 +1491,7 @@ summary(mod)
 
 ```{r, warning=F, cache=T}
 mod <- permutest(mod, progbar = F)
+mod
 
 mod6_permu <- tibble(
   ` ` = c("Intercept",

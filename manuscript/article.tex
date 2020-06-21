@@ -507,42 +507,42 @@ significance levels for the meta-regressions \citep{higgins2004controlling}.
 \cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5} \cmidrule(l{3pt}r{3pt}){6-7}
 & Restricted & Extended & Restricted & Extended & Restricted & Extended \\
 \midrule
-Intercept & -104.07 & -296.907 & 8.959 & -1.574 & 2.669 & -10.11 \\
- & (318.93) & (166.687)$\dagger$ & (47.644) & (15.883) & (2.04) & (5.8586)$\dagger$\\
+Intercept & -117.987 & -300.789 & -7.363 & -8.296 & 2.851 & 2.507\\
+          & (203.717) & (157.555)* & (25.458) & (12.037) & (1.778) & (2.467)$\dagger$\\
 %
-Independent Variable: $N$ & -2.924 & -5.447 & 0.164 & -0.009 & -0.0094 & -0.0015\\
- & (2.093) & (0.969)*** & (0.326) & (0.126) & (0.006) & (0.005)\\
+Independent Variable: $N$ & -2.307 & -5.347 &  -0.280 &  -0.0577 &-0.009 & 0.003\\
+                          & (1.490)$\dagger$ & (0.929)*** & (0.162) & (0.073) & (0.005)$\dagger$ & (0.005)\\
 %
-Independent Variable: log($N$) &  &  &  &  & -0.011 & 0.038\\
- &  &  &  &  & (0.019) & (0.0195)$\dagger$\\
+Independent Variable: log($N$) &  &  &  &  &-0.011& 0.002\\
+                               &  &  &  &  & (0.001) & (0.014)\\
 %
-Year & 0.052 & 0.15 & -0.004 & 0.001 & -0.000 & 0.006\\
- & (0.159) & (0.083)$\dagger$ & (0.024) & (0.008) & (0.001) & (0.003)*\\
+Year & 0.059 & 0.152 &  0.004 &  0.004 &-0.000& -0.000\\
+     & (0.101) & (0.078)* & (0.013) & (0.006) & (0.001) & (0.001)\\
 %
-Published: No &  &  & -0.152 & -0.083 & 0.0633 & 0.113 \\
- &  &  & (0.19) & (0.073) & (0.016)* & (0.026)***\\
+Published: No &  &  & 0.200 &  0.103 & 0.0625 & 0.060\\
+              &  &  & (0.127) & (0.065) & (0.014)* & (0.016)*\\
 %
-Non-Majoritarian (PR \& Mixed) & 0.346 & 1.024 & &  & -2.0556 & -2.163\\
- & (1.553) & (0.77) & &  & (0.3260)** & (0.163)***\\
+Non-Majoritarian (PR \& Mixed) & 0.428 & 0.985 & &  & -2.055 & -2.169\\
+                               & (0.827) & (0.723)$\dagger$ & &  & (0.283)** & (0.166)***\\
 %
-Method: Panel & 1.457 & -0.142 & 0.258 & -0.244 & 0.0557 & 0.126\\
- & (2.238) & (0.814) & (0.189) & (0.0147)* & (0.0071)* & (0.032)***\\
+Method: Panel & 1.203 & -0.135 & 0.188 & -0.252 & 0.055 & 0.058\\
+              & (1.575) & (0.797) & (0.093) & (0.068)*** & (0.013)* & (0.017)*\\
 %
-Method: IV & 1.494 & 0.191 &  &  &  & \\
- & (2.668) & (0.822) &  &  &  & \\
+Method: IV & 1.317 & 0.186 &  &  &  & \\
+           & (1.807) & (0.802) &  &  &  & \\
 %
-Method: RDD &  &  &  &-0.298&  & \\
- &  &  &  & (0.066)*** &  & \\
+Method: RDD &  &  &  &-0.285&  & \\
+            &  &  &  & (0.062)*** &  & \\
 % 
 \bottomrule
 \end{tabular}
 \begin{minipage}{\textwidth}
 \renewcommand{\footnoterule}{}
-\footnotetext{\textbf{Note:} {The restricted and extended samples include 36 and 126 study coefficients, respectively. Reference categories: Independent Variable $= k$; Published $= Yes$; Non-Majoritarian (PR \& Mixed) $= Majoritarian$; Method $= OLS$. Significance codes: *** $p < 0.001$; ** $p < 0.01$; * $p < 0.05$; $\dagger$ $p < 0.1$.}}
+\footnotetext{\textbf{Note:} {The restricted and extended samples include 36 and 126 study coefficients, respectively. We report the results from the permutation tests. Reference categories: Independent Variable $= k$; Published $= Yes$; Non-Majoritarian (PR \& Mixed) $= Majoritarian$; Method $= OLS$. Significance codes: *** $p < 0.001$; ** $p < 0.01$; * $p < 0.05$; $\dagger$ $p < 0.1$.}}
 \end{minipage}
 \end{table}
 
-\newpage
+%% CONFERIR TODOS OS RESULTADOS 
 
 The first two models show the results for public expenditure per capita. In both
 the restricted and the extended samples, we find that models that use $n$ as an
@@ -564,15 +564,13 @@ category.
 
 Several variables are statistically significant in the last set of
 meta-regressions. The dependent variable is public expenditures as a percentage
-of GDP. In both restricted and extended samples we find that unpublished papers
-tend to have higher coefficients than published papers. In contrast with our
-previous results, we also see that passing from OLS to panel/fixed effects and
-from majoritarian to non-majoritarian electoral systems increase the detected
-coefficients. We also see that year has a positive effect on the outcome: the
-newer the publication, the higher the detected coefficient. However, the
-result is statistically significant only in the extended sample. Finally,
-studies with $n$ as an independent variable have lower coefficients than those
-that analyse $k$, what is consistent with our previous meta-regressions.
+of GDP. In our restricted sample, we see that studies with $n$ as an
+independent variable have lower coefficients than those that analyse $k$, what
+is consistent with our previous models. Both models also show that unpublished
+papers tend to have higher coefficients than published papers. Regarding the
+electoral systems, see that passing from majoritarian to non-majoritarian
+decrease overall levels of public spending. Finally, we find that models
+estimated with panel data have larger values than those modelled with OLS.
 
 Overall, our results suggest that study coefficients are highly sensitive to
 research design choices. The same statistical methods or study samples may
