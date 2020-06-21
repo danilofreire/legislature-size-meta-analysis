@@ -134,11 +134,11 @@ build_forest <- function(mod, capt, lsize = 22, ttl = NULL) {
 
 The first step in our systematic review consisted in gathering a study sample. We started our data collection with a manual search based on a set of keywords we scouted from the distributive politics literature. This search produced a database with many entries that were unrelated to our subject of investigation. To reduce the number of false positives in our sample, we restricted our search to studies that cited Weingast, Shepsle and Johnsen's 1981 paper "The Political Economy of Benefits and Costs: A Neoclassical Approach to Distributive Politics", which is a seminal contribution in the field. Although \href{https://scholar.google.com/}{Google Scholar} reports the article amounts to \href{https://scholar.google.com/scholar?um=1&ie=UTF-8&lr&cites=13117579863846712459}{2,180} citations\footnote{As of May 11\textsuperscript{th}, 2020.}, our search resulted in 2,664 records as of the 21\textsuperscript{st} of November 2019.
 
-We webscraped three large academic databases: \href{https://scholar.google.com/}{Google Scholar} (n = 1001); \href{https://academic.microsoft.com/home}{Microsoft Academic} (n = 927); and \href{https://www.scopus.com/}{Scopus} (n = 736). The `R` script we wrote extracted the article title, abstract, authors, year, journal of publication, and database from which the record originated. Our code is available in section \ref{sub:scrap} below. We screened these results with an English language and article restriction, that is, we excluded all records written in other languages and all that were not academic papers, such as book chapters or doctoral theses. We set no restriction to unpublished articles.
+We webscraped three large academic databases: \href{https://scholar.google.com/}{Google Scholar} (n = 1001); \href{https://academic.microsoft.com/home}{Microsoft Academic} (n = 927); and \href{https://www.scopus.com/}{Scopus} (n = 736). The `R` script we wrote extracted the article title, abstract, authors, year, journal of publication, and database from which the record originated. Our code is available in section \ref{sub:scrap} below. We screened these results with an English language and article restriction, that is, we excluded all records written in other languages and all that were not academic papers, such as book chapters or doctoral theses. To reduce the risk of publication bias, we set no restriction to unpublished articles.
 
 # Article Selection
 
-The selection process was conducted by two authors in three phases. In the first round, we excluded all titles that were obviously unrelated to our topic. For instance, we curiously found articles about automobile motors amidst our sample. We consider this a preliminary step, since we were not able to eliminate a large number of entries. Thus, we read all abstracts. We chose to maintain those which indicated that either government expenditure or legislative structures were the main subject of the paper. For instance, if the paper sought to identify variables that increased government size, it was maintained. Abstracts that indicated the paper discussed or estimated the impacts of representative institutions, elections, or chamber dynamics were also included. This allowed us to significantly reduce our sample to 376 records.
+The selection process was conducted by two authors in three stages. In the first round, we excluded all titles that were obviously unrelated to our topic. For instance, we curiously found articles about automobile motors amidst our sample. We consider this a preliminary step, since we were not able to eliminate a large number of entries. Then, we read all abstracts. We chose to maintain those which indicated that either government expenditure or legislative structures were the main subject of the paper. For instance, if the paper sought to identify variables that increased government size, it was maintained. Abstracts that indicated the paper discussed or estimated the impacts of representative institutions, elections, or chamber dynamics were also included. This allowed us to significantly reduce our sample to 376 records.
 
 In the second phase, we assessed full texts. To remain in our sample, the paper should (i) conduct a quantitative analysis, (ii) report data on the number of legislators, and (iii) also on public expenditure. If the record was marked as positive for all three, it was maintained. Disagreements in this phase were discussed among the authors, and a third investigator was consulted when needed.
 
@@ -208,15 +208,81 @@ The diagram below shows each step of our article selection process. We followed 
  \end{tikzpicture}
 ```
 
+## Study Sample
+
+A table with the 26 selected articles is available below. It includes information on the article author, the journal in which the paper was published, the publication year, the country of analysis, the level of data aggregation, and whether the electoral system is majoritarian or not. For unpublished papers, we included the year the paper was made available online.
+
+\vspace{.5cm}
+
+\footnotesize
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.9cm}
+   >{\raggedright\arraybackslash}p{4.2cm}
+   >{\centering\arraybackslash}p{1.3cm}
+   >{\centering\arraybackslash}p{1cm}
+   >{\centering\arraybackslash}p{1cm}
+   >{\centering\arraybackslash}p{1.4cm}
+   >{\centering\arraybackslash}p{2.5cm}}
+\caption{Papers included in the meta-analysis, listed alphabetically by last name}\\
+\toprule
+\raggedright Author(s) & \centering Title & \centering Journal & \centering Year & \centering Country & \centering Level & \raggedleft Electoral System
+\tabularnewline
+\midrule
+\endhead
+R. Baqir & Districts, Spillovers, and Government Overspending & Unpub. & 1999 & USA & Municipal & M\\
+R. Baqir & Districting and Government Overspending & JPE & 2002 & USA & Municipal & M\\
+T. Baskaran & Coalition Governments, Cabinet Size, and the Common Pool Problem: Evidence from the German States & EJPE & 2013 & DEU & State & NM\\
+\begin{tabular}[t]{@{}l@{}}T. Bjedov,\\ S. Lapointe \& \\T. Madiès \end{tabular} & The Impact of Within-Party and Between-Party Ideological Dispersion on Fiscal Outcomes: Evidence from Swiss Cantonal Parliaments & PC & 2014 & CHE & Canton & NM\\
+\begin{tabular}[t]{@{}l@{}}J. Bradbury \& \\ M. Crain\end{tabular} & Legislative Organization and Government Spending: Cross-Country Evidence & JPubE & 2001 & Multiple (37) & Country & NM\\
+\begin{tabular}[t]{@{}l@{}}J. Bradbury \& \\ E. F. Stephenson\end{tabular} & Spatially Targeted Government Spending and Heterogeneous Constituent Cost Shares & JPriE & 2009 & USA & State & M\\
+\begin{tabular}[t]{@{}l@{}}J. Chen \& \\ N. Malhotra\end{tabular} & The Law of 1/K: The Effect of Chamber Size on Government Spending in Bicameral Legislatures & APSR & 2007 & USA & State & M\\
+\begin{tabular}[t]{@{}l@{}}G. Crowley\end{tabular} & The Law of 1/N Revisited: Distributive Politics, Legislature Size, and the Costs of Collective Action &  SEJ & 2019 & USA & State & M\\
+\begin{tabular}[t]{@{}l@{}}J. Drew \& \\ B. Dollery\end{tabular} & The Price of Democracy? Political Representation Structure and Per Capita Expenditure in Victorian Local Government & UAR & 2017 & AUS & State & NM\\
+\begin{tabular}[t]{@{}l@{}}H. A. Erler\end{tabular} & Legislative Term Limits and State Spending & PC & 2007 & USA & State & M\\
+\begin{tabular}[t]{@{}l@{}}N. Fiorino \& \\ R. Ricciuti\end{tabular} & Legislature Size and Government Spending in Italian Regions: Forecasting the Effects of a Reform & PC & 2007 & ITA & Region & NM\\
+\begin{tabular}[t]{@{}l@{}}D. Höhmann\end{tabular} & The Effect of Legislature Size on Public Spending: Evidence from a Regression Discontinuity Design & PC & 2017 & DEU & Municipal & NM\\
+\begin{tabular}[t]{@{}l@{}}A. Kessler\end{tabular} & Communication in Federal Politics: Universalism, Policy Uniformity, and the Optimal Allocation of Fiscal Authority & JPE & 2014 & USA & Municipal & M\\
+\begin{tabular}[t]{@{}l@{}}D. Lee\end{tabular} & Supermajority Rule and Bicameral Bargaining & PC & 2016 & USA & State & M\\
+\begin{tabular}[t]{@{}l@{}}D. Lee \& \\ S. Park\end{tabular} & Court-Ordered Redistricting and the Law of 1/N & PC & 2018 & USA & District & M\\
+\begin{tabular}[t]{@{}l@{}}B. Lewis\end{tabular} & Legislature Size, Local Government Expenditure and Taxation, and Public Service Access in Indonesia & SCID & 2019 & IDN & District & NM\\
+\begin{tabular}[t]{@{}l@{}}V. Lledo\end{tabular} & Electoral Systems, Legislative Fragmentation and Public Spending: A Comparative Analysis of Brazilian States & Unpub. & 2003 & BRA & State & NM\\
+\begin{tabular}[t]{@{}l@{}}L. MacDonald\end{tabular} & The Impact of Government Structure on Local Public Expenditures & PC & 2008 & USA & Municipal & M\\
+\begin{tabular}[t]{@{}l@{}}B. Maldonado\end{tabular} & Legislature, Leaders, and Leviathans: How Constitutional Institutions Affect the Size of Government Spending & SSQ & 2013 & Multiple (92) & Country & NM\\
+\begin{tabular}[t]{@{}l@{}}J. Matsusaka\end{tabular} & The Endogeneity of the Initiative: A Comment on Marschall and Ruhil & SPPQ & 2005 & USA & State & M\\
+\begin{tabular}[t]{@{}l@{}}B. Mukherjee\end{tabular} & Political Parties and the Size of Government in Multiparty Legislatures: Examining Cross-Country and Panel Data Evidence & CPS & 2003 & Multiple (110) & Country & NM\\
+\begin{tabular}[t]{@{}l@{}}P. Pettersson-Lidbom\end{tabular} & Does the Size of the Legislature Affect the Size of Government? Evidence from Two Natural Experiments & JPubE & 2012 & FIN \& SWE & Municipal & NM\\
+\begin{tabular}[t]{@{}l@{}}D. Primo\end{tabular} & Stop Us before We Spend Again: Institutional Constraints on Government Spending & E\&P & 2006 & USA & State & M\\
+\begin{tabular}[t]{@{}l@{}}R. Ricciuti\end{tabular} & Legislature Size, Bicameralism and Government Spending: Evidence from Democratic Countries & Unpub. & 2004 & Multiple (75) & Country & NM\\
+\begin{tabular}[t]{@{}l@{}}C. Schaltegger \& \\ L. Feld\end{tabular} & Do Large Cabinets Favor Large Governments? Evidence on the Fiscal Commons Problems for Swiss Cantons & JPubE & 2009 & CHE & Canton & NM\\
+\begin{tabular}[t]{@{}l@{}}E. Stein,\\ E. Talvi \& \\ A. Grisanti\end{tabular} & Institutional Arrangements and Fiscal Performance: The Latin American Experience & Unpub. & 1998 & Multiple (26) & Country & NM\\ [1ex]
+\bottomrule
+\label{tab:papers}
+\begin{minipage}{\textwidth}
+\renewcommand{\footnoterule}{}
+\vspace{-0.5cm}
+\footnotetext{\textbf{Note:} Unpub$=$Unpublished, JPE$=$Journal of Political
+Economy, EJPE$=$European Journal of Political Economy, PC$=$Public Choice,
+JPubE$=$Journal of Public Economics, JPriE$=$Journal of Private Enterprise,
+APSR$=$American Political Science Review, SEJ$=$Southern Economic Journal,
+UAR$=$Urban Affairs Review, SCID$=$Studies in Comparative International
+Development, SSQ$=$Social Science Quarterly, SPPQ$=$State Politics and Policy
+Quarterly, CPS$=$Comparative Political Studies, E\&P$=$Economics and Politics,
+M$=$Majoritarian, NM$=$Non-majoritarian (mixed or proportional representation).
+Country codes follow the ISO 3166-1 alpha-3 international standard.}
+\end{minipage}
+\end{longtable}
+
+\normalsize
+
+
 # Meta-Analysis Dataset
 
-The meta-analytic data is comprised of two datasets. The first dataset has the main coefficients reported in the studies. These data include only the most rigorous model from each paper, that is, those estimated with the largest $n$, most control variables, and fixed effects if the authors added them. If the article employed a regression discontinuity design, we chose the coefficient from the optimal bandwidth or from the intermediate one. This sample encompasses 36 estimates, as 10 articles analysed two dependent or independent variables of interest. Our second sample, in contrast, contains all the 126 effect sizes reported in the 26 papers.
+Our meta-analytic data is comprised of two datasets. The first dataset has the main coefficients reported in the studies. These data include only the most rigorous model from each paper, that is, those estimated with the largest $n$, most control variables, and fixed effects if the authors added them. If the article employed a regression discontinuity design, we chose the coefficient from the optimal bandwidth or from the intermediate one. This sample encompasses 36 estimates, as 10 articles analysed two dependent or independent variables of interest. Our second sample, in contrast, contains all the 126 effect sizes reported in the 26 papers.
 
 In the main text, we focus on the results for our restricted sample as we consider them more robust, but the findings are very similar when we use the extended set. Below is the data extraction process for all relevant coefficients in the selected articles. Here we present the results of all tests performed in both reduced and full samples. 
 
 # Descriptive Statistics
 
-In this section, we show the descriptive statistics for our meta-analytic sample. We focus on the following paper characteristics: study year, whether the paper has been published or not, the electoral system of the country discussed in the original study, the data aggregation level, as well as the distribution of the dependent and independent variables of interest. We also add a descriptive statistics table similar to the one in the main paper.
+In this section, we show the descriptive statistics for our study sample. We focus on the following paper characteristics: study year, whether the paper has been published or not, the electoral system of the country discussed in the original study, the data aggregation level, as well as the distribution of the dependent and independent variables of interest. We also add a descriptive statistics table similar to the one in the main paper.
 
 ## Study Year
 
@@ -347,8 +413,6 @@ dat %>%
 
 We chose a set of moderators that frequently appear in the literature and may help us interpret our results. We included them in our meta-regressions alongside an indicator for the type of independent variable used in the original study ($n$, log($n$), or $k$). The additional moderators are: 1) electoral system; 2) data aggregation level; 3) estimation method; 4) publication year; 5) paper publication in an academic journal. The table below presents descriptive statistics for these moderators in our selection of articles.
 
-\newpage
-
 ```{r, warning=F,message=F, cache=TRUE}
 fulldat$usemeta2 <- factor(fulldat$usemeta)
 levels(fulldat$usemeta2) <- c("Other Coefficients", "Main Coefficients")
@@ -404,21 +468,19 @@ aux2
 
 Under the null hypothesis of $p=0.5$, we find that `r as.numeric(table(aux$scoef)[2])` studies, out of `r sum(table(aux$scoef))`, had positive sign. The chance of a distribution with $p=0.5$ generate this sample is equal to p-value = `r round(as.numeric(aux2$p.value), 3)`. Therefore, we `r ifelse(as.numeric(aux2$p.value)<0.1, 'accept', 'reject')` the hypothesis that $p \neq 0.5$. This is the only test that presents evidence of an association between the legislature size and expenditure.
 
-\newpage
-
 # Meta-Analysis
 
 ## Estimation Method
 
-In general terms, there are two main ways to conduct a meta-analysis, using fixed effects or random effects models. The fixed effects model assumes that there is one true effect in reality, and that all estimates are an attempt to uncover this true effect. The random effects model, on the other hand, assumes that there are a distribution of true effects, that vary based on sample and tests characteristics.
+In general terms, there are two main ways to conduct a meta-analysis, either using fixed effects or random effects models. The fixed effects model assumes that there is one true effect in reality, and that all estimates are an attempt to uncover this true, unknown effect. The random effects model, on the other hand, assumes that there is a distribution of true effects, one which varies based on sample and tests characteristics.
 
-In this paper, we use the random effects model. The empirical papers testing the _law of 1/n_ are very diverse. We tried to capture some of this diversity by considering the main dependent and independent variables separately, but they have at least three other important sources of dispersion:
+In this paper, we use the random effects model. We do so because the empirical papers testing the _law of 1/n_ are very diverse. We tried to capture some of this diversity by considering the main dependent and independent variables separately, but they have at least three other important sources of dispersion:
 
 1. **Subjects**: Counties, Municipalities, States, Provinces, Countries.
 2. **Electoral systems**: Majoritarian, PR, Mixed.
 3. **Modelling strategies**: Panel data, Standard OLS, IV, RDD.
 
-These sources of heterogeneity have two implications. First, they make our estimates very disperse. All but one of our heterogeneity tests are significant. When the sample sizes are large enough, we removed more heterogeneous studies, but we still had considerable dispersion in our estimates. Second, the amount of heterogeneity makes fixed effects estimates unrealistic and biased. Thus, we opt for random effects model.
+These sources of heterogeneity have two implications. First, they make our estimates very disperse. All but one of our heterogeneity tests are statistically significant. When the sample sizes were large enough, we removed more heterogeneous studies, but we still had considerable dispersion in our estimates. Second, the amount of heterogeneity makes fixed effects estimates unrealistic and biased. Thus, we opt for random effects model.
 
 Let each study having an effect of $T_i$. In a random effects model, we can decompose this effect in two components, the true effect that the study with the same specifications as $i$ comes from, $\theta_i$, and a within-study error $\varepsilon_i$:
 
@@ -472,8 +534,6 @@ Highlights:
 1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-
-\newpage
 
 ### Electoral System Subgroup Analysis
 
@@ -533,8 +593,6 @@ f1b
 
 Therefore, we can see that the hypothesis that majoritarian systems produce systematic positive effects was disproved. The majoritarian systems in the sample had a random effects model estimate of -0.25, while the random effects model in the non-majoritarian subgroup fitted a value of 0.08. Both are non-significant, but they reassure us that the absense of effect is not caused by pooling multiple types of electoral systems.
 
-\newpage
-
 ## Log Lower House Size and Expenditure per Capita
 
 There were no studies that had per capita expenditure in the dependent variable and log of lower house size in the treatment variable.
@@ -576,8 +634,6 @@ Highlights:
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-\newpage
-
 ## Lower House Size and Log Expenditure Per Capita
 
 This model estimates the Log of Per Capita Expenditure as the dependent variable, and the number of lower house legislators as the treatment variable.
@@ -618,8 +674,6 @@ Highlights:
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-\newpage
-
 ## Log of Lower House Size and Log of Expenditure Per Capita
 
 In this specification, we study the log of per capita expenditure (logExpPC) as a function of the log of lower house size (logN).
@@ -656,8 +710,6 @@ Highlights:
 1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`). **This model is significant at the 10\% confidence level.**
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-
-\newpage
 
 ## Log of Upper House Size and Log of Expenditure Per Capita
 
@@ -700,8 +752,6 @@ Highlights:
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-\newpage
-
 ## Log Lower House Size and Expenditure as Percentage of GDP
 
 This model investigates the percentage of GDP as public expenditure as the dependent variable and the log lower house size (logN) as the treatment variable.
@@ -742,8 +792,6 @@ Highlights:
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-\newpage
-
 ## Upper House Size and Expenditure as Percentage of GDP
 
 This model looks into the effect of upper house size (K) on the public expenditure share of the GDP (PCTGDP).
@@ -781,8 +829,6 @@ Highlights:
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-\newpage
-
 # Meta-Analysis (All Coefficients)
 
 ## Lower House Size and Expenditure Per Capita
@@ -815,8 +861,6 @@ Highlights:
 1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-
-\newpage
 
 ### Electoral System Subgroup Analysis
 
@@ -872,8 +916,6 @@ f8b
 
 Therefore, we can see that the hypothesis that majoritarian systems produce systematic positive effects was disproved. The majoritarian systems in the sample had a random effects model estimate of -0.25, while the random effects model in the non-majoritarian subgroup fitted a value of 0.08. Both are non-significant, but they reassure us that the absence of effect is not caused by pooling multiple types of electoral systems.
 
-\newpage
-
 ## Log of Lower House Size and Expenditure Per Capita
 
 There were no studies that had per capita expenditure in the dependent variable and log of lower house size in the treatment variable.
@@ -911,8 +953,6 @@ Highlights:
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-\newpage
-
 ## Lower House Size and Log of Expenditure Per Capita
 
 This model estimates the Log of Per Capita Expenditure as the dependent variable, and the number of lower house legislators as the treatment variable.
@@ -946,8 +986,6 @@ Highlights:
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-\newpage
-
 ## Log of Lower House Size and Log of Expenditure Per Capita
 
 In this specification, we study the log of per capita expenditure (logExpPC) as a function of the log of lower house size (logN).
@@ -980,8 +1018,6 @@ Highlights:
 1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
 2. The estimated SMD in the random effects model is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`). **This model is significant at the 10\% confidence level.**
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-
-\newpage
 
 ## Upper House Size and Log of Expenditure Per Capita
 
@@ -1020,8 +1056,6 @@ Highlights:
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-\newpage
-
 ## Log of Lower House Size and Expenditure as Percentage of GDP
 
 This meta-regression investigates the percentage of GDP as public expenditure as the dependent variable and the natural logarithm of lower house size (log($N$)) as the treatment variable.
@@ -1055,8 +1089,6 @@ Highlights:
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-\newpage
-
 ## Upper House Size and Expenditure as Percentage of GDP
 
 This model looks into the effect of upper house size ($K$) on the public expenditure share of the GDP (PCTGDP).
@@ -1089,8 +1121,6 @@ Highlights:
 1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-
-\newpage
 
 # Meta-Regressions
 
