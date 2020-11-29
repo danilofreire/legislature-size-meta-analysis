@@ -33,13 +33,17 @@ output:
     template: article-template.latex
 ---
 
-```{r, message=FALSE, warning=FALSE, echo=FALSE}
-## Starting
-
+```{r, message=FALSE, warning=FALSE, echo=FALSE, results='hide'}
 # Knitr options
 knitr::opts_chunk$set(fig.pos = "H") # holds figure position
 knitr::opts_chunk$set(echo = TRUE)
+```
 
+```{r, message=FALSE, warning=FALSE, echo=FALSE, results='hide'}
+# Clean up
+rm(list = ls())
+
+## Starting
 set.seed(732578) # From random.org
 
 # Needed packages
@@ -126,6 +130,93 @@ build_forest <- function(mod, capt, lsize = 22, ttl = NULL) {
   return(p)
 }
 
+# Build forest plot for heterogeneous analysis
+# Build plot function for forest plots
+build_forest_het <- function(mod, capt, lsize = 22, ttl = NULL, hetvar = NULL) {
+  mod <- update(mod, byvar = hetvar, print.byvar = F)
+  
+  # Build dataset for plot
+  mod2 <- tibble(
+    byvar = mod$byvar,
+    TE = mod$TE,
+    seTE = mod$seTE,
+    studlab = mod$studlab,
+    lower = mod$lower,
+    upper = mod$upper,
+    group = "A") %>%
+    arrange(byvar)
+  auxmod <- tibble()
+  for (i in rev(mod$bylevs)){
+    auxmod <- rbind(auxmod, tibble(byvar = i,
+                    TE = NA,
+                    seTE = NA,
+                    studlab = toupper(i),
+                    lower = NA,
+                    upper = NA,
+                    group = "B"))
+    auxmod <- rbind(auxmod, 
+                    filter(mod2, byvar==i) %>% 
+                      arrange(desc(TE)))
+    auxmod <- rbind(auxmod, tibble(
+      byvar = i,
+      TE = mod$TE.random.w[which(mod$bylevs==i)],
+      seTE = mod$seTE.random.w[which(mod$bylevs==i)],
+      studlab = 'Subgroup Effect',
+      lower = mod$lower.random.w[which(mod$bylevs==i)],
+      upper = mod$upper.random.w[which(mod$bylevs==i)],
+      group = "B"))
+  }
+  auxmod <- rbind(auxmod, tibble(
+    byvar = NA,
+    TE = c(mod$TE.random, NA),
+    seTE = c(mod$seTE.random, NA),
+    studlab = c("Overall Effect", "Prediction Interval"),
+    lower = c(mod$lower.random, mod$lower.predict),
+    upper = c(mod$upper.random, mod$upper.predict),
+    group = "B"))
+  mod2 <- data.frame(auxmod)
+  mod2$byvar <- toupper(mod2$byvar)
+  TEaux <- mod2$TE
+  TEaux[mod2$studlab== 'Subgroup Effect'] = TEaux[mod2$studlab== 'Subgroup Effect'] - 100
+  
+  # Graph limits
+  limg <- max(abs(c(mod2$lower, mod2$upper)))
+  
+  # Build plot
+  p <- mod2 %>%
+    ggplot(aes(y = reorder(studlab, TEaux),
+               x = TE, xmin = lower, xmax = upper)) +
+    geom_point(aes(color = group)) +
+    geom_errorbarh(aes(color = group),
+                   height = 0.1) +
+    scale_color_manual(values = c("#000000", "#8b0000")) +
+    scale_x_continuous(limits = c(-1.1 * limg, 1.1 * limg)) +
+    scale_y_discrete(
+      labels = function(x)
+        str_replace(x, "_[0-9]*$", "")) +
+    geom_vline(xintercept = 0,
+               color = "#000000", linetype = "dashed") +
+    labs(x = "",
+         y = "") +
+    facet_grid(byvar~., scales = "free", space = "free") +
+    labs(caption = capt,
+         title = ttl) +
+    theme_minimal() %+replace%
+    theme(strip.text.y = element_blank(),
+          legend.position = "none",
+          axis.text.y = element_text(size = .8 * lsize,
+                                     hjust = 1),
+          axis.text.x = element_text(size = .6 * lsize,
+                                     hjust = 1.1),
+          plot.caption = element_text(size = lsize),
+          plot.title.position = "plot",
+          plot.title = element_text(hjust = 0.5,
+                                    face = "bold",
+                                    margin = margin(0, 0, 10, 0)),
+          panel.grid.major = element_blank())
+  return(p)
+}
+
 dat$scoefnd <- as.character(dat$scoef)
 dat$scoefnd[dat$scoefsig=='Positive'&dat$scoef=='Positive'&!is.na(dat$scoefsig)] = 'Positive Significant'
 dat$scoefnd[dat$scoefnd=='Positive'] = 'Positive Insignificant'
@@ -164,9 +255,9 @@ the overall public spending.
 
 Our survey of the scholarship confirms this continuum of positive,
 insignificant, and negative results. Out of the `r dim(dat)[1]` coefficients included in our
-selected articles, `r as.numeric(round(prop.table(table(dat$scoefnd))*100, 0)[4])`\% of them are positive and statistically significant, `r as.numeric(round(prop.table(table(dat$scoefnd))*100, 0)[3])`\%
-are positive and statistically insignificant, `r as.numeric(round(prop.table(table(dat$scoefnd))*100, 0)[1])`\% are negative and
-statistically insignificant, and `r as.numeric(round(prop.table(table(dat$scoefnd))*100, 0)[2])`\% are negative and statistically
+selected articles, `r as.numeric(round(prop.table(table(dat$scoefnd))*100, 0)[which(names(prop.table(table(dat$scoefnd)))=='Positive Significant')])`\% of them are positive and statistically significant, `r as.numeric(round(prop.table(table(dat$scoefnd))*100, 0)[which(names(prop.table(table(dat$scoefnd)))=='Positive Insignificant')])`\%
+are positive and statistically insignificant, `r as.numeric(round(prop.table(table(dat$scoefnd))*100, 0)[which(names(prop.table(table(dat$scoefnd)))=='Negative Insignificant')])`\% are negative and
+statistically insignificant, and `r as.numeric(round(prop.table(table(dat$scoefnd))*100, 0)[which(names(prop.table(table(dat$scoefnd)))=='Negative Significant')])`\% are negative and statistically
 significant. Given this diversity of empirical findings, a systematic review of
 the existing evidence may help us reach a meaningful conclusion about the effect
 of legislature size on public spending. Meta-analysis is the most appropriate
@@ -230,6 +321,58 @@ quality and transparency of study selection processes in meta-analyses. For more
 information on the PRISMA framework, see \citet{liberati2009prisma}.} flow
 diagram showing the number of resulting papers after each review step is
 available in the Supplementary Material.
+
+\footnotesize
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.9cm}>{\raggedright\arraybackslash}p{4.2cm}>{\centering\arraybackslash}p{1.3cm}>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{1.4cm}>{\centering\arraybackslash}p{2.5cm}}
+\caption{Papers included in the meta-analysis, listed alphabetically by last name}\\
+\toprule
+\raggedright Author(s) & \centering Title & \centering Journal & \centering Year & \centering Country & \centering Method & \raggedleft Electoral System
+\tabularnewline
+\midrule
+\endhead
+R. Baqir & Districts, Spillovers, and Government Overspending & Unpub. & 1999 & USA & OLS & M\\
+R. Baqir & Districting and Government Overspending & JPE & 2002 & USA & OLS & M\\
+T. Baskaran & Coalition Governments, Cabinet Size, and the Common Pool Problem: Evidence from the German States & EJPE & 2013 & DEU & IV & NM\\
+\begin{tabular}[t]{@{}l@{}}T. Bjedov,\\ S. Lapointe \& \\T. Madiès \end{tabular} & The Impact of Within-Party and Between-Party Ideological Dispersion on Fiscal Outcomes: Evidence from Swiss Cantonal Parliaments & PC & 2014 & CHE & Panel & NM\\
+\begin{tabular}[t]{@{}l@{}}J. Bradbury \& \\ M. Crain\end{tabular} & Legislative Organization and Government Spending: Cross-Country Evidence & JPubE & 2001 & Multiple (37) & Panel & NM\\
+\begin{tabular}[t]{@{}l@{}}J. Bradbury \& \\ E. F. Stephenson\end{tabular} & Spatially Targeted Government Spending and Heterogeneous Constituent Cost Shares & JPriE & 2009 & USA & OLS & M\\
+\begin{tabular}[t]{@{}l@{}}J. Chen \& \\ N. Malhotra\end{tabular} & The Law of 1/K: The Effect of Chamber Size on Government Spending in Bicameral Legislatures & APSR & 2007 & USA & OLS & M\\
+\begin{tabular}[t]{@{}l@{}}G. Crowley\end{tabular} & The Law of 1/N Revisited: Distributive Politics, Legislature Size, and the Costs of Collective Action &  SEJ & 2019 & USA & Panel & M\\
+\begin{tabular}[t]{@{}l@{}}J. Drew \& \\ B. Dollery\end{tabular} & The Price of Democracy? Political Representation Structure and Per Capita Expenditure in Victorian Local Government & UAR & 2017 & AUS & Panel & NM\\
+\begin{tabular}[t]{@{}l@{}}H. A. Erler\end{tabular} & Legislative Term Limits and State Spending & PC & 2007 & USA & Panel & M\\
+\begin{tabular}[t]{@{}l@{}}N. Fiorino \& \\ R. Ricciuti\end{tabular} & Legislature Size and Government Spending in Italian Regions: Forecasting the Effects of a Reform & PC & 2007 & ITA & IV & NM\\
+\begin{tabular}[t]{@{}l@{}}D. Höhmann\end{tabular} & The Effect of Legislature Size on Public Spending: Evidence from a Regression Discontinuity Design & PC & 2017 & DEU & RDD & NM\\
+\begin{tabular}[t]{@{}l@{}}A. Kessler\end{tabular} & Communication in Federal Politics: Universalism, Policy Uniformity, and the Optimal Allocation of Fiscal Authority & JPE & 2014 & USA & Panel & M\\
+\begin{tabular}[t]{@{}l@{}}D. Lee\end{tabular} & Supermajority Rule and Bicameral Bargaining & PC & 2016 & USA & Panel & M\\
+\begin{tabular}[t]{@{}l@{}}D. Lee \& \\ S. Park\end{tabular} & Court-Ordered Redistricting and the Law of 1/N & PC & 2018 & USA & Panel & M\\
+\begin{tabular}[t]{@{}l@{}}B. Lewis\end{tabular} & Legislature Size, Local Government Expenditure and Taxation, and Public Service Access in Indonesia & SCID & 2019 & IDN & RDD & NM\\
+\begin{tabular}[t]{@{}l@{}}V. Lledo\end{tabular} & Electoral Systems, Legislative Fragmentation and Public Spending: A Comparative Analysis of Brazilian States & Unpub. & 2003 & BRA & OLS & NM\\
+\begin{tabular}[t]{@{}l@{}}L. MacDonald\end{tabular} & The Impact of Government Structure on Local Public Expenditures & PC & 2008 & USA & OLS & M\\
+\begin{tabular}[t]{@{}l@{}}B. Maldonado\end{tabular} & Legislature, Leaders, and Leviathans: How Constitutional Institutions Affect the Size of Government Spending & SSQ & 2013 & Multiple (92) & OLS & NM\\
+\begin{tabular}[t]{@{}l@{}}J. Matsusaka\end{tabular} & The Endogeneity of the Initiative: A Comment on Marschall and Ruhil & SPPQ & 2005 & USA & IV & M\\
+\begin{tabular}[t]{@{}l@{}}B. Mukherjee\end{tabular} & Political Parties and the Size of Government in Multiparty Legislatures: Examining Cross-Country and Panel Data Evidence & CPS & 2003 & Multiple (110) & Panel & NM\\
+\begin{tabular}[t]{@{}l@{}}P. Pettersson-Lidbom\end{tabular} & Does the Size of the Legislature Affect the Size of Government? Evidence from Two Natural Experiments & JPubE & 2012 & FIN \& SWE & RDD & NM\\
+\begin{tabular}[t]{@{}l@{}}D. Primo\end{tabular} & Stop Us before We Spend Again: Institutional Constraints on Government Spending & E\&P & 2006 & USA & Panel & M\\
+\begin{tabular}[t]{@{}l@{}}R. Ricciuti\end{tabular} & Legislature Size, Bicameralism and Government Spending: Evidence from Democratic Countries & Unpub. & 2004 & Multiple (75) & OLS & NM\\
+\begin{tabular}[t]{@{}l@{}}C. Schaltegger \& \\ L. Feld\end{tabular} & Do Large Cabinets Favor Large Governments? Evidence on the Fiscal Commons Problems for Swiss Cantons & JPubE & 2009 & CHE & Panel & NM\\
+\begin{tabular}[t]{@{}l@{}}E. Stein,\\ E. Talvi \& \\ A. Grisanti\end{tabular} & Institutional Arrangements and Fiscal Performance: The Latin American Experience & Unpub. & 1998 & Multiple (26) & OLS & NM\\ [1ex]
+\bottomrule
+\label{tab:papers}
+\begin{minipage}{\textwidth}
+\renewcommand{\footnoterule}{}
+\vspace{-0.5cm}
+\footnotetext{\textbf{Note:} Unpub$=$Unpublished, JPE$=$Journal of Political
+Economy, EJPE$=$European Journal of Political Economy, PC$=$Public Choice,
+JPubE$=$Journal of Public Economics, JPriE$=$Journal of Private Enterprise,
+APSR$=$American Political Science Review, SEJ$=$Southern Economic Journal,
+UAR$=$Urban Affairs Review, SCID$=$Studies in Comparative International
+Development, SSQ$=$Social Science Quarterly, SPPQ$=$State Politics and Policy
+Quarterly, CPS$=$Comparative Political Studies, E\&P$=$Economics and Politics,
+OLS$=$Ordinary least squares, IV$=$Instrumental variables, Panel$=$Panel data/fixed effects, RDD$=$Regression discontinuity design, M$=$Majoritarian, NM$=$Non-majoritarian (mixed or proportional representation). Country codes follow the ISO 3166-1 alpha-3 international standard.}
+\end{minipage}
+\end{longtable}
+
+\normalsize
 
 Our study sample reflects the development of the literature. Although the "law
 of $1/n$" was first formulated in 1981, the empirical assessment of the theory
@@ -435,12 +578,13 @@ measures of public spending we discuss in this paper. To reduce the risk of
 false positives in our analyses, we use permutation tests to calculate
 significance levels for the meta-regressions \citep{higgins2004controlling}.
 
+```latex
 \vspace{.5cm}
 
 \begin{table}[htpb]
-\footnotesize
 \caption{Meta Regression Results}
 \label{tab:regressions}
+\footnotesize
 \centering
 \begin{tabular}{lcccccc}
 \toprule
@@ -482,6 +626,7 @@ Intercept & -117.987 & -300.789 & -7.363 & -8.296 & 2.851 & 2.507\\
 \footnotetext{\textbf{Note:} {The restricted and extended samples include 36 and 126 study coefficients, respectively. We report the results from the permutation tests. Reference categories: Independent Variable $= k$; Published $= Yes$; Non-Majoritarian (PR \& Mixed) $= Majoritarian$; Method $= OLS$. Significance codes: *** $p < 0.001$; ** $p < 0.01$; * $p < 0.05$; $\dagger$ $p < 0.1$.}}
 \end{minipage}
 \end{table}
+```
 
 The first two models show the results for public expenditure per capita. In both
 the restricted and the extended samples, we find that models that use $n$ as an

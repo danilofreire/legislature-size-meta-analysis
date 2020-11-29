@@ -15,8 +15,7 @@ $endif$
 \usepackage[scaled=.95]{inconsolata}
 
 % Add the following packages to support kableExtra
-\usepackage{booktabs}
-\usepackage{longtable}
+\usepackage{booktabs, longtable, makecell}
 \usepackage{array}
 \usepackage{multirow}
 \usepackage{wrapfig}
@@ -26,7 +25,6 @@ $endif$
 \usepackage{threeparttable}
 \usepackage{threeparttablex}
 \usepackage[normalem]{ulem}
-\usepackage{makecell}
 \usepackage{etoolbox}
 \usepackage{tocloft}
 
