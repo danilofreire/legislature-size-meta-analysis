@@ -34,13 +34,103 @@ output:
 ---
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE}
-# If you need to install any package while knitting the document
-r <- getOption("repos")
-r["CRAN"] <- "https://cran.rstudio.com/"
-options(repos = r)
-if (!require("kableExtra")) {
-    install.packages("kableExtra")
+## Starting
+
+# Knitr options
+knitr::opts_chunk$set(fig.pos = "H") # holds figure position
+knitr::opts_chunk$set(echo = TRUE)
+
+set.seed(732578) # From random.org
+
+# Needed packages
+pkgs <- c("tidyverse", "meta", "metafor",
+          "readxl", "compareGroups",
+          "knitr", "gridGraphics", "gridExtra",
+          "ggpubr", "kableExtra", "magick")
+
+# Install if not already installed
+installIfNot <- function(x) {
+  if (x %in% rownames(installed.packages()) == FALSE)
+    install.packages(x, dependencies = T,
+					 repos = "http://cran.us.r-project.org")
 }
+lapply(pkgs, installIfNot)
+
+# Load packs
+lapply(pkgs, require, character.only = T)
+rm(pkgs, installIfNot)
+
+# Load datasets
+load("../dataset/dataCoefs.RData")
+
+# Build plot function for forest plots
+build_forest <- function(mod, capt, lsize = 22, ttl = NULL) {
+  # Build dataset for plot
+  mod2 <- tibble(
+    TE = mod$TE,
+    seTE = mod$seTE,
+    studlab = mod$studlab,
+    lower = mod$lower,
+    upper = mod$upper,
+    group = "A") %>%
+    bind_rows(.,
+              aux = tibble(
+                TE = c(mod$TE.random, NA),
+                seTE = c(mod$seTE.random, NA),
+                studlab = c("Overall Effect",
+                            "Prediction Interval"),
+                lower = c(mod$lower.random,
+                          mod$lower.predict),
+                upper = c(mod$upper.random,
+                          mod$upper.predict),
+                group = "B")) %>%
+    group_by(studlab) %>%
+    mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+    ungroup()
+
+  # Graph limits
+  limg <- max(abs(c(mod2$lower, mod2$upper)))
+
+  # Build plot
+  p <- mod2 %>%
+    ggplot(aes(y = reorder(studlab2, TE),
+               x = TE, xmin = lower, xmax = upper)) +
+    geom_point(aes(color = group)) +
+    geom_errorbarh(aes(color = group),
+                   height = 0.1) +
+    scale_color_manual(values = c("#000000", "#8b0000")) +
+    scale_x_continuous(limits = c(-1.1 * limg, 1.1 * limg)) +
+    scale_y_discrete(
+      labels = function(x)
+        str_replace(x, "_[0-9]*$", "")) +
+    geom_vline(xintercept = 0,
+               color = "#000000", linetype = "dashed") +
+    labs(x = "",
+         y = "") +
+    facet_grid(group~., scales = "free", space = "free") +
+    labs(caption = capt,
+         title = ttl) +
+    theme_minimal() %+replace%
+    theme(strip.text.y = element_blank(),
+          legend.position = "none",
+          axis.text.y = element_text(size = .8 * lsize,
+                                     hjust = 1),
+          axis.text.x = element_text(size = .6 * lsize,
+                                     hjust = 1.1),
+          plot.caption = element_text(size = lsize),
+          plot.title.position = "plot",
+          plot.title = element_text(hjust = 0.5,
+                                    face = "bold",
+                                    margin = margin(0, 0, 10, 0)),
+          panel.grid.major = element_blank())
+  return(p)
+}
+
+dat$scoefnd <- as.character(dat$scoef)
+dat$scoefnd[dat$scoefsig=='Positive'&dat$scoef=='Positive'&!is.na(dat$scoefsig)] = 'Positive Significant'
+dat$scoefnd[dat$scoefnd=='Positive'] = 'Positive Insignificant'
+dat$scoefnd[dat$scoefsig=='Negative'&dat$scoef=='Negative'&!is.na(dat$scoefsig)] = 'Negative Significant'
+dat$scoefnd[dat$scoefnd=='Negative'] = 'Negative Insignificant'
 ```
 
 [^huzeyfe]: Research Associate, Contemporary Brazilian History Research and Documentation Center, School of Social Sciences, Fundação Getulio Vargas, <huzeyfealptekin@gmail.com>.
@@ -73,10 +163,10 @@ hold, wherein a higher number of legislators in small constituencies decrease
 the overall public spending.
 
 Our survey of the scholarship confirms this continuum of positive,
-insignificant, and negative results. Out of the 36 coefficients included in our
-selected articles, 42\% of them are positive and statistically significant, 22\%
-are positive and statistically insignificant, 17\% are negative and
-statistically insignificant, and 19\% are negative and statistically
+insignificant, and negative results. Out of the `r dim(dat)[1]` coefficients included in our
+selected articles, `r as.numeric(round(prop.table(table(dat$scoefnd))*100, 0)[4])`\% of them are positive and statistically significant, `r as.numeric(round(prop.table(table(dat$scoefnd))*100, 0)[3])`\%
+are positive and statistically insignificant, `r as.numeric(round(prop.table(table(dat$scoefnd))*100, 0)[1])`\% are negative and
+statistically insignificant, and `r as.numeric(round(prop.table(table(dat$scoefnd))*100, 0)[2])`\% are negative and statistically
 significant. Given this diversity of empirical findings, a systematic review of
 the existing evidence may help us reach a meaningful conclusion about the effect
 of legislature size on public spending. Meta-analysis is the most appropriate
@@ -88,12 +178,12 @@ assess threats to external validity and direct future efforts into more
 promising areas of academic inquiry \citep{doucouliagos2008democracy}.
 
 In this letter, we conduct the first meta-analysis that tests the generality of
-the "law of $1/n$". We have selected 29 articles that use quantitative methods
+the "law of $1/n$". We have selected `r length(unique(dat$id))` articles that use quantitative methods
 to analyse the impact of legislature size over government spending. We run two
-sets of models: the first group uses only the main estimates of each paper (42),
+sets of models: the first group uses only the main estimates of each paper (`r dim(dat)[1]`),
 while the second set includes all coefficients reported in our sample
-(142).\footnote{Although there are 29 papers in our review, we include 42
-coefficients in the restricted sample. This is because 13 articles report
+(`r dim(fulldat)[1]`).\footnote{Although there are `r length(unique(dat$id))` papers in our review, we include `r dim(dat)[1]`
+coefficients in the restricted sample. This is because `r as.numeric(sum(table(table(dat$id))[-1]))` articles report
 separate estimates for the impact of lower and upper house size on government
 expenditures. In the full model, we add every outcome reported in the
 papers, regardless of whether the coefficient comes from the main tables or
