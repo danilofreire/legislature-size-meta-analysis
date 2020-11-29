@@ -216,12 +216,6 @@ build_forest_het <- function(mod, capt, lsize = 22, ttl = NULL, hetvar = NULL) {
           panel.grid.major = element_blank())
   return(p)
 }
-
-dat$scoefnd <- as.character(dat$scoef)
-dat$scoefnd[dat$scoefsig=='Positive'&dat$scoef=='Positive'&!is.na(dat$scoefsig)] = 'Positive Significant'
-dat$scoefnd[dat$scoefnd=='Positive'] = 'Positive Insignificant'
-dat$scoefnd[dat$scoefsig=='Negative'&dat$scoef=='Negative'&!is.na(dat$scoefsig)] = 'Negative Significant'
-dat$scoefnd[dat$scoefnd=='Negative'] = 'Negative Insignificant'
 ```
 
 [^huzeyfe]: Research Associate, Contemporary Brazilian History Research and Documentation Center, School of Social Sciences, Fundação Getulio Vargas, <huzeyfealptekin@gmail.com>.
@@ -323,39 +317,40 @@ diagram showing the number of resulting papers after each review step is
 available in the Supplementary Material.
 
 \footnotesize
-\begin{longtable}{>{\raggedright\arraybackslash}p{2.9cm}>{\raggedright\arraybackslash}p{4.2cm}>{\centering\arraybackslash}p{1.3cm}>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{1.4cm}>{\centering\arraybackslash}p{2.5cm}}
-\caption{Papers included in the meta-analysis, listed alphabetically by last name}\\
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.9cm}>{\raggedright\arraybackslash}p{4.5cm}>{\centering\arraybackslash}p{1.3cm}>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{1.4cm}>{\centering\arraybackslash}p{2.4cm}}
+\caption{Papers included in the meta-analysis, listed year of appearance}\\
 \toprule
 \raggedright Author(s) & \centering Title & \centering Journal & \centering Year & \centering Country & \centering Method & \raggedleft Electoral System
 \tabularnewline
 \midrule
 \endhead
-R. Baqir & Districts, Spillovers, and Government Overspending & Unpub. & 1999 & USA & OLS & M\\
-R. Baqir & Districting and Government Overspending & JPE & 2002 & USA & OLS & M\\
-T. Baskaran & Coalition Governments, Cabinet Size, and the Common Pool Problem: Evidence from the German States & EJPE & 2013 & DEU & IV & NM\\
-\begin{tabular}[t]{@{}l@{}}T. Bjedov,\\ S. Lapointe \& \\T. Madiès \end{tabular} & The Impact of Within-Party and Between-Party Ideological Dispersion on Fiscal Outcomes: Evidence from Swiss Cantonal Parliaments & PC & 2014 & CHE & Panel & NM\\
-\begin{tabular}[t]{@{}l@{}}J. Bradbury \& \\ M. Crain\end{tabular} & Legislative Organization and Government Spending: Cross-Country Evidence & JPubE & 2001 & Multiple (37) & Panel & NM\\
-\begin{tabular}[t]{@{}l@{}}J. Bradbury \& \\ E. F. Stephenson\end{tabular} & Spatially Targeted Government Spending and Heterogeneous Constituent Cost Shares & JPriE & 2009 & USA & OLS & M\\
-\begin{tabular}[t]{@{}l@{}}J. Chen \& \\ N. Malhotra\end{tabular} & The Law of 1/K: The Effect of Chamber Size on Government Spending in Bicameral Legislatures & APSR & 2007 & USA & OLS & M\\
-\begin{tabular}[t]{@{}l@{}}G. Crowley\end{tabular} & The Law of 1/N Revisited: Distributive Politics, Legislature Size, and the Costs of Collective Action &  SEJ & 2019 & USA & Panel & M\\
-\begin{tabular}[t]{@{}l@{}}J. Drew \& \\ B. Dollery\end{tabular} & The Price of Democracy? Political Representation Structure and Per Capita Expenditure in Victorian Local Government & UAR & 2017 & AUS & Panel & NM\\
-\begin{tabular}[t]{@{}l@{}}H. A. Erler\end{tabular} & Legislative Term Limits and State Spending & PC & 2007 & USA & Panel & M\\
-\begin{tabular}[t]{@{}l@{}}N. Fiorino \& \\ R. Ricciuti\end{tabular} & Legislature Size and Government Spending in Italian Regions: Forecasting the Effects of a Reform & PC & 2007 & ITA & IV & NM\\
-\begin{tabular}[t]{@{}l@{}}D. Höhmann\end{tabular} & The Effect of Legislature Size on Public Spending: Evidence from a Regression Discontinuity Design & PC & 2017 & DEU & RDD & NM\\
-\begin{tabular}[t]{@{}l@{}}A. Kessler\end{tabular} & Communication in Federal Politics: Universalism, Policy Uniformity, and the Optimal Allocation of Fiscal Authority & JPE & 2014 & USA & Panel & M\\
-\begin{tabular}[t]{@{}l@{}}D. Lee\end{tabular} & Supermajority Rule and Bicameral Bargaining & PC & 2016 & USA & Panel & M\\
-\begin{tabular}[t]{@{}l@{}}D. Lee \& \\ S. Park\end{tabular} & Court-Ordered Redistricting and the Law of 1/N & PC & 2018 & USA & Panel & M\\
-\begin{tabular}[t]{@{}l@{}}B. Lewis\end{tabular} & Legislature Size, Local Government Expenditure and Taxation, and Public Service Access in Indonesia & SCID & 2019 & IDN & RDD & NM\\
-\begin{tabular}[t]{@{}l@{}}V. Lledo\end{tabular} & Electoral Systems, Legislative Fragmentation and Public Spending: A Comparative Analysis of Brazilian States & Unpub. & 2003 & BRA & OLS & NM\\
-\begin{tabular}[t]{@{}l@{}}L. MacDonald\end{tabular} & The Impact of Government Structure on Local Public Expenditures & PC & 2008 & USA & OLS & M\\
-\begin{tabular}[t]{@{}l@{}}B. Maldonado\end{tabular} & Legislature, Leaders, and Leviathans: How Constitutional Institutions Affect the Size of Government Spending & SSQ & 2013 & Multiple (92) & OLS & NM\\
-\begin{tabular}[t]{@{}l@{}}J. Matsusaka\end{tabular} & The Endogeneity of the Initiative: A Comment on Marschall and Ruhil & SPPQ & 2005 & USA & IV & M\\
-\begin{tabular}[t]{@{}l@{}}B. Mukherjee\end{tabular} & Political Parties and the Size of Government in Multiparty Legislatures: Examining Cross-Country and Panel Data Evidence & CPS & 2003 & Multiple (110) & Panel & NM\\
-\begin{tabular}[t]{@{}l@{}}P. Pettersson-Lidbom\end{tabular} & Does the Size of the Legislature Affect the Size of Government? Evidence from Two Natural Experiments & JPubE & 2012 & FIN \& SWE & RDD & NM\\
-\begin{tabular}[t]{@{}l@{}}D. Primo\end{tabular} & Stop Us before We Spend Again: Institutional Constraints on Government Spending & E\&P & 2006 & USA & Panel & M\\
-\begin{tabular}[t]{@{}l@{}}R. Ricciuti\end{tabular} & Legislature Size, Bicameralism and Government Spending: Evidence from Democratic Countries & Unpub. & 2004 & Multiple (75) & OLS & NM\\
-\begin{tabular}[t]{@{}l@{}}C. Schaltegger \& \\ L. Feld\end{tabular} & Do Large Cabinets Favor Large Governments? Evidence on the Fiscal Commons Problems for Swiss Cantons & JPubE & 2009 & CHE & Panel & NM\\
-\begin{tabular}[t]{@{}l@{}}E. Stein,\\ E. Talvi \& \\ A. Grisanti\end{tabular} & Institutional Arrangements and Fiscal Performance: The Latin American Experience & Unpub. & 1998 & Multiple (26) & OLS & NM\\ [1ex]
+```{r, echo = FALSE, results = 'asis'}
+build_nams <- function(x) {
+  x_ <- unlist(strsplit(as.character(x), ' & ', fixed = T, useBytes = T))
+  if(length(x_) == 1) return(x_)
+  else {
+    aux <- x_[1]
+      for (i in 2:length(x_))
+        if (i == length(x_)){
+          aux <- paste(aux, ' \\& \\\\ ', x_[i], sep = '')
+        } else {
+          aux <- paste(aux, ',\\\\ ', x_[i], sep = '')
+        }
+  }
+  return(paste('\\begin{tabular}[t]{@{}l@{}}', aux,'\\end{tabular}', 
+                   sep = ''))
+}
+aux <- dat %>%
+  select(authorCite, title, journalCode, year, locationISO, method, elecsys3) %>%
+  unique() %>%
+  arrange(year)
+for (i in 1:dim(aux)[1]) {
+  cat(paste(build_nams(aux$authorCite[i]), ' & ', aux$title[i], ' & ',
+      aux$journalCode[i], ' & ', aux$year[i], ' & ', 
+      aux$locationISO[i], ' & ', aux$method[i], ' & ', 
+      aux$elecsys3[i], ' \\\\ [0.5ex]', sep = ''), '\n')
+}
+```
 \bottomrule
 \label{tab:papers}
 \begin{minipage}{\textwidth}
@@ -367,8 +362,7 @@ JPubE$=$Journal of Public Economics, JPriE$=$Journal of Private Enterprise,
 APSR$=$American Political Science Review, SEJ$=$Southern Economic Journal,
 UAR$=$Urban Affairs Review, SCID$=$Studies in Comparative International
 Development, SSQ$=$Social Science Quarterly, SPPQ$=$State Politics and Policy
-Quarterly, CPS$=$Comparative Political Studies, E\&P$=$Economics and Politics,
-OLS$=$Ordinary least squares, IV$=$Instrumental variables, Panel$=$Panel data/fixed effects, RDD$=$Regression discontinuity design, M$=$Majoritarian, NM$=$Non-majoritarian (mixed or proportional representation). Country codes follow the ISO 3166-1 alpha-3 international standard.}
+Quarterly, CPS$=$Comparative Political Studies, RivPE$=$Rivista di Politica Economica, E\&P$=$Economics and Politics, NTJ$=$National Tax Journal, OLS$=$Ordinary least squares, IV$=$Instrumental variables, Panel$=$Panel data/fixed effects, RDD$=$Regression discontinuity design, M$=$Majoritarian, NM$=$Non-majoritarian (mixed or proportional representation). Country codes follow the ISO 3166-1 alpha-3 international standard.}
 \end{minipage}
 \end{longtable}
 
@@ -376,22 +370,22 @@ OLS$=$Ordinary least squares, IV$=$Instrumental variables, Panel$=$Panel data/fi
 
 Our study sample reflects the development of the literature. Although the "law
 of $1/n$" was first formulated in 1981, the empirical assessment of the theory
-only started a few years later, as dates of publishing range from 1998 to 2019. 
+only started a few years later, as dates of publishing range from `r min(dat$year)` to `r max(dat$year)`. 
 
-Most studies focus on the United States (12), but our sample also contains
-papers on Australia (1), Brazil (1), Germany (2), Indonesia (1), Italy (1), and
-Switzerland (2). Five articles use cross-national data and analyse from 2 to 110
+Most studies focus on the United States (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='USA')])`), but our sample also contains
+papers on Australia (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='AUS')])`), Brazil (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='BRA')])`), Germany (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='DEU')])`), Indonesia (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='IDN')])`), Italy (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='ITA')])`), and
+Switzerland (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='CHE')])`). Five articles use cross-national data and analyse from 2 to 110
 countries. 
 
-Regarding the dependent variables included in the sample, 13 studies employ
-public expenditure per capita, 7 papers use its natural logarithm, and 8 of them
+Regarding the dependent variables included in the sample, `r as.numeric(table(unique(dat[,c('id','depvar2')])$depvar2)[which(names(table(unique(dat[,c('id','depvar2')])$depvar2))=='ExpPC')])` studies employ
+public expenditure per capita, `r as.numeric(table(unique(dat[,c('id','depvar2')])$depvar2)[which(names(table(unique(dat[,c('id','depvar2')])$depvar2))=='logExpPC')])` papers use its natural logarithm, and `r as.numeric(table(unique(dat[,c('id','depvar2')])$depvar2)[which(names(table(unique(dat[,c('id','depvar2')])$depvar2))=='PCTGDP')])` of them
 analyse the impact of legislature size on public expenditures as a percentage of
 GDP. This indicates that the area has refined the original formulation of $1/n$
 suggested by \citet{weingast1981political} and tested the impact of larger
 legislatures on different measures of government spending. Our independent
-variables of interest are $n$, lower chamber size (21), ($\log(n)$), the natural
-logarithm of lower chamber size (6), and $k$, which represents upper chamber
-size (9).
+variables of interest are $n$, lower chamber size (`r as.numeric(table(dat$indepvar2)[which(names(table(dat$indepvar2))=='N')])`), ($\log(n)$), the natural
+logarithm of lower chamber size (`r as.numeric(table(dat$indepvar2)[which(names(table(dat$indepvar2))=='logN')])`), and $k$, which represents upper chamber
+size (`r as.numeric(table(dat$indepvar2)[which(names(table(dat$indepvar2))=='K')])`).
 
 We also coded four moderators that may help us understand the heterogeneity in
 the reported results. We included them in our meta-regressions alongside an
@@ -416,12 +410,12 @@ includes only the most rigorous model from each paper, that is, those estimated
 with the largest $n$, most control variables, and fixed effects if the authors
 added them. If the article employed a regression discontinuity design, we chose
 the coefficient from the optimal bandwidth or from the intermediate one. This
-sample encompasses 36 estimates, as 10 articles analysed two dependent or
+sample encompasses `r dim(dat)[1]` estimates, as `r as.numeric(sum(table(table(dat$id))[-1]))` articles analysed two dependent or
 independent variables of interest \citep{baqir1999districts, bjedov2014impact,
 bradbury2001legislative, chen_malhotra_2007, crowley2019law,
 lee2016supermajority, lee2018court, maldonado2013legislatures, primo2006stop,
-ricciuti2003trading}. Our second sample, in contrast, contains all the 126 effect
-sizes reported in the 26 papers. Here we focus on the results for our restricted
+ricciuti2003trading}. Our second sample, in contrast, contains all the `r dim(fulldat)[1]` effect
+sizes reported in the `r length(unique(dat$id))` papers. Here we focus on the results for our restricted
 sample as we consider them more robust, but the findings are very similar when
 we use the extended set. We discuss eventual differences in the next section.
 Please refer to the Supplementary Material for further information about our
