@@ -403,6 +403,67 @@ variables.
 
 \vspace{.5cm}
 
+```{r, echo = FALSE, results='hide', warning=FALSE, message=FALSE}
+fulldat$usemeta2 <- factor(fulldat$usemeta)
+levels(fulldat$usemeta2) <- c("Other Coefficients", "Main Coefficients")
+fulldat$usemeta2 <- as.character(fulldat$usemeta2)
+fulldat$usemeta2 <- factor(fulldat$usemeta2)
+aux <- select(fulldat, usemeta2, indepvar2, year, published,
+              elecsys2, method) %>%
+  rename(`Independent Variables` = indepvar2,
+         `Year` = year,
+         `Published work` = published,
+         `Electoral system` = elecsys2,
+         `Estimation method` = method)
+
+res <- export2latex(
+  descrTable(~.-usemeta2, aux, y = aux$usemeta2,
+             show.p.overall = F, show.all = T, all.last = T), 
+  caption = 'Descriptive Statistics of Moderators\\label{tab:descriptive}'
+)
+res <- gsub(pattern = '\\[ALL\\]', 'All Coefficients', res$desc, useBytes = T)
+cat(res)
+```
+
+\begin{longtable}{lccc}\caption{Descriptive Statistics of Moderators\label{tab:descriptive}}\\
+\hline  
+& Main Coefficients & Other Coefficients &    All Coefficients   \\ 
+&       N=42        &       N=100        &    N=142    \\
+\hline
+\hline     
+\endfirsthead 
+\multicolumn{4}{l}{\tablename\ \thetable{} \textit{-- continued from previous page}}\\ 
+\hline
+& Main Coefficients & Other Coefficients &    All Coefficients   \\ 
+&       N=42        &       N=100        &    N=142    \\ 
+\hline
+\hline  
+\endhead   
+\hline
+\multicolumn{4}{l}{\textit{continued on next page}} \\ 
+\endfoot   
+\multicolumn{4}{l}{}  \\ 
+\endlastfoot 
+Independent Variables: &                   &                    &            \\ 
+$\qquad$K &    12 (28.6\%)     &     33 (33.0\%)     & 45 (31.7\%) \\ 
+$\qquad$N &    24 (57.1\%)     &     55 (55.0\%)     & 79 (55.6\%) \\ 
+$\qquad$logN &     6 (14.3\%)     &     12 (12.0\%)     & 18 (12.7\%) \\ 
+Year &    2009 (6.56)    &    2008 (5.82)     & 2008 (6.04)\\ 
+Published work: &                   &                    &            \\ 
+$\qquad$Yes &    36 (85.7\%)     &     93 (93.0\%)     & 129 (90.8\%)\\ 
+$\qquad$No &     6 (14.3\%)     &     7 (7.00\%)      & 13 (9.15\%) \\ 
+Electoral system: &                   &                    &            \\ 
+$\qquad$Majoritarian &    22 (52.4\%)     &     46 (46.0\%)     & 68 (47.9\%) \\ 
+$\qquad$Non-Majoritarian &    20 (47.6\%)     &     54 (54.0\%)     & 74 (52.1\%) \\ 
+Estimation method: &                   &                    &            \\ 
+$\qquad$OLS &    11 (26.2\%)     &     36 (36.0\%)     & 47 (33.1\%) \\ 
+$\qquad$PANEL &    23 (54.8\%)     &     51 (51.0\%)     & 74 (52.1\%) \\ 
+$\qquad$IV &     5 (11.9\%)     &     7 (7.00\%)      & 12 (8.45\%) \\ 
+$\qquad$RDD &     3 (7.14\%)     &     6 (6.00\%)      &  9 (6.34\%)  \\ 
+ 
+\hline
+\end{longtable}
+
 Since most selected articles have more than one effect size, the observations
 in our dataset are not independent. To reduce the impact of multicollinearity,
 we estimate the models using two sets of study coefficients. The first group
