@@ -504,19 +504,28 @@ variables are public expenditure per capita, the natural logarithm of public
 expenditure per capita, and government expenditure as a percentage of GDP. Since
 the outcomes have different scales, we treat them separately in our models.
 
+```{r, cache=TRUE, echo = FALSE}
+aux <- filter(dat, indepvar2 == "N")
+binN <- binom.test(table(aux$scoef)[2], sum(table(aux$scoef)), p = 0.5)
+aux <- filter(dat, indepvar2=='K')
+binK <- binom.test(table(aux$scoef)[2], sum(table(aux$scoef)), p=0.5)
+aux <- filter(dat, indepvar2 == "logN")
+binlogN <- binom.test(table(aux$scoef)[2], sum(table(aux$scoef)), p = 0.5)
+```
+
 The binomial z-test evaluates whether the coefficient of our independent
 variables are positive or negative. The null hypothesis here states that the
 sign of the coefficient is equally likely to be positive or negative. We start
 with $n$, lower house size. Our results indicate that there is no correlation
 between the number of legislators in the lower house and public expenditure 
-(successes = 10, trials = 21, $p_{success} = 0.476$, 95\% CI = [0.257; 0.702],
-$p$-value = 1). Note that the "law of $1/n$" suggests that there is a positive
+(successes = `r as.numeric(binN$statistic)`, trials = `r as.numeric(binN$parameter)`, $p_{success} = $ `r round(as.numeric(binN$estimate), 3)`, 95\% CI = [`r round(as.numeric(binN$conf.int[1]), 3)`; `r round(as.numeric(binN$conf.int[2]), 3)`],
+$p$-value = `r round(as.numeric(binN$p.value), 3)`). Note that the "law of $1/n$" suggests that there is a positive
 association between both. The binomial test for log($n$) also shows a
-non-statistically significant result (successes = 5, trials = 6, $p_{success} =
-0.833$, 95\% CI = [0.359; 0.996], $p$-value = 0.219). In contrast, we find a
+non-statistically significant result (successes = `r as.numeric(binlogN$statistic)`, trials = `r as.numeric(binlogN$parameter)`, $p_{success} = $ `r round(as.numeric(binlogN$estimate), 3)`, 95\% CI = [`r round(as.numeric(binlogN$conf.int[1]), 3)`; `r round(as.numeric(binlogN$conf.int[2]), 3)`],
+$p$-value = `r round(as.numeric(binlogN$p.value), 3)`). In contrast, we find a
 positive result for the number of legislators in the upper house ($k$), which is
-in line with the mainstream literature (successes = 8, trials = 9, $p_{success}
-= 0.889$, 95\% CI = [0.518; 0.997], $p$-value = 0.039). 
+in line with the mainstream literature (successes = `r as.numeric(binK$statistic)`, trials = `r as.numeric(binK$parameter)`, $p_{success} = $ `r round(as.numeric(binK$estimate), 3)`, 95\% CI = [`r round(as.numeric(binK$conf.int[1]), 3)`; `r round(as.numeric(binK$conf.int[2]), 3)`],
+$p$-value = `r round(as.numeric(binK$p.value), 3)`). 
 
 ## Meta-Analysis
 \label{sub:Meta-Analysis}
@@ -529,7 +538,7 @@ between log($n$), and public expenditure per capita and between $k$ and the
 logarithm of public expenditure per capita.
 
 Figure \ref{fig:plots} shows the forest plots for our restricted sample, the one
-which includes only the main 36 coefficients for the 26 selected papers. On the
+which includes only the main `r dim(dat)[1]` coefficients for the `r length(unique(dat$id))` selected papers. On the
 left side of the plots are the name of the study authors and the paper
 publication year. For unpublished studies, we included the first year the paper
 was available online. The bars in the middle show the reported effect sizes and
@@ -538,24 +547,130 @@ of the lines represent the precision of the estimates. The red line at the
 bottom of the figures displays the aggregate coefficients plus their respective
 confidence intervals.
 
+```{r, echo = FALSE, message = FALSE, warning = FALSE, cache=TRUE}
+mod <- list()
+# Pooling effects analysis -- ExpPC x N
+aux <- dat %>%
+  filter(indepvar2 == 'N',
+         depvar2 == 'ExpPC')
+
+mod[[1]] <- metagen(coef, SE, data=aux,
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
+
+# Pooling effects analysis -- ExpPC x K
+aux <- dat %>%
+  filter(indepvar2 == 'K',
+         depvar2 == 'ExpPC')
+
+mod[[2]] <- metagen(coef, SE, data=aux,
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
+# Pooling effects analysis -- logExpPC x N
+aux <- dat %>%
+  filter(indepvar2 == 'N',
+         depvar2 == 'logExpPC')
+
+mod[[3]] <- metagen(
+  coef, SE, data=aux,
+  studlab=paste(authoryear),
+  comb.fixed = FALSE,
+  comb.random = TRUE,
+  method.tau = "REML",
+  hakn = TRUE,
+  prediction = TRUE,
+  sm="SMD"
+  )
+
+# Pooling effects analysis -- logExpPC x logN
+aux <- dat %>%
+  filter(indepvar2 == 'logN',
+         depvar2 == 'logExpPC')
+
+mod[[4]] <- metagen(coef, SE, data=aux,
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
+
+# Pooling effects analysis -- PCTGDP x N
+aux <- dat %>%
+  filter(indepvar2 == 'N',
+         depvar2 == 'PCTGDP')
+
+mod[[5]] <- metagen(coef, SE, data=aux,
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
+
+# Pooling effects analysis -- PCTGDP x logN
+aux <- dat %>%
+  filter(indepvar2 == 'logN',
+         depvar2 == 'PCTGDP')
+
+mod[[6]] <- metagen(
+  coef, SE, data=aux,
+  studlab=paste(authoryear),
+  comb.fixed = FALSE,
+  comb.random = TRUE,
+  method.tau = "REML",
+  hakn = TRUE,
+  prediction=TRUE,
+  sm="SMD"
+  )
+
+# Pooling effects analysis -- PCTGDP x K
+aux <- dat %>%
+  filter(indepvar2 == 'K',
+         depvar2 == 'PCTGDP')
+
+mod[[7]] <- metagen(coef, SE, data=aux,
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
+
+
+```
+
 The first column of the graph reports the results for $n$, lower chamber size.
 In the first model, which correlates $n$ and expenditure per capita, we find a
-standardised mean difference (SMD) of $-0.070$ and a standard error of $0.273$
-(studies = 12, 95\% CI = [-0.671; 0.531], $p$-value = 0.803, prediction interval
-= [-1.55; 1.41]). Therefore, we cannot reject the null hypothesis that the
+standardised mean difference (SMD) of `r round(mod[[1]]$TE.random,3)` and a standard error of `r round(mod[[1]]$seTE.random,3)`
+(studies = `r mod[[1]]$k`, 95\% CI = [`r round(mod[[1]]$lower.random,3)`; `r round(mod[[1]]$upper.random,3)`], $p$-value = `r round(mod[[1]]$pval.random,3)` , prediction interval
+= [`r round(mod[[1]]$lower.predict,3)`; `r round(mod[[1]]$upper.predict,3)`]). Therefore, we cannot reject the null hypothesis that the
 effect size is zero. The $I^2$ statistic, which quantifies the degree of
-heterogeneity among studies, is equal to 94.7\%. $I^2$ values above 75\%
+heterogeneity among studies, is equal to `r round(mod[[1]]$I2*100, 2)`\%. $I^2$ values above 75\%
 indicate very high study heterogeneity \citep{higgins2019cochrane}.
 
 We see similar results when we compare $n$ with log expenditure per capita. In
-this model, the average effect size is -0.07 and the standard deviation is
-0.059 (studies = 4, 95\% CI = [-0.256; 0.119], $p$-value = 0.328, prediction
+this model, the average effect size is `r round(mod[[3]]$TE.random,3)` and the standard error is
+`r round(mod[[3]]$seTE.random,3)` (studies = `r mod[[3]]$k`, 95\% CI = [`r round(mod[[3]]$lower.random,3)`; `r round(mod[[3]]$upper.random,3)`], $p$-value = `r round(mod[[3]]$pval.random,3)`, prediction
 interval = [-0.618; 0.481]; $I^2$ = 92.5\%). The coefficient is 
 statistically indistinguishable from zero.
 
 In our restricted sample, larger lower house size also does not increase
-government spending as a percentage of GDP (studies = 5, SMD = -0.008, SE =
-0.013, 95\% CI = [-0.045; 0.0285], $p$-value = 0.567, prediction interval =
+government spending as a percentage of GDP (studies = `r mod[[5]]$k`, SMD = `r round(mod[[5]]$TE.random,3)`, SE =
+`r round(mod[[5]]$seTE.random,3)`, 95\% CI = [`r round(mod[[5]]$lower.random,3)`; `r round(mod[[5]]$upper.random,3)`], $p$-value = `r round(mod[[5]]$pval.random,3)`, prediction interval =
 [-0.105; 0.089], $I^2$ = 87.1\%). We find a positive effect in our extended
 sample and the coefficient is statistically significant at the 10\% level
 (coefficients = 21, SMD = 0.008, SE = 0.004, 95\% CI = [-0.000; 0.016], $p$-value =
@@ -578,21 +693,21 @@ Next, we present the meta-analyses using log($n$), the logarithm of lower house
 size, as the main explanatory variable. We start with the relationship between
 log($n$) and the logarithm of expenditure per capita. The result is positive and
 statistically significant at 10\%, but the prediction interval encompasses zero
-(studies = 3, SMD = 0.184, SE = 0.06, 95\% CI = [-0.0738; 0.4425], $p$-value =
-0.0916, prediction interval = [-1.258; 1.627], $I^2$ = 85.9\%). Although the
+(studies = `r mod[[4]]$k`, SMD = `r round(mod[[4]]$TE.random,3)`, SE = `r round(mod[[4]]$seTE.random,3)`, 95\% CI = [`r round(mod[[4]]$lower.random,3)`; `r round(mod[[4]]$upper.random,3)`], $p$-value =
+`r round(mod[[4]]$pval.random,3)`, prediction interval = [-1.258; 1.627], $I^2$ = 85.9\%). Although the
 coefficient has the predicted sign, we should interpret the finding with caution
 as it does not replicate in our sample of 126 effect sizes.
 
 Our model that correlates log($n$) with public expenditures as a percentage of
 GDP fails to reach conventional levels of statistical significance (studies =
-3, SMD = 0.0203, SE = 1.677, 95\% CI = [-7.196; 7.237], $p$-value = 0.991,
+`r mod[[6]]$k`, SMD = `r round(mod[[6]]$TE.random,3)`, SE = `r round(mod[[6]]$seTE.random,3)`, 95\% CI = [`r round(mod[[6]]$lower.random,3)`; `r round(mod[[6]]$upper.random,3)`], $p$-value = `r round(mod[[6]]$pval.random,3)`,
 prediction interval = [-36.206; 36.246], $I^2$ = 96.1\%). The extended sample
 also gives us a null result.
 
 The third set of models uses $k$, upper house size, as the main independent
 variable. We find a positive correlation between $k$ and expenditure per capita
-and the coefficient is significant at a 10\% level (studies = 6, SMD = 10.613, SE
-= 5.148, 95\% CI = [-2.621; 23.848], $p$-value = 0.094, prediction interval =
+and the coefficient is significant at a 10\% level (studies = `r mod[[2]]$k`, SMD = `r round(mod[[2]]$TE.random,3)`, SE
+= `r round(mod[[2]]$seTE.random,3)`, 95\% CI = [`r round(mod[[2]]$lower.random,3)`; `r round(mod[[2]]$upper.random,3)`], $p$-value = `r round(mod[[2]]$pval.random,3)`, prediction interval =
 [-21.130; 42.357], $I^2$ = 79.4\%). But as with the other models, the prediction
 interval again includes zero. When we run the same analysis in the extended
 sample, we also see a significant coefficient yet a prediction interval that
@@ -601,8 +716,8 @@ $p$-value $<$ 0.0001, prediction interval = [-1.222; 15.654], $I^2$ = 77.7\%).
 
 Our last estimation analyses the relationship between $k$ and government
 spending as a percentage of GDP. The coefficient is not statistically
-significant, indicating a null effect (studies = 3, SMD = -0.003, SE =, 95\% CI
-= [-0.079; 0.074], $p$-value = 0.891, prediction interval = [-0.428; 0.423],
+significant, indicating a null effect (studies = `r mod[[7]]$k`, SMD = `r round(mod[[7]]$TE.random,3)`, SE = `r round(mod[[7]]$seTE.random,3)`, 95\% CI
+= [`r round(mod[[7]]$lower.random,3)`; `r round(mod[[7]]$upper.random,3)`], $p$-value = `r round(mod[[7]]$pval.random,3)`, prediction interval = [-0.428; 0.423],
 $I^2$ = 85.8\%). The result is very similar in the extended sample.
 
 In a nutshell, we find only weak evidence in favour of the "law of $1/n$".
@@ -723,7 +838,7 @@ the selected model.
 \label{sec:discussion}
 
 In this article, we assess the empirical validity of the "law of $1/n$". Based
-on a sample of 26 recent publications on the topic, our meta-analyses show that
+on a sample of `r length(unique(dat$id))` recent publications on the topic, our meta-analyses show that
 there is little evidence that an increase in the number of legislators has a
 significant effect on public expenditures. If such effect exists, it is likely
 driven by an increase in $k$, the size of the upper legislature, as suggested
