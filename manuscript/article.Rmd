@@ -650,7 +650,33 @@ mod[[7]] <- metagen(coef, SE, data=aux,
           prediction=TRUE,
           sm="SMD")
 
+# Full model - Pooling effects analysis -- PCTGDP x N
+aux <- fulldat %>%
+  filter(indepvar2 == 'N',
+         depvar2 == 'PCTGDP')
 
+mod[[8]] <- metagen(coef, SE, data = aux,
+          studlab = paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm = "SMD")
+
+# Full data - Pooling effects analysis -- ExpPC x K
+aux <- fulldat %>%
+  filter(indepvar2 == 'K',
+         depvar2 == 'ExpPC')
+
+mod[[9]] <- metagen(coef, SE, data=aux,
+          studlab=paste(authoryear),
+          comb.fixed = FALSE,
+          comb.random = TRUE,
+          method.tau = "REML",
+          hakn = TRUE,
+          prediction=TRUE,
+          sm="SMD")
 ```
 
 The first column of the graph reports the results for $n$, lower chamber size.
@@ -665,16 +691,16 @@ indicate very high study heterogeneity \citep{higgins2019cochrane}.
 We see similar results when we compare $n$ with log expenditure per capita. In
 this model, the average effect size is `r round(mod[[3]]$TE.random,3)` and the standard error is
 `r round(mod[[3]]$seTE.random,3)` (studies = `r mod[[3]]$k`, 95\% CI = [`r round(mod[[3]]$lower.random,3)`; `r round(mod[[3]]$upper.random,3)`], $p$-value = `r round(mod[[3]]$pval.random,3)`, prediction
-interval = [-0.618; 0.481]; $I^2$ = 92.5\%). The coefficient is 
+interval = [`r round(mod[[3]]$lower.predict,3)`; `r round(mod[[3]]$upper.predict,3)`]; $I^2$ = `r round(mod[[3]]$I2*100, 2)`\%). The coefficient is 
 statistically indistinguishable from zero.
 
 In our restricted sample, larger lower house size also does not increase
 government spending as a percentage of GDP (studies = `r mod[[5]]$k`, SMD = `r round(mod[[5]]$TE.random,3)`, SE =
 `r round(mod[[5]]$seTE.random,3)`, 95\% CI = [`r round(mod[[5]]$lower.random,3)`; `r round(mod[[5]]$upper.random,3)`], $p$-value = `r round(mod[[5]]$pval.random,3)`, prediction interval =
-[-0.105; 0.089], $I^2$ = 87.1\%). We find a positive effect in our extended
+[`r round(mod[[5]]$lower.predict,3)`; `r round(mod[[5]]$upper.predict,3)`], $I^2$ = `r round(mod[[5]]$I2*100, 2)`\%). We find a positive effect in our extended
 sample and the coefficient is statistically significant at the 10\% level
-(coefficients = 21, SMD = 0.008, SE = 0.004, 95\% CI = [-0.000; 0.016], $p$-value =
-0.058, prediction interval = [-0.026; 0.042], $I^2$ = 98.5\%). The 
+(coefficients = `r mod[[8]]$k`, SMD = `r round(mod[[8]]$TE.random,3)`, SE = `r round(mod[[8]]$seTE.random,3)`, 95\% CI = [`r round(mod[[8]]$lower.random,3)`; `r round(mod[[8]]$upper.random,3)`], $p$-value =
+`r round(mod[[8]]$pval.random,3)`, prediction interval = [`r round(mod[[8]]$lower.predict,3)`; `r round(mod[[8]]$upper.predict,3)`], $I^2$ = `r round(mod[[8]]$I2*100, 2)`\%). The 
 result supports the "law of 1/$n$", but the evidence is moderate
 as the prediction interval include zero.
 
@@ -694,31 +720,31 @@ size, as the main explanatory variable. We start with the relationship between
 log($n$) and the logarithm of expenditure per capita. The result is positive and
 statistically significant at 10\%, but the prediction interval encompasses zero
 (studies = `r mod[[4]]$k`, SMD = `r round(mod[[4]]$TE.random,3)`, SE = `r round(mod[[4]]$seTE.random,3)`, 95\% CI = [`r round(mod[[4]]$lower.random,3)`; `r round(mod[[4]]$upper.random,3)`], $p$-value =
-`r round(mod[[4]]$pval.random,3)`, prediction interval = [-1.258; 1.627], $I^2$ = 85.9\%). Although the
+`r round(mod[[4]]$pval.random,3)`, prediction interval = [`r round(mod[[4]]$lower.predict,3)`; `r round(mod[[4]]$upper.predict,3)`], $I^2$ = `r round(mod[[4]]$I2*100, 2)`\%). Although the
 coefficient has the predicted sign, we should interpret the finding with caution
-as it does not replicate in our sample of 126 effect sizes.
+as it does not replicate in our sample of `r dim(fulldat)[1]` effect sizes.
 
 Our model that correlates log($n$) with public expenditures as a percentage of
 GDP fails to reach conventional levels of statistical significance (studies =
 `r mod[[6]]$k`, SMD = `r round(mod[[6]]$TE.random,3)`, SE = `r round(mod[[6]]$seTE.random,3)`, 95\% CI = [`r round(mod[[6]]$lower.random,3)`; `r round(mod[[6]]$upper.random,3)`], $p$-value = `r round(mod[[6]]$pval.random,3)`,
-prediction interval = [-36.206; 36.246], $I^2$ = 96.1\%). The extended sample
+prediction interval = [`r round(mod[[6]]$lower.predict,3)`; `r round(mod[[6]]$upper.predict,3)`], $I^2$ = `r round(mod[[6]]$I2*100, 2)`\%). The extended sample
 also gives us a null result.
 
 The third set of models uses $k$, upper house size, as the main independent
 variable. We find a positive correlation between $k$ and expenditure per capita
 and the coefficient is significant at a 10\% level (studies = `r mod[[2]]$k`, SMD = `r round(mod[[2]]$TE.random,3)`, SE
 = `r round(mod[[2]]$seTE.random,3)`, 95\% CI = [`r round(mod[[2]]$lower.random,3)`; `r round(mod[[2]]$upper.random,3)`], $p$-value = `r round(mod[[2]]$pval.random,3)`, prediction interval =
-[-21.130; 42.357], $I^2$ = 79.4\%). But as with the other models, the prediction
+[`r round(mod[[2]]$lower.predict,3)`; `r round(mod[[2]]$upper.predict,3)`], $I^2$ = `r round(mod[[2]]$I2*100, 2)`\%). But as with the other models, the prediction
 interval again includes zero. When we run the same analysis in the extended
 sample, we also see a significant coefficient yet a prediction interval that
-contains zero (coefficients = 24, SMD = 7.216, SE = 1.342, 95\% CI = [4.440; 9.992],
-$p$-value $<$ 0.0001, prediction interval = [-1.222; 15.654], $I^2$ = 77.7\%).
+contains zero (coefficients = `r mod[[9]]$k`, SMD = `r round(mod[[9]]$TE.random,3)`, SE = `r round(mod[[9]]$seTE.random,3)`, 95\% CI = [`r round(mod[[9]]$lower.random,3)`; `r round(mod[[9]]$upper.random,3)`],
+$p$-value $<$ 0.001, prediction interval = [`r round(mod[[9]]$lower.predict,3)`; `r round(mod[[9]]$upper.predict,3)`], $I^2$ = `r round(mod[[9]]$I2*100, 2)`\%).
 
 Our last estimation analyses the relationship between $k$ and government
 spending as a percentage of GDP. The coefficient is not statistically
 significant, indicating a null effect (studies = `r mod[[7]]$k`, SMD = `r round(mod[[7]]$TE.random,3)`, SE = `r round(mod[[7]]$seTE.random,3)`, 95\% CI
-= [`r round(mod[[7]]$lower.random,3)`; `r round(mod[[7]]$upper.random,3)`], $p$-value = `r round(mod[[7]]$pval.random,3)`, prediction interval = [-0.428; 0.423],
-$I^2$ = 85.8\%). The result is very similar in the extended sample.
+= [`r round(mod[[7]]$lower.random,3)`; `r round(mod[[7]]$upper.random,3)`], $p$-value = `r round(mod[[7]]$pval.random,3)`, prediction interval = [`r round(mod[[7]]$lower.predict,3)`; `r round(mod[[7]]$upper.predict,3)`],
+$I^2$ = `r round(mod[[7]]$I2*100, 2)`\%). The result is very similar in the extended sample.
 
 In a nutshell, we find only weak evidence in favour of the "law of $1/n$".
 While some models do show a positive and statistically significant result, none
