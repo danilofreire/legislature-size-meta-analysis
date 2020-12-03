@@ -31,6 +31,7 @@ output:
     toc: no
     toc_depth: 3
     template: article-template.latex
+    md_extensions: +raw_attribute
 ---
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE, results='hide'}
@@ -709,7 +710,7 @@ as the prediction interval include zero.
 \begin{center}
 \caption{Forest Plots for the Relationship between Legislature Size and Government Spending (Reduced Sample)}
 \vspace{.3cm}
-\includegraphics[width=25cm,height=17cm]{meta-analysis.pdf}
+\includegraphics[width=25cm,height=17cm]{../graphs/graph1.pdf}
 \label{fig:plots}
 \end{center}
 \end{figure}
@@ -752,10 +753,23 @@ of the prediction intervals are totally positive or negative. The studies also
 have considerable heterogeneity, what indicates that the original coefficients
 do not point consistently towards the same direction.
 
+One reason why we have not detected any effects may be the identification strategy used to estimate the effects. On the one hand, OLS and Panel data models, require too many controls to make units comparable. On the other hand, these techniques are not as credible to estimate the causal effect of legislature size on public expenditures. Estimation methods such as Instrumental Variables, and Regression Discontinuity Design make the units comparable by employing natural and quasi-natural experiments. Figure \ref{fig:plots2} disentangle the estimation techniques for two models that there is broadly variation in the estimation method used: Lower House Size and Expenditure Per Capita (left) and Lower House Size and Log of Expenditure Per Capita (right).[XXXX DANILO CHECAR]
+
+\begin{figure}[htb!]
+\begin{center}
+\caption{Forest Plots for the Relationship between Legislature Size and Government Spending with Regression Method Heterogeneity (Restricted Sample)}
+\vspace{.3cm}
+\includegraphics[width=1\linewidth]{../graphs/graph2.pdf}
+\label{fig:plots2}
+\end{center}
+\end{figure}
+
+Instrumental variables has an interesting variation: from the four coefficients listed, two are positive and two are negative. Two of these four coefficients are significant, again one positive and one negative. The subgroup analysis present a SMD negative but insignificant. When using Regression discontinuity design, the results are uniformily negative. From three papers employing the technique on the natural logarithm of expenditure per capita, all find negative and significant effects. The number of studies, only three, is not enough to predict an overall negative result, but they point in the direction that better identification suggests a zero-to-negative impact of legislature size on expenditure, in support of the reverse "law of $1/n$".[XXXX DANILO CHECAR]
+
 ## Meta-Regressions
 \label{sub:regressions}
 
-In this section, we run a series of meta-regressions with 5 covariates that may
+In this section, we run a series of meta-regressions with five covariates that may
 account for differences across the selected papers. The first variable indicates
 whether the study uses $n$, log($n$) or $k$ as its main explanatory variable.
 The second variable shows the study publication year, which we included to
@@ -768,18 +782,188 @@ Our last covariate is a categorical variable indicating the statistical
 procedure used in the original models (panel data, instrumental variables,
 OLS, or regression discontinuity design).
 
-Table \ref{tab:regressions} presents the meta-regression results for our
+Table \ref{tabregressions} presents the meta-regression results for our
 restricted and extended samples. Each column represents one of the three
 measures of public spending we discuss in this paper. To reduce the risk of
 false positives in our analyses, we use permutation tests to calculate
 significance levels for the meta-regressions \citep{higgins2004controlling}.
 
-```latex
-\vspace{.5cm}
+```{r, echo = FALSE, warning = FALSE, message = FALSE, results = 'hide', cache = TRUE}
+res <- list()
+
+## Expenditure as percentage GDP -- Restricted
+mod <-  rma(yi = coef,
+              sei = SE,
+              data = dat,
+              method = "REML",
+              mods = ~indepvar2+year+published+elecsys2+method,
+              test = "knha",
+            subset = dat$depvar2=='PCTGDP',
+            slab = dat$authoryear)
+
+res[[1]] <- tibble(
+     ` ` = c("Intercept",
+             "Indepvar: N",
+             "Indepvar: logN",
+             "Year",
+             "Elecsys: Non-Majoritarian",
+             "Method: Panel"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  `T` = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4), ")"),
+  model = "PCTGDP"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 4)))
+
+## Expenditure as percentage GDP -- Extended
+mod <- rma(yi = coef,
+              sei = SE,
+              data = fulldat,
+              method = "REML",
+              mods = ~ indepvar2+year+published+elecsys2+method,
+              test = "knha",
+            subset = fulldat$depvar2=='PCTGDP',
+            slab = fulldat$authoryear)
+
+res[[2]] <- tibble(
+  ` ` = c("Intercept",
+          "Indepvar: N",
+          "Indepvar: logN",
+          "Year",
+          "Elecsys: Non-Majoritarian",
+          "Method: Panel"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  `T` = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
+  model = "PCTGDP - All coefs"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 3)))
+
+# Expenditure per capita - Restricted
+mod <-  rma(yi = coef,
+              sei = SE,
+              data = dat,
+              method = "REML",
+              mods = ~indepvar2+year+published+elecsys2+method,
+              test = "knha",
+            subset = dat$depvar2=='ExpPC',
+            slab = dat$authoryear,
+            control=list(maxiter=1000))
+
+res[[3]] <- tibble(
+  ` ` = c("Intercept",
+          "Indepvar: N",
+          "Year",
+          "Published: No",
+          "Elecsys: Non-Majoritarian",
+          "Method: Panel",
+          "Method: IV"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  `T` = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
+  model = "ExpPC"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 3)))
+
+# Expenditure per capita - Extended
+mod <- rma(yi = coef,
+              sei = SE,
+              data = fulldat,
+              method = "REML",
+              mods = ~ indepvar2+year+published+elecsys2+method,
+              test = "knha",
+            subset = fulldat$depvar2=='ExpPC',
+            slab = fulldat$authoryear)
+
+res[[4]] <- tibble(
+  ` ` = c("Intercept",
+          "Indepvar: N",
+          "Year",
+          "Published: No",
+          "Elecsys: Non-Majoritarian",
+          "Method: Panel",
+          "Method: IV"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  `T` = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
+  model = "ExpPC - All coefs"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 3)))
+
+# Log of Expenditure per capita - Restricted
+mod <- rma(yi = coef,
+              sei = SE,
+              data = dat,
+              method = "REML",
+              mods = ~indepvar2+year+published+elecsys2+method,
+              test = "knha",
+            subset = dat$depvar2=='logExpPC',
+            slab = dat$authoryear)
+
+res[[5]] <- tibble(
+   ` ` = c("Intercept",
+           "Indepvar: N",
+           "Year",
+           "Published: No",
+           "Method: Panel"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  `T` = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4 ), ")"),
+  model = "logExpPC"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 3)))
+
+# Log of Expenditure per capita - Extended
+mod <- rma(yi = coef,
+              sei = SE,
+              data = fulldat,
+              method = "REML",
+              mods = ~ indepvar2+year+published+elecsys2+method,
+              test = "knha",
+            subset = fulldat$depvar2=='logExpPC',
+            slab = fulldat$authoryear)
+
+res[[6]] <- tibble(
+  ` ` = c("Intercept",
+          "Indepvar: N",
+          "Year",
+          "Published: No",
+          "Method: Panel",
+          "Method: RDD"),
+  Estimate = mod[["beta"]],
+  SE = mod[["se"]],
+  `T` = mod[["zval"]],
+  `P-Value` = mod[["pval"]],
+  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
+              round(mod[["ci.ub"]], digits = 4), ")"),
+  model = "logExpPC - All coefs"
+) %>%
+  mutate_if(is.numeric, list(~round(., digits = 3)))
+strep <- function (x) {
+  ifelse(x<0.01, '***',ifelse(x<0.05,'**', ifelse(x<0.1,'*','')))
+}
+```
+
+```{=latex}
+\vspace{0.5cm}
 
 \begin{table}[htpb]
-\caption{Meta Regression Results}
-\label{tab:regressions}
+\caption{Meta Regression Results\label{tabregressions}}
 \footnotesize
 \centering
 \begin{tabular}{lcccccc}
@@ -789,37 +973,37 @@ significance levels for the meta-regressions \citep{higgins2004controlling}.
 \cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5} \cmidrule(l{3pt}r{3pt}){6-7}
 & Restricted & Extended & Restricted & Extended & Restricted & Extended \\
 \midrule
-Independent Variable: $N$ & -2.307 & -5.347 &  -0.280 &  -0.0577 &-0.009 & 0.003\\
-                          & (1.490)$\dagger$ & (0.929)*** & (0.162) & (0.073) & (0.005)$\dagger$ & (0.005)\\
+Independent Variable: $N$ & `r round(res[[3]][2,2],3)` & `r round(res[[4]][2,2],3)` & `r round(res[[5]][2,2],3)` & `r round(res[[6]][2,2],3)` & `r round(res[[1]][2,2],3)` & `r round(res[[2]][2,2],3)`\\
+                          & (`r round(res[[3]][2,3],3)`)`r strep(res[[3]][2,5])` & (`r round(res[[4]][2,3],3)`)`r strep(res[[4]][2,5])` & (`r round(res[[5]][2,3],3)`)`r strep(res[[5]][2,5])` & (`r round(res[[6]][2,3],3)`)`r strep(res[[6]][2,5])` & (`r round(res[[1]][2,3],3)`)`r strep(res[[1]][2,5])` & (`r round(res[[2]][2,3],3)`)`r strep(res[[2]][2,5])`\\
 %
-Independent Variable: log($N$) &  &  &  &  &-0.011& 0.002\\
-                               &  &  &  &  & (0.001) & (0.014)\\
+Independent Variable: log($N$) &  &  &  &  & `r round(res[[1]][3,2],3)` & `r round(res[[2]][3,2],3)`\\
+                               &  &  &  &  & (`r round(res[[1]][3,3],3)`)`r strep(res[[1]][3,5])` & (`r round(res[[2]][3,3],3)`)`r strep(res[[2]][3,5])`\\
 %
-Year & 0.059 & 0.152 &  0.004 &  0.004 &-0.000& -0.000\\
-     & (0.101) & (0.078)* & (0.013) & (0.006) & (0.001) & (0.001)\\
+Year & `r round(res[[3]][3,2],3)` & `r round(res[[4]][3,2],3)` & `r round(res[[5]][3,2],3)` & `r round(res[[6]][3,2],3)` & `r round(res[[1]][4,2],3)` & `r round(res[[2]][4,2],3)`\\
+     & (`r round(res[[3]][3,3],3)`)`r strep(res[[3]][3,5])` & (`r round(res[[4]][3,3],3)`)`r strep(res[[4]][3,5])` & (`r round(res[[5]][3,3],3)`)`r strep(res[[5]][3,5])` & (`r round(res[[6]][3,3],3)`)`r strep(res[[6]][3,5])` & (`r round(res[[1]][4,3],3)`)`r strep(res[[1]][4,5])` & (`r round(res[[2]][4,3],3)`)`r strep(res[[2]][4,5])`\\
 %
-Published: No &  &  & 0.200 &  0.103 & 0.0625 & 0.060\\
-              &  &  & (0.127) & (0.065) & (0.014)* & (0.016)*\\
+Published: No & `r round(res[[3]][4,2],3)` & `r round(res[[4]][4,2],3)` & `r round(res[[5]][4,2],3)` &  `r round(res[[6]][4,2],3)` &  & \\
+              & (`r round(res[[3]][4,3],3)`)`r strep(res[[3]][4,5])` & (`r round(res[[4]][4,3],3)`)`r strep(res[[4]][4,5])` & (`r round(res[[5]][4,3],3)`)`r strep(res[[5]][4,5])` & (`r round(res[[6]][4,3],3)`)`r strep(res[[6]][4,5])` &  & \\
 %
-Non-Majoritarian (PR \& Mixed) & 0.428 & 0.985 & &  & -2.055 & -2.169\\
-                               & (0.827) & (0.723)$\dagger$ & &  & (0.283)** & (0.166)***\\
+Non-Majoritarian (PR \& Mixed) & `r round(res[[3]][5,2],3)` & `r round(res[[4]][5,2],3)` & &  & `r round(res[[1]][5,2],3)` & `r round(res[[2]][5,2],3)` \\
+                               & (`r round(res[[3]][5,3],3)`)`r strep(res[[3]][5,5])` & (`r round(res[[4]][5,3],3)`)`r strep(res[[4]][5,5])` & &  & (`r round(res[[1]][5,3],3)`)`r strep(res[[1]][5,5])` & (`r round(res[[2]][5,3],3)`)`r strep(res[[2]][5,5])`\\
 %
-Method: Panel & 1.203 & -0.135 & 0.188 & -0.252 & 0.055 & 0.058\\
-              & (1.575) & (0.797) & (0.093) & (0.068)*** & (0.013)* & (0.017)*\\
+Method: Panel & `r round(res[[3]][6,2],3)` & `r round(res[[4]][6,2],3)` & `r round(res[[5]][5,2],3)` & `r round(res[[6]][5,2],3)` & `r round(res[[1]][6,2],3)` & `r round(res[[2]][6,2],3)`\\
+              & (`r round(res[[3]][6,3],3)`)`r strep(res[[3]][6,5])` & (`r round(res[[4]][6,3],3)`)`r strep(res[[4]][6,5])` & (`r round(res[[5]][5,3],3)`)`r strep(res[[5]][5,5])` & (`r round(res[[6]][5,3],3)`)`r strep(res[[6]][5,5])` & (`r round(res[[1]][6,3],3)`)`r strep(res[[1]][6,5])` & (`r round(res[[2]][6,3],3)`)`r strep(res[[2]][6,5])`\\
 %
-Method: IV & 1.317 & 0.186 &  &  &  & \\
-           & (1.807) & (0.802) &  &  &  & \\
+Method: IV & `r round(res[[3]][7,2],3)` & `r round(res[[4]][7,2],3)` &  &  &  & \\
+           & (`r round(res[[3]][7,3],3)`)`r strep(res[[3]][7,5])` & (`r round(res[[4]][7,3],3)`)`r strep(res[[4]][7,5])` &  &  &  & \\
 %
-Method: RDD &  &  &  &-0.285&  & \\
-            &  &  &  & (0.062)*** &  & \\
+Method: RDD &  &  &  & `r round(res[[6]][6,2],3)` &  & \\
+            &  &  &  & (`r round(res[[6]][6,3],3)`)`r strep(res[[6]][6,5])` &  & \\
 % 
-Intercept & -117.987 & -300.789 & -7.363 & -8.296 & 2.851 & 2.507\\
-          & (203.717) & (157.555)* & (25.458) & (12.037) & (1.778) & (2.467)$\dagger$\\
+Intercept & `r round(res[[3]][1,2],3)` & `r round(res[[4]][1,2],3)` & `r round(res[[5]][1,2], 3)` & `r round(res[[6]][1,2], 3)` & `r round(res[[1]][1,2], 3)` & `r round(res[[2]][1,2], 3)`\\
+          & (`r round(res[[3]][1,3],3)`)`r strep(res[[3]][1,5])` & (`r res[[4]][1,3]`)`r strep(res[[4]][1,5])` & (`r round(res[[5]][1,3],3)`)`r strep(res[[5]][1,5])` & (`r round(res[[6]][1,3],3)`)`r strep(res[[6]][1,5])` & (`r round(res[[1]][1,3],3)`)`r strep(res[[1]][1,5])` & (`r round(res[[2]][1,3],3)`)`r strep(res[[2]][1,5])`\\
 \bottomrule
 \end{tabular}
 \begin{minipage}{\textwidth}
 \renewcommand{\footnoterule}{}
-\footnotetext{\textbf{Note:} {The restricted and extended samples include 36 and 126 study coefficients, respectively. We report the results from the permutation tests. Reference categories: Independent Variable $= k$; Published $= Yes$; Non-Majoritarian (PR \& Mixed) $= Majoritarian$; Method $= OLS$. Significance codes: *** $p < 0.001$; ** $p < 0.01$; * $p < 0.05$; $\dagger$ $p < 0.1$.}}
+\footnotetext{\textbf{Note:} {The restricted and extended samples include `r length(dat$id)` and `r length(fulldat$id)` study coefficients, respectively. We report the results from the permutation tests. Reference categories: Independent Variable $= k$; Published $= Yes$; Non-Majoritarian (PR \& Mixed) $= Majoritarian$; Method $= OLS$. Significance codes: *** $p < 0.01$; ** $p < 0.05$; * $p < 0.10$.}}
 \end{minipage}
 \end{table}
 ```
@@ -883,7 +1067,9 @@ between legislature size and public expenditure \citep{primo2008distributive,
 baqir2002districting, bradbury2003local}, have a substantial impact on the
 estimates. We find conflicting evidence for the former and no support for the
 latter. Moreover, different statistical techniques produce distinctive results,
-which authors should bear in mind.
+with better identified methods (IV and RDD), producing zero and negative effects more frequently.
+
+One may ask why we find no clear-cut evidence in favor or against the theory. The theory renders simple and testable empirical regularities in both of its forms, the "law of $1/n$" and the reverse "law of $1/n$." However, the empirical accessment is far from uniform in its findings. One reason may be the fact that the academic reward in social sciences for accumulating evidence is small, and most papers add features to their theory and further tests while acessing the "law of $1/n$". For instance, in our sample, papers added to the theory supermajority rules [@lee2015supermajority; @lee2016supermajority], redistricting [@baqir2002districting; @lee2018court], party ideology [@bjedov2014impact], coalition sizes [@baskaran2013coalition], term limits [@erler2007termlimits], bicameralism [@ricciuti2004legislature], the interplay between upper and lower houses [@chen_malhotra_2007], among others. This has the benefit of enriching the original theory with useful details, but has the disadvantage of providing less clear and decisive tests to the "law of $1/n$" theory. To solve this problem, we need more direct tests of the theory, preferably using well causally identified techniques, such as regression discontinuity design. [XXXX DANILO CHECAR]
 
 Our analyses suggest three areas for further research. First, our study sample
 did not include articles that evaluate the association between the log($n$) and
