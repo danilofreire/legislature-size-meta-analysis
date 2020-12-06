@@ -339,7 +339,7 @@ dat %>%
 
 ## Electoral System
 
-Our sample differs considerably in regards to research design. One remarkable difference is that several authors apply the logics of the _law of 1/n_, which was built with majoritarian systems in mind, to non-majoritarian democracies. In the sample, `r as.numeric(table(unique(select(dat, id, elecsys2))$elecsys2)[1])` of the papers study *Majoritarian* systems while `r as.numeric(table(unique(select(dat, id, elecsys2))$elecsys2)[2])` study *Non-Majoritarian* electoral systems.\footnote{Note that the argument for working in a non-majoritarian system, we need to assume that despite the fact that politicians are able to campaign in every place in the district, the votes are geographically concentrated. The concentration facilitates politicians to use pork-barrel projects to captivate their electoral supporters.}
+Our sample differs considerably in regards to research design. One remarkable difference is that several authors apply the logics of the _law of 1/n_, which was built with majoritarian systems in mind, to non-majoritarian democracies. In the sample, `r as.numeric(table(unique(select(dat, id, elecsys2))$elecsys2)[1])` of the papers study *Majoritarian* systems while `r as.numeric(table(unique(select(dat, id, elecsys2))$elecsys2)[2])` study *Non-Majoritarian* electoral systems.\footnote{Note that for the \textit{law of 1/n} to be valid in a non-majoritarian system, we need to assume that despite the fact that politicians are able to campaign in every place in the district, the votes are geographically concentrated. The concentration facilitates politicians to use pork-barrel projects to captivate their electoral supporters.}
 
 ```{r, fig.width=4, fig.height=3, fig.cap="Electoral Systems", cache=TRUE}
 dat %>%

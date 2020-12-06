@@ -238,19 +238,19 @@ legislature size and public expenditure. @weingast1981political provided the
 general framework to analyse distributive politics. The authors argue that the
 larger the number of legislative districts ($n$), the smaller the share of tax
 burden each one will bear ($1/n$), thus legislators have an incentive to
-overspend in their districts and transfer the costs to the entire polity. The
-first studies that assessed the "law of $1/n$", as the theory is currently
-known, mostly found a positive correlation between government spending and the
-number of legislature seats, although the effect was sometimes limited to the
-lower house [e.g., @baqir1999districts; @bradbury2001legislative;
-@gilligan1995deviations]. However, recent studies have questioned the validity
-of the theory. For instance, spending limits or strong executives may reduce
-the inefficiency of pork barrel projects [@chen_malhotra_2007; @primo2006stop].
-Moreover, @primo2008distributive affirm that, due to spatial spillovers, a
-collection of small districts can supply public goods more efficiently than the
-central government. The authors conclude that a "reverse law of $1/n$" may
-hold, wherein a higher number of legislators in small constituencies decrease
-the overall public spending. 
+overspend in their districts and transfer the costs to the entire polity.
+Most of the early studies which assessed the "law of $1/n$", as the theory is
+currently known, indeed found a positive correlation between the number of
+legislature seats and government spending, although the effect was sometimes
+limited to the lower house [e.g., @baqir1999districts;
+@bradbury2001legislative; @gilligan1995deviations]. However, recent research
+has questioned the validity of the theory. For instance, spending limits or
+strong executives may reduce the inefficiency of pork barrel projects
+[@chen_malhotra_2007; @primo2006stop]. Moreover, @primo2008distributive affirm
+that, due to spatial spillovers, a collection of small districts can supply
+public goods more efficiently than the central government. The authors conclude
+that a "reverse law of $1/n$" may hold, wherein a higher number of legislators
+in small constituencies decrease the overall public spending. 
 
 Our survey of the scholarship confirms this continuum of positive,
 insignificant, and negative results. Out of the `r dim(dat)[1]` coefficients included in our
