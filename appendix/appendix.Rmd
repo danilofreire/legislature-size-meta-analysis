@@ -15,6 +15,7 @@ spacing: double
 papersize: a4paper
 bibliography: references.bib
 biblio-style: apalike
+always_allow_html: true
 output:
   pdf_document:
     citation_package: natbib
@@ -29,7 +30,7 @@ output:
 
 [^alptekin]: Research Associate, Contemporary Brazilian History Research and Documentation Center, School of Social Sciences, Getulio Vargas Foundation, Brazil, <huzeyfealptekin@gmail.com>.
 
-[^freire]: Independent Researcher, <danilofreire@brown.edu>, <http://danilofreire.github.io>. Corresponding author.
+[^freire]: Independent Researcher, <danilofreire@gmail.com>, <http://danilofreire.github.io>. Corresponding author.
 
 [^mignozzetti]: Visiting Assistant Professor, Quantitative Theory and Methods, Emory University, <umberto.mignozzetti@emory.edu>, <http://umbertomig.com>.
 
@@ -435,8 +436,6 @@ dat %>%
 
 We chose a set of moderators that frequently appear in the literature and may help us interpret our results. We included them in our meta-regressions alongside an indicator for the type of independent variable used in the original study ($n$, log($n$), or $k$). The additional moderators are: 1) electoral system; 2) data aggregation level; 3) estimation method; 4) publication year; 5) paper publication in an academic journal. The table below presents descriptive statistics for these moderators in our selection of articles.
 
-\newpage
-
 ```{r, warning=F,message=F, cache=TRUE}
 fulldat$usemeta2 <- factor(fulldat$usemeta)
 levels(fulldat$usemeta2) <- c("Other Coefficients", "Main Coefficients")
@@ -561,8 +560,6 @@ Highlights:
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-\newpage
-
 ### Electoral System Subgroup Analysis
 
 The _law of 1/n_ was created for majoritarian systems. In the theoretical section below, we explain why the argument have potential issues when applied to non-majoritarian electoral systems. We estimated a subgroup analysis using a binary electoral system.
@@ -572,8 +569,6 @@ build_forest_het(mod, capt = NULL, hetvar = aux$elecsys2)
 ```
 
 Therefore, we can see that the hypothesis that majoritarian systems produce systematic positive effects was disproved. Both are non-significant, and they reassure us that the absense of effect is not caused by pooling multiple types of electoral systems.
-
-\newpage
 
 ## Log Lower House Size and Expenditure per Capita
 
@@ -616,8 +611,6 @@ Highlights:
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-\newpage
-
 ## Lower House Size and Log Expenditure Per Capita
 
 This model estimates the Log of Per Capita Expenditure as the dependent variable, and the number of lower house legislators as the treatment variable.
@@ -658,8 +651,6 @@ Highlights:
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-\newpage
-
 ## Log of Lower House Size and Log of Expenditure Per Capita
 
 In this specification, we study the log of per capita expenditure (logExpPC) as a function of the log of lower house size (logN).
@@ -696,8 +687,6 @@ Highlights:
 1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`). **This model is significant at the 10\% confidence level.**
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-
-\newpage
 
 ## Log of Upper House Size and Log of Expenditure Per Capita
 
@@ -740,8 +729,6 @@ Highlights:
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-\newpage
-
 ## Log Lower House Size and Expenditure as Percentage of GDP
 
 This model investigates the percentage of GDP as public expenditure as the dependent variable and the log lower house size (logN) as the treatment variable.
@@ -781,8 +768,6 @@ Highlights:
 1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-
-\newpage
 
 ## Upper House Size and Expenditure as Percentage of GDP
 
@@ -892,9 +877,7 @@ build_forest_het(mod, capt = NULL, hetvar = aux$method)
 
 Although all methods generate a null effect, the IV method seems to be well distributed, with two papers with positive effects and two papers negative displaying negative effects. The random effects model for the subgroup is 0.22, which is negative but non-significant. Improve the estimation technique, for the case of IVs, render still a null effect of legislature size on per capita government expenditure.
 
-\newpage
-
-## Lower House Size and Log of Expenditure per Capita (RDD Only)
+## Lower House Size and Log of Expenditure per Capita (RDD)
 
 ```{r, cache=TRUE}
 # Pooling effects analysis -- logExpPC x N (RDD only)
@@ -942,8 +925,6 @@ Highlights:
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-\newpage
-
 ### Regression Method Subgroup Analysis
 
 Over time, the literature evolved to use causally identified techniques for determine the effect of legislature size on the log of expenduture per capita. To study whether the method had an effect on the estimated coefficients, we fit a subgroup analysis using the method employed in each paper.
@@ -967,8 +948,6 @@ build_forest_het(mod, capt = NULL, hetvar = aux$method)
 
 For the RDD subgroup analysis, we can see a much clearer picture. All estimates are negative, and the subgroup effect is -0.11. This suggests that improving the estimation renders to a negative result that is likely to hold conditional on more papers using the technique displaying the same effect size and sign.
 
-\newpage
-
 # Code for the Main Graphs
 
 ## Figure 1
@@ -986,8 +965,6 @@ pdf('../graphs/graph2.pdf', width = 12, height = 6)
 ggarrange(f8, f9, align = 'hv')
 dev.off()
 ```
-
-\newpage
 
 # Meta-Analysis (All Coefficients)
 
@@ -1023,8 +1000,6 @@ Highlights:
 1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-
-\newpage
 
 ### Electoral System Subgroup Analysis
 
@@ -1080,8 +1055,6 @@ f8b
 
 Therefore, we see that majoritarian systems do not have a clear positive effect on budgetary spending. The majoritarian systems in the sample had a random effects model estimate of -0.25, while the random effects model in the non-majoritarian subgroup fitted a value of 0.08. Both are non-significant, but they reassure us that the absence of effect is not caused by pooling multiple types of electoral systems.
 
-\newpage
-
 ## Log of Lower House Size and Expenditure Per Capita
 
 There are no studies that have per capita expenditure as the dependent variable and log of lower house size as the treatment variable.
@@ -1119,8 +1092,6 @@ Highlights:
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-\newpage
-
 ## Lower House Size and Log of Expenditure Per Capita
 
 This model estimates the log of per capita expenditure as the dependent variable, and the number of lower house legislators as the treatment variable.
@@ -1154,8 +1125,6 @@ Highlights:
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-\newpage
-
 ## Log of Lower House Size and Log of Expenditure Per Capita
 
 In this specification, we study the log of per capita expenditure (logExpPC) as a function of the log of lower house size (logN).
@@ -1188,8 +1157,6 @@ Highlights:
 1. The results are highly heterogeneous: $I^2 = $ `r round(mod$I2*100, 2)`.
 2. The estimated SMD in the random effects model is $g = $ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`). **This model is significant at the 10\% confidence level.**
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-
-\newpage
 
 ## Upper House Size and Log of Expenditure Per Capita
 
@@ -1228,8 +1195,6 @@ Highlights:
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-\newpage
-
 ## Log of Lower House Size and Expenditure as Percentage of GDP
 
 This meta-regression investigates the percentage of GDP as public expenditure as the dependent variable and the natural logarithm of lower house size (log($N$)) as the treatment variable.
@@ -1262,8 +1227,6 @@ Highlights:
 1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-
-\newpage
 
 ## Upper House Size and Expenditure as Percentage of GDP
 
@@ -1331,7 +1294,7 @@ Highlights:
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-## Lower House Size and Log of Expenditure per Capita (RDD Only)
+## Lower House Size and Log of Expenditure per Capita (RDD)
 
 ```{r, cache=TRUE}
 # Pooling effects analysis -- ExpPC x N
@@ -1695,7 +1658,7 @@ mod5_permu <- tibble(
 mod5_permu %>%
   select(-model) %>%
   kable(booktabs = T,align = "c",linesep ='') %>%
-  kable_styling(c("striped","bordered","scale_down"), position = "center")
+  kable_styling(c("striped","bordered"), position = "center")
 ```
 
 We have the following results for the meta-regressions of Log of Expenditure Per Capita:
@@ -1764,83 +1727,9 @@ With all coefficients, the results of the effect sizes on the Log of Expenditure
 1. In terms of the modelling, passing from `OLS` to `PANEL` or `RDD` decreases the detected effects.
 2. All other coefficients remained insignificant.
 
-```{r, warning=F, error=F, message=F, cache=T}
-coefs <- tibble(
-  ` ` = c("Intercept",
-          "Indepvar: N",
-          "Indepvar: logN",
-          "Year",
-          "Published: No",
-          "Elecsys: Non-Majoritarian",
-          "Method: Panel",
-          "Method: IV",
-          "Method: RDD"))
+\newpage 
 
-aux <- list(mod3, mod5, mod1) %>%
-  map(~{
-    left_join(coefs, .x) %>%
-      mutate(model = ifelse(is.na(model), model[1], model))
-  }) %>%
-  reduce(bind_cols) %>%
-  mutate(
-         order = ifelse(` ` == "Intercept", 1, NA),
-         order = ifelse(` ` == "Indepvar: N", 2, order),
-         order = ifelse(` ` == "Indepvar: logN", 3, order),
-         order = ifelse(` ` == "Year", 4, order),
-         order = ifelse(` ` == "Published: No", 5, order),
-         order = ifelse(` ` == "Elecsys: Non-Majoritarian", 6, order),
-         order = ifelse(` ` == "Method: Panel", 7, order),
-         order = ifelse(` ` == "Method: IV", 8, order),
-         order = ifelse(` ` == "Method: RDD", 9, order)) %>%
-  filter(` ` != "Method: RDD") %>%
-  arrange(order) %>%
-  mutate_at(vars(contains("Value")), list(
-    ~(ifelse(is.na(.), " ", ifelse(. < 0.001, "***",
-                       ifelse(. < 0.01, "**",
-                              ifelse(. < 0.05, "*",
-                                     ifelse(. >= 0.05, " ",
-                                            ifelse(is.na(.), " ", .))))))))) %>%
-  mutate_at(vars(contains("Estimate") | contains("SE")),
-            list(~(ifelse(is.na(.), " ", .)))) %>%
-  select(-` 1`, -` 2`, -contains("model"), -order) %>%
-  mutate(mod = "Base") %>%
-  select(mod, everything())
-
-aux2 = list(mod4, mod6, mod2) %>%
-  map(~{
-    left_join(coefs, .x) %>%
-      mutate(model = ifelse(is.na(model), model[1], model))
-  }) %>%
-  reduce(bind_cols) %>%
-  mutate(
-         order = ifelse(` ` == "Intercept", 1, NA),
-         order = ifelse(` ` == "Indepvar: N", 2, order),
-         order = ifelse(` ` == "Indepvar: logN", 3, order),
-         order = ifelse(` ` == "Year", 4, order),
-         order = ifelse(` ` == "Published: No", 5, order),
-         order = ifelse(` ` == "Elecsys: Non-Majoritarian", 6, order),
-         order = ifelse(` ` == "Method: Panel", 7, order),
-         order = ifelse(` ` == "Method: IV", 8, order),
-         order = ifelse(` ` == "Method: RDD", 9, order)) %>%
-  arrange(order) %>%
-  mutate_at(vars(contains("Value")), list(
-    ~(ifelse(is.na(.), " ", ifelse(. < 0.001, "***",
-                       ifelse(. < 0.01, "**",
-                              ifelse(. < 0.05, "*",
-                                     ifelse(. >= 0.05, " ",
-                                            ifelse(is.na(.), " ", .))))))))) %>%
-  mutate_at(vars(contains("Estimate") | contains("SE")),
-            list(~ifelse(is.na(.), " ", .))) %>%
-  select(-` 1`, -` 2`, -contains("model"), -order) %>%
-  mutate(mod = "All Coefs") %>%
-  select(mod, everything())
-
-aux <- bind_rows(aux, aux2) %>%
-  select(-contains("CI"),-`T`,-T1,-T2)
-```
-
-
-# Robustness: Meta-Regressions with Our Complete Sample
+# Robustness: Meta-Regressions (All Coefficients)
 
 In this section, we aggregate all the coefficients and run a multivariate meta-regression, controlling for:
 
@@ -1887,6 +1776,8 @@ summary(mod)
 ```{r, cache=T}
 permutest(mod, progbar = F)
 ```
+
+\newpage 
 
 # Auxiliary Functions
 
@@ -2326,6 +2217,8 @@ for (i in 1:nrow(articles_links)) {
 
 write_csv(articles_links, "microsoft_academic_clean.csv")
 ```
+
+\newpage
 
 # Session Information
 
