@@ -29,7 +29,7 @@ output:
 
 [^alptekin]: Research Associate, Contemporary Brazilian History Research and Documentation Center, School of Social Sciences, Getulio Vargas Foundation, Brazil, <huzeyfealptekin@gmail.com>.
 
-[^freire]: Postdoctoral Research Associate, The Political Theory Project, Brown University, Providence, RI 02912, USA, <danilofreire@brown.edu>, <http://danilofreire.github.io>.
+[^freire]: Independent Researcher, <danilofreire@brown.edu>, <http://danilofreire.github.io>. Corresponding author.
 
 [^mignozzetti]: Visiting Assistant Professor, Quantitative Theory and Methods, Emory University, <umberto.mignozzetti@emory.edu>, <http://umbertomig.com>.
 
@@ -1498,7 +1498,7 @@ For all the coefficients, we have the following results:
 2. Year has a positive effect: the younger the publication, the higher the detected coefficient.
 3. Unpublished papers tend to have higher coefficients than published papers.
 4. Passing from `Majoritarian` to `Non-Majoritarian` significantly decreases the effects found in our models.
-5. In terms of the modeling, passing from `OLS` to `PANEL` increases the detected effects.
+5. Regarding statistical models, passing from `OLS` to `PANEL` increases the detected effects.
 
 ## Meta-Regressions for Expenditure Per Capita
 
@@ -1567,7 +1567,7 @@ We have the following results for the meta-regressions of Expenditure Per Capita
 1. Compared with `K`, models with `N` tend to detect significantly smaller effects.
 2. Year has null effect.
 3. `Majoritarian`, when compared to `Non-Majoritarian` electoral systems, significantly increase per capita expenditure.
-4. In terms of the modeling, passing from `OLS` to `PANEL` or `IV` increases the detected effects.
+4. Regarding statistical models, passing from `OLS` to `PANEL` or `IV` increases the detected effects.
 
 We also run the meta-regressions adding all coefficients in the papers. The results follow below:
 
@@ -1632,7 +1632,7 @@ With all coefficients, the results of the effect sizes on the Expenditure Per Ca
 1. Compared with `K`, models with `N` tend to detect significantly smaller effects.
 2. Year has now a positive effect on coefficient sizes.
 3. `Majoritarian`, when compared to `Non-Majoritarian` electoral systems, significantly increase per capita expenditure.
-4. In terms of the modeling, passing from `OLS` to `PANEL` decreases the detected effects.
+4. Regarding statistical models, passing from `OLS` to `PANEL` decreases the detected effects.
 5. All other coeffients were not significant.
 
 ## Meta-Regressions for the Log of Expenditure Per Capita
@@ -1701,7 +1701,7 @@ mod5_permu %>%
 We have the following results for the meta-regressions of Log of Expenditure Per Capita:
 
 1. Unpublished papers report significantly higher coefficients.
-2. In terms of the modeling, passing from `OLS` to `PANEL` increases the detected effects.
+2. Moving from `OLS` to `PANEL` increases the detected effects.
 3. All other coefficients remained insignificant.
 
 Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
@@ -1761,7 +1761,7 @@ mod6_permu <- tibble(
 
 With all coefficients, the results of the effect sizes on the Log of Expenditure Per Capita Regressions are the following:
 
-1. In terms of the modeling, passing from `OLS` to `PANEL` or `RDD` decreases the detected effects.
+1. In terms of the modelling, passing from `OLS` to `PANEL` or `RDD` decreases the detected effects.
 2. All other coefficients remained insignificant.
 
 ```{r, warning=F, error=F, message=F, cache=T}
@@ -1840,7 +1840,7 @@ aux <- bind_rows(aux, aux2) %>%
 ```
 
 
-# Robustness: Full Model Meta-Regressions
+# Robustness: Meta-Regressions with Our Complete Sample
 
 In this section, we aggregate all the coefficients and run a multivariate meta-regression, controlling for:
 

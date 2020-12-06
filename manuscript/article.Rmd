@@ -49,7 +49,7 @@ set.seed(732578) # From random.org
 
 # Needed packages
 pkgs <- c("tidyverse", "meta", "metafor",
-          "readxl", "compareGroups",
+          "readxl", "data.table",
           "knitr", "gridGraphics", "gridExtra",
           "ggpubr", "kableExtra", "magick")
 
@@ -61,9 +61,10 @@ installIfNot <- function(x) {
 }
 lapply(pkgs, installIfNot)
 
-# Load packs
+# Load packages
 lapply(pkgs, require, character.only = T)
-rm(pkgs, installIfNot)
+devtools::install_github("isubirana/compareGroups")
+library("compareGroups")
 
 # Load datasets
 load("../dataset/dataCoefs.RData")
@@ -233,24 +234,27 @@ build_forest_het <- function(mod, capt, lsize = 22, ttl = NULL, hetvar = NULL) {
 \label{sec:intro}
 
 Over the past decades, a large literature has examined the relationship between
-legislature size and public expenditure. \citet{weingast1981political} provided
-the general framework to analyse distributive politics. The authors argue that
-the larger the number of legislative districts ($n$), the smaller the share of
-tax burden each one will bear ($1/n$), thus legislators have an incentive to
-overspend in their districts and transfer the costs to the entire polity.
-However, recent studies have questioned the validity of the "law of $1/n$", as
-the theory is currently known. For instance, spending limits, strong executives,
-and bicameralism may reduce the inefficiency of pork barrel projects
-\citep{bradbury2009spatially,chen_malhotra_2007,primo2006stop}. Moreover,
-\citet{primo2008distributive} affirm that, due to spatial spillovers, a
+legislature size and public expenditure. @weingast1981political provided the
+general framework to analyse distributive politics. The authors argue that the
+larger the number of legislative districts ($n$), the smaller the share of tax
+burden each one will bear ($1/n$), thus legislators have an incentive to
+overspend in their districts and transfer the costs to the entire polity. The
+first studies that assessed the "law of $1/n$", as the theory is currently
+known, mostly found a positive correlation between government spending and the
+number of legislature seats, although the effect was sometimes limited to the
+lower house [e.g., @baqir1999districts; @bradbury2001legislative;
+@gilligan1995deviations]. However, recent studies have questioned the validity
+of the theory. For instance, spending limits or strong executives may reduce
+the inefficiency of pork barrel projects [@chen_malhotra_2007; @primo2006stop].
+Moreover, @primo2008distributive affirm that, due to spatial spillovers, a
 collection of small districts can supply public goods more efficiently than the
 central government. The authors conclude that a "reverse law of $1/n$" may
 hold, wherein a higher number of legislators in small constituencies decrease
-the overall public spending.
+the overall public spending. 
 
 Our survey of the scholarship confirms this continuum of positive,
 insignificant, and negative results. Out of the `r dim(dat)[1]` coefficients included in our
-selected articles, `r as.numeric(round(prop.table(table(dat$scoefnd))*100, 0)[which(names(prop.table(table(dat$scoefnd)))=='Positive Significant')])`\% of them are positive and statistically significant, `r as.numeric(round(prop.table(table(dat$scoefnd))*100, 0)[which(names(prop.table(table(dat$scoefnd)))=='Positive Insignificant')])`\%
+article sample, `r as.numeric(round(prop.table(table(dat$scoefnd))*100, 0)[which(names(prop.table(table(dat$scoefnd)))=='Positive Significant')])`\% of them are positive and statistically significant, `r as.numeric(round(prop.table(table(dat$scoefnd))*100, 0)[which(names(prop.table(table(dat$scoefnd)))=='Positive Insignificant')])`\%
 are positive and statistically insignificant, `r as.numeric(round(prop.table(table(dat$scoefnd))*100, 0)[which(names(prop.table(table(dat$scoefnd)))=='Negative Insignificant')])`\% are negative and
 statistically insignificant, and `r as.numeric(round(prop.table(table(dat$scoefnd))*100, 0)[which(names(prop.table(table(dat$scoefnd)))=='Negative Significant')])`\% are negative and statistically
 significant. Given this diversity of empirical findings, a systematic review of
@@ -261,39 +265,41 @@ into a single estimation and allows scholars to draw robust conclusions from the
 aggregated data \citep{cooper2019handbook,hedges1985statistical}. It can also
 identify potential sources of study heterogeneity, enabling researchers to
 assess threats to external validity and direct future efforts into more
-promising areas of academic inquiry \citep{doucouliagos2008democracy}.
+promising areas of academic inquiry [@doucouliagos2008democracy].
 
 In this letter, we conduct the first meta-analysis that tests the generality of
-the "law of $1/n$". We have selected `r length(unique(dat$id))` articles that use quantitative methods
-to analyse the impact of legislature size over government spending. We run two
-sets of models: the first group uses only the main estimates of each paper (`r dim(dat)[1]`),
-while the second set includes all coefficients reported in our sample
-(`r dim(fulldat)[1]`).\footnote{Although there are `r length(unique(dat$id))` papers in our review, we include `r dim(dat)[1]`
-coefficients in the restricted sample. This is because `r as.numeric(sum(table(table(dat$id))[-1]))` articles report
-separate estimates for the impact of lower and upper house size on government
-expenditures. In the full model, we add every outcome reported in the
-papers, regardless of whether the coefficient comes from the main tables or
-from robustness checks conducted by the original authors. We discuss our
-sampling process in the Methods section of this paper and in the Supplementary
-Material.} Our independent variables consist of three measures, namely the size
-of the lower chamber ($n$), its natural logarithm (log($n$)), and the number of
-members in the upper chamber ($k$). We evaluate their effect upon public
-expenditure per capita, the natural logarithm of public expenditure per capita,
-and government expenditure as a percentage of GDP. We then estimate if the
-results vary according to four potential sources of effect heterogeneity.
+the "law of $1/n$". We have selected `r length(unique(dat$id))` articles that
+use quantitative methods to assess the impact of legislature size over
+government spending across several dimensions. We run two sets of models: the
+first group uses only the main estimates of each selected paper (`r dim(dat)[1]`),
+while the second set includes all coefficients reported in our
+sample (`r dim(fulldat)[1]`).\footnote{Although there are `r length(unique(dat$id))`
+papers in our review, we include `r dim(dat)[1]`
+coefficients in the restricted sample. This is because `r as.numeric(sum(table(table(dat$id))[-1]))`
+articles report separate estimates
+for the impact of lower and upper house size on government expenditures. In the
+full model, we add every outcome reported in the papers, regardless of whether
+the coefficient comes from the main tables or from robustness checks. We
+discuss our sampling process in the Methods section and in the
+Supplementary Material.} Our independent variables consist of three measures,
+namely the size of the lower chamber ($n$), its natural logarithm (log($n$)),
+and the number of members in the upper chamber ($k$). We evaluate their effect
+upon public expenditure per capita, the natural logarithm of public expenditure
+per capita, and government expenditure as a percentage of GDP. We then estimate
+if the results vary according to four potential sources of effect
+heterogeneity.
 
 Aggregate results show that council size has no significant impact on public
 spending. However, the meta-regressions suggest that our study sample has high
-levels of heterogeneity, and effects differ substantially according to research
-design specifications. Whereas earlier studies employing convention spending
-regressions often find a positive relation between legislature size and
-government budgets, recent studies that use new methods of causal inference,
-specially those with regression discontinuity designs, provide consistent
-evidence for a negative relation. This goes in contrast with the original
-theory and supports the existence of a "reverse law of $1/n$".
-\textbf{Moreover, ...}  In summary, our results point out that if legislature
-size affects government budgets, they do so under specific conditions and are
-mediated by domestic factors.
+levels of heterogeneity, and effects differ substantially according to the
+study design. We find that a reliable predictor of effect size is the research
+method employed in the original paper. While earlier studies that employed
+conventional linear regressions often find a positive relation between
+legislature size and government budgets, recent studies that use new methods of
+causal inference, specially those with regression discontinuity designs,
+provide consistent evidence for a negative relation. This goes in contrast with
+the original theory and supports the existence of a "reverse law of $1/n$". 
+
 
 # Methods
 
@@ -307,7 +313,7 @@ variables.} Third, the study should be written in the English language. We
 conducted a primary search using Scopus, Microsoft Academic, and Google Scholar,
 three large academic databases.\footnote{See the Supplementary Material for code.}
 
-After applying our exclusion criteria, the search produced a dataset of 26
+After applying our exclusion criteria, the search produced a dataset of `r length(unique(dat$id))` 
 studies as of the 21\textsuperscript{st} of November, 2019. Table
 \ref{tab:papers} contains the full list of articles from which we drew data. A
 PRISMA\footnote{The Preferred Reporting Items for Systematic Reviews and
@@ -363,8 +369,12 @@ JPubE$=$Journal of Public Economics, JPriE$=$Journal of Private Enterprise,
 APSR$=$American Political Science Review, SEJ$=$Southern Economic Journal,
 UAR$=$Urban Affairs Review, SCID$=$Studies in Comparative International
 Development, SSQ$=$Social Science Quarterly, SPPQ$=$State Politics and Policy
-Quarterly, CPS$=$Comparative Political Studies, RivPE$=$Rivista di Politica Economica, E\&P$=$Economics and Politics, NTJ$=$National Tax Journal, OLS$=$Ordinary least squares, IV$=$Instrumental variables, Panel$=$Panel data/fixed effects, RDD$=$Regression discontinuity design, M$=$Majoritarian, NM$=$Non-majoritarian (mixed or proportional representation). Country codes follow the ISO 3166-1 alpha-3 international standard.}
-\end{minipage}
+Quarterly, CPS$=$Comparative Political Studies, RivPE$=$Rivista di Politica
+Economica, E\&P$=$Economics and Politics, NTJ$=$National Tax Journal,
+OLS$=$Ordinary least squares, IV$=$Instrumental variables, Panel$=$Panel
+data/fixed effects, RDD$=$Regression discontinuity design, M$=$Majoritarian,
+NM$=$Non-majoritarian (mixed or proportional representation). Country codes
+follow the ISO 3166-1 alpha-3 international standard.} \end{minipage}
 \end{longtable}
 
 \normalsize
@@ -1067,9 +1077,26 @@ between legislature size and public expenditure \citep{primo2008distributive,
 baqir2002districting, bradbury2003local}, have a substantial impact on the
 estimates. We find conflicting evidence for the former and no support for the
 latter. Moreover, different statistical techniques produce distinctive results,
-with better identified methods (IV and RDD), producing zero and negative effects more frequently.
+with better identified methods (IV and RDD), producing zero and negative
+effects more frequently.
 
-One may ask why we find no clear-cut evidence in favor or against the theory. The theory renders simple and testable empirical regularities in both of its forms, the "law of $1/n$" and the reverse "law of $1/n$." However, the empirical accessment is far from uniform in its findings. One reason may be the fact that the academic reward in social sciences for accumulating evidence is small, and most papers add features to their theory and further tests while acessing the "law of $1/n$". For instance, in our sample, papers added to the theory supermajority rules [@lee2015supermajority; @lee2016supermajority], redistricting [@baqir2002districting; @lee2018court], party ideology [@bjedov2014impact], coalition sizes [@baskaran2013coalition], term limits [@erler2007termlimits], bicameralism [@ricciuti2004legislature], the interplay between upper and lower houses [@chen_malhotra_2007], among others. This has the benefit of enriching the original theory with useful details, but has the disadvantage of providing less clear and decisive tests to the "law of $1/n$" theory. To solve this problem, we need more direct tests of the theory, preferably using well causally identified techniques, such as regression discontinuity design. [XXXX DANILO CHECAR]
+One may ask why we find no clear-cut evidence in favour or against the theory.
+Although the literature renders simple and testable empirical regularities in both of its
+forms, the "law of $1/n$" and the reverse "law of $1/n$", the
+empirical assessment is far from uniform in its findings. One reason may be the
+fact that the academic reward in social sciences for accumulating evidence is
+small, and most papers add features to their theory and further tests while
+accessing the "law of $1/n$". For instance, in our sample, papers added to the
+theory supermajority rules [@lee2015supermajority; @lee2016supermajority],
+redistricting [@baqir2002districting; @lee2018court], party ideology
+[@bjedov2014impact], coalition sizes [@baskaran2013coalition], term limits
+[@erler2007termlimits], bicameralism [@ricciuti2004legislature], the interplay
+between upper and lower houses [@chen_malhotra_2007], among others. This has
+the benefit of enriching the original theory with useful details, but has the
+disadvantage of providing less clear and decisive tests to the "law of $1/n$"
+theory. To solve this problem, we need more direct tests of the theory,
+preferably using well causally identified techniques, such as regression
+discontinuity design. [XXXX DANILO CHECAR]
 
 Our analyses suggest three areas for further research. First, our study sample
 did not include articles that evaluate the association between the log($n$) and
