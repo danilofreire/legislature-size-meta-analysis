@@ -378,7 +378,7 @@ dat %>%
 
 ## Independent Variables
 
-Most papers in our sample analyse the number of legislators in the lower house (`r as.numeric(table(unique(select(dat, id, indepvar2))$indepvar2)[2])`). The second most frequent independent variable is the number of legislators in the upper house (`r as.numeric(table(unique(select(dat, id, indepvar2))$indepvar2)[1])`). Finally, the minority of papers use the natural log of the number of legislators in the lower house as an independent variable (`r as.numeric(table(unique(select(dat, id, indepvar2))$indepvar2)[3])`). As we noted above, some papers had multiple coefficients, and thus the total number of coefficients is `r dim(dat)[2]`, while the number of papers is only `r length(unique(dat$id))`.
+Most papers in our sample analyse the number of legislators in the lower house (`r as.numeric(table(dat$indepvar2)[2])`). The second most frequent independent variable is the number of legislators in the upper house (`r as.numeric(table(dat$indepvar2)[1])`). Finally, the minority of papers use the natural log of the number of legislators in the lower house as an independent variable (`r as.numeric(table(dat$indepvar2)[3])`). As we noted above, some papers had multiple coefficients, and thus the total number of coefficients is `r dim(dat)[1]`, while the number of papers is only `r length(unique(dat$id))`.
 
 ```{r, fig.width=4, fig.height=3, fig.cap="Independent variables across the law of 1/n studies", cache=TRUE}
 dat %>%
@@ -1343,26 +1343,6 @@ mod <-  rma(yi = coef,
               test = "knha",
             subset = dat$depvar2=='PCTGDP',
             slab = dat$authoryear)
-
-mod1 <- tibble(
-     ` ` = c("Intercept",
-             "Indepvar: N",
-             "Indepvar: logN",
-             "Year",
-             "Elecsys: Non-Majoritarian",
-             "Method: Panel"),
-  Estimate = mod[["beta"]],
-  SE = mod[["se"]],
-  `T` = mod[["zval"]],
-  `P-Value` = mod[["pval"]],
-  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
-              round(mod[["ci.ub"]], digits = 4), ")"),
-  model = "PCTGDP"
-) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4)))
-```
-
-```{r, warning=F, cache=T}
 summary(mod)
 ```
 
@@ -1371,23 +1351,6 @@ As we have considerable heterogeneity in our sample, we run a permutation test t
 ```{r, warning=F, cache=T}
 mod <- permutest(mod, progbar = F)
 mod
-
-mod1_permu <- tibble(
-     ` ` = c("Intercept",
-             "Indepvar: N",
-             "Indepvar: logN",
-             "Year",
-             "Elecsys: Non-Majoritarian",
-             "Method: Panel"),
-  Estimate = mod[["beta"]],
-  SE = mod[["se"]],
-  `T` = mod[["zval"]],
-  `P-Value` = mod[["pval"]],
-  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
-              round(mod[["ci.ub"]], digits = 4 ), ")"),
-  model = "PCTGDP - Permutation"
-) %>%
-  mutate_if(is.numeric, list(~round(., digits = 3)))
 ```
 
 We have the following results for the meta-regressions of Expenditure as a Percentage of GDP:
@@ -1410,49 +1373,12 @@ mod <- rma(yi = coef,
               test = "knha",
             subset = fulldat$depvar2=='PCTGDP',
             slab = fulldat$authoryear)
-
-mod2 <- tibble(
-  ` ` = c("Intercept",
-          "Indepvar: N",
-          "Indepvar: logN",
-          "Year",
-          "Elecsys: Non-Majoritarian",
-          "Method: Panel"),
-  Estimate = mod[["beta"]],
-  SE = mod[["se"]],
-  `T` = mod[["zval"]],
-  `P-Value` = mod[["pval"]],
-  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
-              round(mod[["ci.ub"]], digits = 4 ), ")"),
-  model = "PCTGDP - All coefs"
-) %>%
-  mutate_if(is.numeric, list(~round(., digits = 3)))
-```
-
-```{r, warning=F, cache=T}
 summary(mod)
 ```
 
 ```{r, warning=F, cache=T}
 mod <- permutest(mod, progbar = F)
 mod
-
-mod2_permu <- tibble(
-     ` ` = c("Intercept",
-             "Indepvar: N",
-             "Indepvar: logN",
-             "Year",
-             "Elecsys: Non-Majoritarian",
-             "Method: Panel"),
-  Estimate = mod[["beta"]],
-  SE = mod[["se"]],
-  `T` = mod[["zval"]],
-  `P-Value` = mod[["pval"]],
-  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
-              round(mod[["ci.ub"]], digits = 4 ), ")"),
-  model = "PCTGDP - All coefs - Permutation"
-) %>%
-  mutate_if(is.numeric, list(~round(., digits = 3)))
 ```
 
 For all the coefficients, we have the following results:
@@ -1477,27 +1403,6 @@ mod <-  rma(yi = coef,
             subset = dat$depvar2=='ExpPC',
             slab = dat$authoryear,
             control=list(maxiter=1000))
-
-mod3 <- tibble(
-  ` ` = c("Intercept",
-          "Indepvar: N",
-          "Year",
-          "Published: No",
-          "Elecsys: Non-Majoritarian",
-          "Method: Panel",
-          "Method: IV"),
-  Estimate = mod[["beta"]],
-  SE = mod[["se"]],
-  `T` = mod[["zval"]],
-  `P-Value` = mod[["pval"]],
-  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
-              round(mod[["ci.ub"]], digits = 4 ), ")"),
-  model = "ExpPC"
-) %>%
-  mutate_if(is.numeric, list(~round(., digits = 3)))
-```
-
-```{r, warning=F, cache=T}
 summary(mod)
 ```
 As we have considerable heterogeneity in our sample, we run a permutation test to ensure the validity of our estimates. The results follow below.
@@ -1505,24 +1410,6 @@ As we have considerable heterogeneity in our sample, we run a permutation test t
 ```{r, error=F, warning=F, cache=T}
 mod <- permutest(mod, progbar = F)
 mod
-
-mod3_permu <- tibble(
-  ` ` = c("Intercept",
-          "Indepvar: N",
-          "Year",
-          "Published: No",
-          "Elecsys: Non-Majoritarian",
-          "Method: Panel",
-          "Method: IV"),
-  Estimate = mod[["beta"]],
-  SE = mod[["se"]],
-  `T` = mod[["zval"]],
-  `P-Value` = mod[["pval"]],
-  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
-              round(mod[["ci.ub"]], digits = 4 ), ")"),
-  model = "ExpPC - Permutation"
-) %>%
-  mutate_if(is.numeric, list(~round(., digits = 3)))
 ```
 
 We have the following results for the meta-regressions of Expenditure Per Capita:
@@ -1543,51 +1430,12 @@ mod <- rma(yi = coef,
               test = "knha",
             subset = fulldat$depvar2=='ExpPC',
             slab = fulldat$authoryear)
-
-mod4 <- tibble(
-  ` ` = c("Intercept",
-          "Indepvar: N",
-          "Year",
-          "Published: No",
-          "Elecsys: Non-Majoritarian",
-          "Method: Panel",
-          "Method: IV"),
-  Estimate = mod[["beta"]],
-  SE = mod[["se"]],
-  `T` = mod[["zval"]],
-  `P-Value` = mod[["pval"]],
-  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
-              round(mod[["ci.ub"]], digits = 4 ), ")"),
-  model = "ExpPC - All coefs"
-) %>%
-  mutate_if(is.numeric, list(~round(., digits = 3)))
-```
-
-```{r, warning=F, cache=T}
 summary(mod)
 ```
 
 ```{r, warning=F, cache=T}
 mod <- permutest(mod, progbar = F, iter = 100)
 mod
-
-mod4_permu <- tibble(
-  ` ` = c("Intercept",
-          "Indepvar: N",
-          "Year",
-          "Published: No",
-          "Elecsys: Non-Majoritarian",
-          "Method: Panel",
-          "Method: IV"),
-  Estimate = mod[["beta"]],
-  SE = mod[["se"]],
-  `T` = mod[["zval"]],
-  `P-Value` = mod[["pval"]],
-  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
-              round(mod[["ci.ub"]], digits = 4 ), ")"),
-  model = "ExpPC - All coefs - Permutation"
-) %>%
-  mutate_if(is.numeric, list(~round(., digits = 3)))
 ```
 
 With all coefficients, the results of the effect sizes on the Expenditure Per Capita regressions are the following:
@@ -1611,22 +1459,6 @@ mod <- rma(yi = coef,
               test = "knha",
             subset = dat$depvar2=='logExpPC',
             slab = dat$authoryear)
-
-mod5 <- tibble(
-   ` ` = c("Intercept",
-           "Indepvar: N",
-           "Year",
-           "Published: No",
-           "Method: Panel"),
-  Estimate = mod[["beta"]],
-  SE = mod[["se"]],
-  `T` = mod[["zval"]],
-  `P-Value` = mod[["pval"]],
-  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
-              round(mod[["ci.ub"]], digits = 4 ), ")"),
-  model = "logExpPC"
-) %>%
-  mutate_if(is.numeric, list(~round(., digits = 3)))
 ```
 
 ```{r, warning=F, cache=T}
@@ -1638,34 +1470,9 @@ As we have considerable heterogeneity in our sample, we run a permutation test t
 ```{r, warning=F, cache=T}
 mod <- permutest(mod, progbar = F)
 mod
-
-mod5_permu <- tibble(
-  ` ` = c("Intercept",
-          "Indepvar: N",
-          "Year",
-          "Published: No",
-          "Method: Panel"),
-  Estimate = mod[["beta"]],
-  SE = mod[["se"]],
-  `T` = mod[["zval"]],
-  `P-Value` = mod[["pval"]],
-  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
-              round(mod[["ci.ub"]], digits = 4 ), ")"),
-  model = "logExpPC - Permutation"
-) %>%
-  mutate_if(is.numeric, list(~round(., digits = 3)))
-
-mod5_permu %>%
-  select(-model) %>%
-  kable(booktabs = T,align = "c",linesep ='') %>%
-  kable_styling(c("striped","bordered"), position = "center")
 ```
 
-We have the following results for the meta-regressions of Log of Expenditure Per Capita:
-
-1. Unpublished papers report significantly higher coefficients.
-2. Moving from `OLS` to `PANEL` increases the detected effects.
-3. All other coefficients remained insignificant.
+Gor the meta-regressions of Log of Expenditure Per Capita we find no significant results.
 
 Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
 
@@ -1678,48 +1485,11 @@ mod <- rma(yi = coef,
               test = "knha",
             subset = fulldat$depvar2=='logExpPC',
             slab = fulldat$authoryear)
-
-mod6 <- tibble(
-  ` ` = c("Intercept",
-          "Indepvar: N",
-          "Year",
-          "Published: No",
-          "Method: Panel",
-          "Method: RDD"),
-  Estimate = mod[["beta"]],
-  SE = mod[["se"]],
-  `T` = mod[["zval"]],
-  `P-Value` = mod[["pval"]],
-  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
-              round(mod[["ci.ub"]], digits = 4), ")"),
-  model = "logExpPC - All coefs"
-) %>%
-  mutate_if(is.numeric, list(~round(., digits = 3)))
-```
-
-```{r, warning=F, cache=T}
 summary(mod)
 ```
 
 ```{r, warning=F, cache=T}
 mod <- permutest(mod, progbar = F)
-
-mod6_permu <- tibble(
-  ` ` = c("Intercept",
-          "Indepvar: N",
-          "Year",
-          "Published: No",
-          "Method: Panel",
-          "Method: RDD"),
-  Estimate = mod[["beta"]],
-  SE = mod[["se"]],
-  `T` = mod[["zval"]],
-  `P-Value` = mod[["pval"]],
-  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
-              round(mod[["ci.ub"]], digits = 4), ")"),
-  model = "logExpPC - All coefs - Permutation"
-) %>%
-  mutate_if(is.numeric, list(~round(., digits = 3)))
 ```
 
 With all coefficients, the results of the effect sizes on the Log of Expenditure Per Capita Regressions are the following:
