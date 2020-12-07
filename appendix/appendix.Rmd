@@ -925,7 +925,7 @@ Highlights:
 
 ### Regression Method Subgroup Analysis
 
-Over time, the literature evolved to use causally identified techniques for determine the effect of legislature size on the log of expenduture per capita. To study whether the method had an effect on the estimated coefficients, we fit a subgroup analysis using the method employed in each paper.
+Over time, the literature evolved to use causally identified techniques for determine the effect of legislature size on the log of expenditure per capita. To study whether the method had an effect on the estimated coefficients, we fit a subgroup analysis using the method employed in each paper.
 
 ```{r, fig.width=8, fig.height=6, fig.cap="Subgroup Analysis of (N) x (logExpPC), controlling by the regression methods",warning=FALSE, cache=TRUE}
 aux <- dat %>%
@@ -1051,7 +1051,7 @@ f8b <- mod2 %>%
 f8b
 ```
 
-Therefore, we see that majoritarian systems do not have a clear positive effect on budgetary spending. The majoritarian systems in the sample had a random effects model estimate of -0.25, while the random effects model in the non-majoritarian subgroup fitted a value of 0.08. Both are non-significant, but they reassure us that the absence of effect is not caused by pooling multiple types of electoral systems.
+Therefore, we see that majoritarian systems do not have a clear positive effect on budgetary spending. The majoritarian systems in the sample had a random effects model estimate of -0.25, while the random effects model in the non-majoritarian subgroup fitted a value of 0.08. Both are not statistically significant, but they reassure us that the absence of effect is not caused by pooling multiple types of electoral systems.
 
 ## Log of Lower House Size and Expenditure Per Capita
 
@@ -1285,7 +1285,6 @@ And the forest plot:
 build_forest(mod, NULL)
 ```
 
-
 Highlights:
 
 1. The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
@@ -1442,7 +1441,7 @@ With all coefficients, the results of the effect sizes on the Expenditure Per Ca
 4. Regarding statistical models, passing from `OLS` to `PANEL` decreases the detected effects.
 5. All other coeffients were not significant.
 
-## Meta-Regressions for the Log of Expenditure Per Capita
+## Meta-Regressions for Log of Expenditure Per Capita
 
 Lastly, we run the model with the natural logarithm of expenditure per capita.
 
@@ -1468,7 +1467,7 @@ mod <- permutest(mod, progbar = F)
 mod
 ```
 
-Gor the meta-regressions of Log of Expenditure Per Capita we find no significant results.
+For the meta-regressions of Log of Expenditure Per Capita we find no significant results.
 
 Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
 
