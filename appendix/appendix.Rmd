@@ -221,13 +221,13 @@ build_forest_het <- function(mod, capt, lsize = 22, ttl = NULL, hetvar = NULL) {
 
 # Search Criteria
 
-The first step in our systematic review consisted in gathering a study sample. We started our data collection with a manual search based on a set of keywords we scouted from the distributive politics literature. This search produced a database with many entries that were unrelated to our subject of investigation. To reduce the number of false positives in our sample, we restricted our search to studies that cited Weingast, Shepsle and Johnsen's 1981 paper "The Political Economy of Benefits and Costs: A Neoclassical Approach to Distributive Politics", which is a seminal contribution in the field. Although \href{https://scholar.google.com/}{Google Scholar} reports the article has received \href{https://scholar.google.com/scholar?um=1&ie=UTF-8&lr&cites=13117579863846712459}{2,180} citations, our search resulted in 2,664 records on the 21^st^ of November 2019.
+The first step in our systematic review consisted in gathering a study sample. We started our data collection with a manual search based on a set of keywords we scouted from the distributive politics literature. This search produced a database with many entries that were unrelated to our subject of investigation. To reduce the number of false positives in our sample, we restricted our search to studies that cited Weingast, Shepsle and Johnsen's 1981 paper "_The Political Economy of Benefits and Costs: A Neoclassical Approach to Distributive Politics_", which is a seminal contribution to the field. Although \href{https://scholar.google.com/}{Google Scholar} reports the article has received \href{https://scholar.google.com/scholar?um=1&ie=UTF-8&lr&cites=13117579863846712459}{2,180} citations, our search resulted in 2,664 records on the 21^st^ of November 2019.
 
 We webscraped three large academic databases: \href{https://scholar.google.com/}{Google Scholar} (n = 1001); \href{https://academic.microsoft.com/home}{Microsoft Academic} (n = 927); and \href{https://www.scopus.com/}{Scopus} (n = 736). The `R` script we wrote extracted the article title, abstract, authors, year, journal of publication, and database from which the record originated. Our code is available in section \ref{sub:scrap} below. We screened these results with an English language and article restriction, that is, we excluded all records written in other languages and all that were not academic papers, such as book chapters or doctoral theses. We set no restriction to unpublished articles.
 
 # Article Selection
 
-The selection process was conducted by two authors in three phases. In the first round, we excluded all titles that were clearly unrelated to our topic of interest. For instance, we curiously found articles about automobile motors amidst our sample. We consider this a preliminary step, since we were not able to eliminate a large number of entries. Then, we read all abstracts. We chose to maintain those which indicated that either government expenditure or legislative structures were the main subject of the paper. For instance, if the paper sought to identify variables that increased government size, it was maintained. Abstracts that indicated the paper discussed or estimated the impacts of representative institutions, elections, or chamber dynamics were also included. This allowed us to significantly reduce our sample to 376 records.
+The selection process was conducted by two authors in three phases. In the first round, we excluded all titles that were clearly unrelated to our topic of interest. For instance, we curiously found articles about car motors amidst our sample. We consider this a preliminary step, since we were not able to eliminate a large number of entries. Then, we read all abstracts. We chose to maintain those which indicated that either government expenditure or legislative structures were the main subject of the paper. For instance, if the paper sought to identify variables that increased government size, it was maintained. Abstracts that indicated the paper discussed or estimated the impacts of representative institutions, elections, or chamber dynamics were also included. This allowed us to significantly reduce our sample to 376 records.
 
 In the second phase, we assessed full texts. To remain in our sample, the paper should (i) conduct a quantitative analysis, (ii) report data on the number of legislators, and (iii) also include data on public expenditure. If the publication had all three, it was maintained. Disagreements in this phase were discussed among the authors, and a third investigator was consulted when needed.
 
@@ -301,11 +301,11 @@ The diagram below shows each step of our article selection process. We followed 
 
 Our data are comprised of two datasets. The first dataset has the main coefficients reported in the studies. These data include only the most rigorous model from each paper, that is, those estimated with the largest sample size, most control variables, and fixed effects if the authors added them. If the article employed a regression discontinuity design, we chose the coefficient from the optimal bandwidth or from the intermediate one. This sample encompasses `r dim(dat)[1]` estimates, as `r as.numeric(table(table(dat$id))[2])` articles analysed two dependent or independent variables of interest. Our second sample, in contrast, contains all the `r dim(fulldat)[1]` effect sizes reported in the `r length(unique(dat$id))` papers.
 
-In the main text, we focus on the results for our restricted sample as we consider them more robust, but the findings are very similar when we use the extended dataset. Below is the data extraction process for all relevant coefficients in the selected articles. Here we present the results of all tests performed in both reduced and full samples.
+In the main text, we focus on the results for our restricted sample as we consider them more robust, but the findings are very similar when we use the extended dataset. Here we present the results of all tests performed in both reduced and full samples.
 
 # Descriptive Statistics
 
-In this section, we show the descriptive statistics for our sample. We focus on the following paper characteristics: study year, whether the paper has been published or not, the electoral system of the country discussed in the original study, the data aggregation level, as well as the distribution of the dependent and independent variables of interest. We also add a descriptive statistics table similar to the one in the main paper.
+In this section, we show the descriptive statistics for our sample. We focus on the following paper characteristics: study year, whether the paper has been published or not, the electoral system of the country discussed in the original study, the data aggregation level, as well as the distribution of the dependent and independent variables of interest. 
 
 ## Study Year
 
@@ -490,8 +490,6 @@ aux2
 ```
 
 Here we see that `r as.numeric(table(aux$scoef)[2])` out of `r sum(table(aux$scoef))` had a positive sign. The p-value for this test is `r round(as.numeric(aux2$p.value), 3)`. Therefore, we `r ifelse(as.numeric(aux2$p.value)<0.1, 'accept', 'reject')` the hypothesis that $p \neq 0.5$. This is the only test that presents evidence of an association between the legislature size and expenditure.
-
-\newpage
 
 # Meta-Analysis
 
@@ -688,7 +686,7 @@ Highlights:
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`). **This model is significant at the 10\% confidence level.**
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-## Log of Upper House Size and Log of Expenditure Per Capita
+## Upper House Size and Log of Expenditure Per Capita
 
 No studies correlate the log of per capita expenditure with the size of upper house (K).
 
@@ -1326,8 +1324,6 @@ Highlights:
 2. The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3. The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
 
-\newpage
-
 # Meta-Regressions
 
 ## Meta-Regressions for Expenditure as a Percentage of the GDP
@@ -1497,8 +1493,6 @@ With all coefficients, the results of the effect sizes on the Log of Expenditure
 1. In terms of the modelling, passing from `OLS` to `PANEL` or `RDD` decreases the detected effects.
 2. All other coefficients remained insignificant.
 
-\newpage 
-
 # Robustness: Meta-Regressions (All Coefficients)
 
 In this section, we aggregate all the coefficients and run a multivariate meta-regression, controlling for:
@@ -1546,8 +1540,6 @@ summary(mod)
 ```{r, cache=T}
 permutest(mod, progbar = F)
 ```
-
-\newpage 
 
 # Auxiliary Functions
 
@@ -1987,8 +1979,6 @@ for (i in 1:nrow(articles_links)) {
 
 write_csv(articles_links, "microsoft_academic_clean.csv")
 ```
-
-\newpage
 
 # Session Information
 
