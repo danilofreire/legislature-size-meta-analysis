@@ -40,6 +40,11 @@ output:
 # Knitr options
 knitr::opts_chunk$set(fig.pos = "H") # holds figure position
 knitr::opts_chunk$set(echo = TRUE)
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
 ```
 
 ```{r, include=FALSE}
@@ -231,7 +236,7 @@ The selection process was conducted by two authors in three phases. In the first
 
 In the second phase, we assessed full texts. To remain in our sample, the paper should (i) conduct a quantitative analysis, (ii) report data on the number of legislators, and (iii) also include data on public expenditure. If the publication had all three, it was maintained. Disagreements in this phase were discussed among the authors, and a third investigator was consulted when needed.
 
-The third phase consisted of filling out tables for each of the remaining 50 articles to systematically evaluate their eligibility. Since authors use different measures for government spending and the number of lower/upper house members, we extracted all coefficients that provided this information. We decided which variables to keep by following the current practices of the literature. In this phase, we also collected information on whether or not the paper had been published, and if it explicitly discussed the \textit{law of 1/n}. Upon choosing the variables, we excluded the non-conforming studies, arriving at our final sample of `r length(unique(dat$authoryear))` articles.
+The third phase consisted of filling out tables for each of the remaining 47 articles to systematically evaluate their eligibility. Since authors use different measures for government spending and the number of lower/upper house members, we extracted all coefficients that provided this information. We decided which variables to keep by following the current practices of the literature. In this phase, we also collected information on whether or not the paper had been published, and if it explicitly discussed the \textit{law of 1/n}. Upon choosing the variables, we excluded the non-conforming studies, arriving at our final sample of `r length(unique(dat$authoryear))` articles.
 
 ## Exclusion Analysis
 
@@ -246,6 +251,8 @@ We selected the final pool of articles based on two criteria regarding their rep
   + *ExpPC*: Expenditure Per Capita
   + *logExpPC*: Log Expenditure Per Capita
   + *PCTGDP*: Percent GDP Public Expenditure
+  
+If a paper did not use a combination of these variables, we excluded it from the meta-analysis.
 
 ## Flow Chart
 
@@ -311,7 +318,7 @@ In this section, we show the descriptive statistics for our sample. We focus on 
 
 For study year, we have an average of `r round(mean(dat$year), 2)`, with standard deviation of `r round(sd(dat$year), 2)`. The oldest study included in the paper is from `r min(dat$year)`, while the most recent paper was written in `r max(dat$year)`. Therefore, we cover `r max(dat$year)-min(dat$year)` years of tests of the _law of 1/n_.
 
-```{r, fig.width=7, fig.height=3, fig.cap="Study Year Frequencies", cache=TRUE}
+```{r, fig.width=7, fig.height=3, fig.cap="Study Year Frequencies", cache=TRUE, size="footnotesize"}
 dat %>%
   select(id, year) %>%
   unique() %>%
@@ -326,7 +333,7 @@ dat %>%
 
 Studies were included in our sample regardless of their publication status. From the `r length(unique(dat$id))` papers in the sample, `r as.numeric(table(unique(select(dat, id, published))$published)[1])` were published while `r as.numeric(table(unique(select(dat, id, published))$published)[2])` were not published.
 
-```{r, fig.width=4, fig.height=3, fig.cap="Was the study published?", cache=TRUE}
+```{r, fig.width=4, fig.height=3, fig.cap="Was the study published?", size="footnotesize", cache=TRUE}
 dat %>%
   select(id, published) %>%
   unique() %>%
@@ -341,7 +348,7 @@ dat %>%
 
 Our sample differs considerably in regards to research design. One remarkable difference is that several authors apply the logics of the _law of 1/n_, which was built with majoritarian systems in mind, to non-majoritarian democracies. In the sample, `r as.numeric(table(unique(select(dat, id, elecsys2))$elecsys2)[1])` of the papers study *Majoritarian* systems while `r as.numeric(table(unique(select(dat, id, elecsys2))$elecsys2)[2])` study *Non-Majoritarian* electoral systems.\footnote{Note that for the \textit{law of 1/n} to be valid in a non-majoritarian system, we need to assume that despite the fact that politicians are able to campaign in every place in the district, the votes are geographically concentrated. The concentration facilitates politicians to use pork-barrel projects to captivate their electoral supporters.}
 
-```{r, fig.width=4, fig.height=3, fig.cap="Electoral Systems", cache=TRUE}
+```{r, fig.width=4, fig.height=3, fig.cap="Electoral Systems", size="footnotesize", cache=TRUE}
 dat %>%
   select(id, elecsys2) %>%
   unique() %>%
@@ -360,7 +367,7 @@ The outcome variables included in the paper are:
 - `r as.numeric(table(unique(select(dat, id, depvar2))$depvar2)[3])` Natural Log of Per Capita Expenditure papers
 - `r as.numeric(table(unique(select(dat, id, depvar2))$depvar2)[2])` Expenditure as a Percentage of the GDP papers
 
-```{r, fig.width=4, fig.height=3, fig.cap="Dependent variables across the law of 1/n studies", cache=TRUE}
+```{r, fig.width=4, fig.height=3, fig.cap="Dependent variables across the law of 1/n studies", size="footnotesize", cache=TRUE}
 dat %>%
   select(id, depvar2) %>%
   unique() %>%
@@ -380,7 +387,7 @@ dat %>%
 
 Most papers in our sample analyse the number of legislators in the lower house (`r as.numeric(table(dat$indepvar2)[2])`). The second most frequent independent variable is the number of legislators in the upper house (`r as.numeric(table(dat$indepvar2)[1])`). Finally, the minority of papers use the natural log of the number of legislators in the lower house as an independent variable (`r as.numeric(table(dat$indepvar2)[3])`). As we noted above, some papers had multiple coefficients, and thus the total number of coefficients is `r dim(dat)[1]`, while the number of papers is only `r length(unique(dat$id))`.
 
-```{r, fig.width=4, fig.height=3, fig.cap="Independent variables across the law of 1/n studies", cache=TRUE}
+```{r, fig.width=4, fig.height=3, fig.cap="Independent variables across the law of 1/n studies", size="footnotesize", cache=TRUE}
 dat %>%
   select(id, indepvar2) %>%
   unique() %>%
@@ -401,7 +408,7 @@ The coefficients in the papers vary considerably. In this section, we plot a his
 
 Coefficients:
 
-```{r, cache=TRUE, fig.width=5, fig.height=4}
+```{r, size="footnotesize", cache=TRUE, fig.width=5, fig.height=4}
 dat %>%
   ggplot(aes(x = coef)) +
   geom_histogram(bins = 15, color = "black") +
@@ -411,7 +418,7 @@ dat %>%
 
 Standard errors:
 
-```{r, cache=TRUE, fig.width=5, fig.height=4}
+```{r, size="footnotesize", cache=TRUE, fig.width=5, fig.height=4}
 dat %>%
   ggplot(aes(x = SE)) +
   geom_histogram(bins = 10, color = "black") +
@@ -423,7 +430,7 @@ dat %>%
 
 One simple statistic that we can compute to assess the validity of the _law of 1/n_ is the frequency of positive and negative estimates in the study sample. Below we plot the frequency for all the papers included in the meta-analytic dataset.
 
-```{r, fig.width=5, fig.height=4, fig.cap="Coefficient Sign", cache=TRUE}
+```{r, size="footnotesize", fig.width=5, fig.height=4, fig.cap="Coefficient Sign", cache=TRUE}
 dat %>%
   ggplot(aes(x=as.factor(scoef))) +
   geom_bar(color = "black") +
@@ -436,7 +443,7 @@ dat %>%
 
 We chose a set of moderators that frequently appear in the literature and may help us interpret our results. We included them in our meta-regressions alongside an indicator for the type of independent variable used in the original study ($n$, log($n$), or $k$). The additional moderators are: 1) electoral system; 2) data aggregation level; 3) estimation method; 4) publication year; 5) paper publication in an academic journal. The table below presents descriptive statistics for these moderators in our selection of articles.
 
-```{r, warning=F,message=F, cache=TRUE}
+```{r, size="footnotesize", warning=F,message=F, cache=TRUE}
 fulldat$usemeta2 <- factor(fulldat$usemeta)
 levels(fulldat$usemeta2) <- c("Other Coefficients", "Main Coefficients")
 aux <- select(fulldat, usemeta2, indepvar2, year, published,
@@ -463,7 +470,7 @@ This test has two advantages. First, it is robust to the design of the paper. Th
 
 For the number of legislators in the lower house ($N$), the results follow below.
 
-```{r, cache=TRUE}
+```{r, size="footnotesize", cache=TRUE}
 aux <- filter(dat, indepvar2 == "N")
 aux2 <- binom.test(table(aux$scoef)[2], sum(table(aux$scoef)), p = 0.5)
 aux2
@@ -473,7 +480,7 @@ Under the null hypothesis of $p=0.5$, we find that `r as.numeric(table(aux$scoef
 
 For the log of the number of legislators in the lower house ($\log(N)$), the results follow below.
 
-```{r, cache=TRUE}
+```{r, size="footnotesize", cache=TRUE}
 aux <- filter(dat, indepvar2 == "logN")
 aux2 <- binom.test(table(aux$scoef)[2], sum(table(aux$scoef)), p = 0.5)
 aux2
@@ -483,7 +490,7 @@ Out of `r sum(table(aux$scoef))`, `r as.numeric(table(aux$scoef)[2])` had a posi
 
 Finally, for the number of legislators in the upper house ($K$), the results are:
 
-```{r, cache=TRUE}
+```{r, size="footnotesize", cache=TRUE}
 aux <- filter(dat, indepvar2=='K')
 aux2 <- binom.test(table(aux$scoef)[2], sum(table(aux$scoef)), p=0.5)
 aux2
@@ -525,7 +532,7 @@ We combined the three independent variables ($N$, $\log(N)$, and $K$) with our d
 
 ## Lower House Size and Expenditure per Capita
 
-```{r, cache=TRUE}
+```{r, cache=TRUE, size="footnotesize"}
 # Pooling effects analysis -- ExpPC x N
 aux <- dat %>%
   filter(indepvar2 == 'N',
@@ -576,7 +583,7 @@ There are no studies that have per capita expenditure as the dependent variable 
 
 Now, we look into the upper house size (K). In this model, we investigate the effect of upper house size on expenditure per capita (ExpPC).
 
-```{r, cache=TRUE}
+```{r, size="footnotesize", cache=TRUE}
 # Pooling effects analysis -- ExpPC x K
 aux <- dat %>%
   filter(indepvar2 == 'K',
@@ -613,7 +620,7 @@ Highlights:
 
 This model estimates the Log of Per Capita Expenditure as the dependent variable, and the number of lower house legislators as the treatment variable.
 
-```{r, cache=TRUE}
+```{r, size="footnotesize", cache=TRUE}
 # Pooling effects analysis -- logExpPC x N
 aux <- dat %>%
   filter(indepvar2 == 'N',
@@ -653,7 +660,7 @@ Highlights:
 
 In this specification, we study the log of per capita expenditure (logExpPC) as a function of the log of lower house size (logN).
 
-```{r, cache=TRUE}
+```{r, size="footnotesize", cache=TRUE}
 # Pooling effects analysis -- logExpPC x logN
 aux <- dat %>%
   filter(indepvar2 == 'logN',
@@ -694,7 +701,7 @@ No studies correlate the log of per capita expenditure with the size of upper ho
 
 This model fits the random effects for the percentage of GDP as public expenditure as the main outcome, and the size of lower house as the treatment variable.
 
-```{r, cache=TRUE}
+```{r, size="footnotesize", cache=TRUE}
 # Pooling effects analysis -- PCTGDP x N
 aux <- dat %>%
   filter(indepvar2 == 'N',
@@ -731,7 +738,7 @@ Highlights:
 
 This model investigates the percentage of GDP as public expenditure as the dependent variable and the log lower house size (logN) as the treatment variable.
 
-```{r, cache=TRUE}
+```{r, size="footnotesize", cache=TRUE}
 # Pooling effects analysis -- PCTGDP x logN
 aux <- dat %>%
   filter(indepvar2 == 'logN',
@@ -771,7 +778,7 @@ Highlights:
 
 This model looks into the effect of upper house size (K) on the public expenditure share of the GDP (PCTGDP).
 
-```{r, cache=TRUE}
+```{r, size="footnotesize", cache=TRUE}
 # Pooling effects analysis -- PCTGDP x K
 aux <- dat %>%
   filter(indepvar2 == 'K',
@@ -806,7 +813,7 @@ Highlights:
 
 ## Lower House Size and Expenditure per Capita (IV)
 
-```{r, cache=TRUE}
+```{r, size="footnotesize", cache=TRUE}
 # Pooling effects analysis -- ExpPC x N (IV only)
 aux <- dat %>%
   filter(indepvar2 == 'N',
@@ -877,7 +884,7 @@ Although all methods generate a null effect, the IV method seems to be well dist
 
 ## Lower House Size and Log of Expenditure per Capita (RDD)
 
-```{r, cache=TRUE}
+```{r, size="footnotesize", cache=TRUE}
 # Pooling effects analysis -- logExpPC x N (RDD only)
 aux <- dat %>%
   filter(indepvar2 == 'N',
@@ -970,7 +977,7 @@ dev.off()
 
 Here we estimate the relationship between expenditure per capita as a dependent variable, and the lower house size as the independent variable.
 
-```{r, warning=F, cache=T}
+```{r, size="footnotesize", warning=F, cache=T}
 # Pooling effects analysis -- ExpPC x N
 aux <- fulldat %>%
   filter(indepvar2 == 'N',
@@ -1061,7 +1068,7 @@ There are no studies that have per capita expenditure as the dependent variable 
 
 Now we investigate the effect of the upper house size ($K$) on government spending. In the model below, we evaluate the relationship between upper house size and expenditure per capita (ExpPC).
 
-```{r, warning=F, cache=TRUE}
+```{r, size="footnotesize", warning=F, cache=TRUE}
 # Pooling effects analysis -- ExpPC x K
 aux <- fulldat %>%
   filter(indepvar2 == 'K',
@@ -1094,7 +1101,7 @@ Highlights:
 
 This model estimates the log of per capita expenditure as the dependent variable, and the number of lower house legislators as the treatment variable.
 
-```{r, warning=F, cache=TRUE}
+```{r, size="footnotesize", warning=F, cache=TRUE}
 # Pooling effects analysis -- logExpPC x N
 aux <- fulldat %>%
   filter(indepvar2 == 'N',
@@ -1127,7 +1134,7 @@ Highlights:
 
 In this specification, we study the log of per capita expenditure (logExpPC) as a function of the log of lower house size (logN).
 
-```{r, warning=F, cache=TRUE}
+```{r, size="footnotesize", warning=F, cache=TRUE}
 # Pooling effects analysis -- logExpPC x logN
 aux <- fulldat %>%
   filter(indepvar2 == 'logN',
@@ -1164,7 +1171,7 @@ No studies related the log of per capita expenditure with the size of upper hous
 
 This model fits the random effects for the percentage of GDP as public expenditure as the main outcome, and the size of lower house as the treatment variable.
 
-```{r, warning=F, cache=TRUE}
+```{r, size="footnotesize", warning=F, cache=TRUE}
 # Pooling effects analysis -- PCTGDP x N
 aux <- fulldat %>%
   filter(indepvar2 == 'N',
@@ -1197,7 +1204,7 @@ Highlights:
 
 This meta-regression investigates the percentage of GDP as public expenditure as the dependent variable and the natural logarithm of lower house size (log($N$)) as the treatment variable.
 
-```{r, warning=F, cache=TRUE}
+```{r, size="footnotesize", warning=F, cache=TRUE}
 # Pooling effects analysis -- PCTGDP x logN
 aux <- fulldat %>%
   filter(indepvar2 == 'logN',
@@ -1230,7 +1237,7 @@ Highlights:
 
 This model looks into the effect of upper house size ($K$) on the public expenditure share of the GDP (PCTGDP).
 
-```{r, warning=F, cache=TRUE}
+```{r, size="footnotesize", warning=F, cache=TRUE}
 # Pooling effects analysis -- PCTGDP x K
 aux <- fulldat %>%
   filter(indepvar2 == 'K',
@@ -1261,7 +1268,7 @@ Highlights:
 
 ## Lower House Size and Expenditure per Capita (IV)
 
-```{r, cache=TRUE}
+```{r, size="footnotesize", cache=TRUE}
 # Pooling effects analysis -- ExpPC x N (IV only)
 aux <- fulldat %>%
   filter(indepvar2 == 'N',
@@ -1293,7 +1300,7 @@ Highlights:
 
 ## Lower House Size and Log of Expenditure per Capita (RDD)
 
-```{r, cache=TRUE}
+```{r, size="footnotesize", cache=TRUE}
 # Pooling effects analysis -- ExpPC x N
 aux <- fulldat %>%
   filter(indepvar2 == 'N',
@@ -1329,7 +1336,7 @@ Highlights:
 
 In this section, we show the coefficients for our meta-regressions. We start with expenditure as a percentage of GDP as the dependent variable.
 
-```{r, warning=F, cache=T}
+```{r, size="footnotesize", warning=F, cache=T}
 mod <-  rma(yi = coef,
               sei = SE,
               data = dat,
@@ -1343,7 +1350,7 @@ summary(mod)
 
 As we have considerable heterogeneity in our sample, we run a permutation test to ensure the validity of our estimates. The results follow below.
 
-```{r, warning=F, cache=T}
+```{r, size="footnotesize", warning=F, cache=T}
 mod <- permutest(mod, progbar = F)
 mod
 ```
@@ -1359,7 +1366,7 @@ We have the following results for the meta-regressions of Expenditure as a Perce
 
 Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
 
-```{r, warning=F, cache=T}
+```{r, size="footnotesize", warning=F, cache=T}
 mod <- rma(yi = coef,
               sei = SE,
               data = fulldat,
@@ -1371,7 +1378,7 @@ mod <- rma(yi = coef,
 summary(mod)
 ```
 
-```{r, warning=F, cache=T}
+```{r, size="footnotesize", warning=F, cache=T}
 mod <- permutest(mod, progbar = F)
 mod
 ```
@@ -1388,7 +1395,7 @@ For all the coefficients, we have the following results:
 
 Here we do the same exercise with expenditure per capita as the main outcome.
 
-```{r, error=F, warning=F, cache=T}
+```{r, size="footnotesize", error=F, warning=F, cache=T}
 mod <-  rma(yi = coef,
               sei = SE,
               data = dat,
@@ -1402,7 +1409,7 @@ summary(mod)
 ```
 As we have considerable heterogeneity in our sample, we run a permutation test to ensure the validity of our estimates. The results follow below.
 
-```{r, error=F, warning=F, cache=T}
+```{r, size="footnotesize", error=F, warning=F, cache=T}
 mod <- permutest(mod, progbar = F)
 mod
 ```
@@ -1416,7 +1423,7 @@ We have the following results for the meta-regressions of Expenditure Per Capita
 
 We also run the meta-regressions adding all coefficients in the papers. The results follow below:
 
-```{r, warning=F, cache=T}
+```{r, size="footnotesize", warning=F, cache=T}
 mod <- rma(yi = coef,
               sei = SE,
               data = fulldat,
@@ -1428,7 +1435,7 @@ mod <- rma(yi = coef,
 summary(mod)
 ```
 
-```{r, warning=F, cache=T}
+```{r, size="footnotesize", warning=F, cache=T}
 mod <- permutest(mod, progbar = F, iter = 100)
 mod
 ```
@@ -1445,7 +1452,7 @@ With all coefficients, the results of the effect sizes on the Expenditure Per Ca
 
 Lastly, we run the model with the natural logarithm of expenditure per capita.
 
-```{r, warning=F, cache=T}
+```{r, size="footnotesize", warning=F, cache=T}
 mod <- rma(yi = coef,
               sei = SE,
               data = dat,
@@ -1454,15 +1461,12 @@ mod <- rma(yi = coef,
               test = "knha",
             subset = dat$depvar2=='logExpPC',
             slab = dat$authoryear)
-```
-
-```{r, warning=F, cache=T}
 summary(mod)
 ```
 
 As we have considerable heterogeneity in our sample, we run a permutation test to ensure the validity of our estimates. The results follow below.
 
-```{r, warning=F, cache=T}
+```{r, size="footnotesize", warning=F, cache=T}
 mod <- permutest(mod, progbar = F)
 mod
 ```
@@ -1471,7 +1475,7 @@ For the meta-regressions of Log of Expenditure Per Capita we find no significant
 
 Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
 
-```{r, warning=F, cache=T}
+```{r, size="footnotesize", warning=F, cache=T}
 mod <- rma(yi = coef,
               sei = SE,
               data = fulldat,
@@ -1502,41 +1506,35 @@ In this section, we aggregate all the coefficients and run a multivariate meta-r
 
 The results follow below, and show null effects for all variables, including the intercept.
 
-```{r, warning=F, cache=T}
+```{r, size="footnotesize", warning=F, cache=T}
 mod <-  rma(yi = coef,
               sei = SE,
               data = dat,
               method = "REML",
               mods = ~ depvar2+indepvar2+year+published+elecsys2+method,
               test = "knha")
-```
-
-```{r}
 summary(mod)
 ```
 
 As we have considerable heterogeneity in our sample, we run a permutation test to ensure the validity of our estimates. The results follow below.
 
-```{r, cache=T}
+```{r, size="footnotesize", cache=T}
 permutest(mod, progbar = F)
 ```
 
 In the main text, we selected coefficients based on the regressions that had most observations and presented a full model (with fixed effects or intermediate bandwidth in RDD). We also run the meta-regressions adding all coefficients in the papers. The results follow below:
 
-```{r, warning=F, cache=T}
+```{r, size="footnotesize", warning=F, cache=T}
 mod <- rma(yi = coef,
               sei = SE,
               data = fulldat,
               method = "REML",
               mods = ~ depvar2+indepvar2+year+published+elecsys2+method,
               test = "knha")
-```
-
-```{r, cache=T}
 summary(mod)
 ```
 
-```{r, cache=T}
+```{r, size="footnotesize", cache=T}
 permutest(mod, progbar = F)
 ```
 
@@ -1546,7 +1544,7 @@ permutest(mod, progbar = F)
 
 This function receives the meta-analysis results and builds a forest plot using `ggplot2`.
 
-```{r, eval = FALSE, cache=T}
+```{r, size="footnotesize", eval = FALSE, cache=T}
 # Build plot function for forest plots
 build_forest <- function(mod, capt, lsize = 22, ttl = NULL) {
   # Build dataset for plot
@@ -1697,7 +1695,7 @@ build_forest_het <- function(mod, capt, lsize = 22, ttl = NULL, hetvar = NULL) {
 
 We used the code below to download the articles cited in our paper.
 
-```{r, eval = FALSE, cache=T}
+```{r, size="footnotesize", eval = FALSE, cache=T}
 # Required packages
 pkgs <- c("tidyverse", "rvest", "RSelenium")
 
@@ -1981,6 +1979,6 @@ write_csv(articles_links, "microsoft_academic_clean.csv")
 
 # Session Information
 
-```{r}
+```{r, size="footnotesize"}
 sessionInfo()
 ```
