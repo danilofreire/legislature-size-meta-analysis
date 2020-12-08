@@ -9,7 +9,7 @@ author:
   - Catarina Roman[^catarina]
 date: \today
 thanks: "The authors thank Guilherme Duarte, Robert Myles McDonnell, and David Skarbek for their constructive feedback. We also thank Cedric Antunes, Luis Castro, Giovanna França, Julia Oriente, and Lucas Mingardi for their excellent research assistance. Replication materials are available at <https://github.com/danilofreire/distributive-politics-meta-analysis>. We kindly acknowledge funding from the São Paulo State Science Foundation (FAPESP grant number 2018/00646-1)."
-abstract: "In a seminal article, @weingast1981political argue that there is a positive relationship between legislature size and inefficiency in public expenditures. Their proposition is currently known as the \"law of $1/n$\" and has been widely debated in political science and public administration. However, recent studies have questioned the validity of the theory. In this letter, we estimate the first meta-analysis of the relationship between the number of legislators and public spending. Based on a sample of 29 articles, we find no robust evidence for the effect of legislature size on government budgets. Yet the aggregate results show significant heterogeneity. While earlier studies provide moderate support for the \"law of $1/n$\", papers using modern causal inference methods consistently find a negative relationship between seats and spending. The available evidence also indicates that proportional representation and mixed voting systems are no more likely to overspend than majoritarian ones."
+abstract: "In a seminal article, @weingast1981political argue that there is a positive relationship between legislature size and inefficiency in public expenditures. Their proposition is currently known as the \"law of $1/n$\" and has been widely debated in political science and public administration. However, recent studies have questioned the validity of the theory. In this letter, we estimate the first meta-analysis of the relationship between the number of legislators and public spending. Based on a sample of 29 articles, we find no robust evidence for the effect of legislature size on government budgets. Yet the aggregate results show significant heterogeneity. While earlier studies provide moderate support for the \"law of $1/n$\", papers using causal inference methods consistently find a negative relationship between seats and spending. The available evidence also indicates that proportional representation and mixed voting systems are no more likely to overspend than majoritarian ones."
 abstractspacing: double
 keywords: distributive politics; law of $1/n$; legislature size; meta-analysis; public spending
 jelcodes: H21; H23; H50; H61
@@ -291,43 +291,46 @@ capita, the natural logarithm of public expenditure per capita, and government
 expenditure as a percentage of GDP. We then estimate if the results vary
 according to four potential sources of effect heterogeneity.
 
-Aggregate results show that legislative size has no significant impact on public
-spending. However, the meta-regressions suggest that our study sample has high
-levels of heterogeneity, and effects differ substantially according to study
-specifications. A reliable predictor of effect size is the research method
-employed in the original paper. While papers that employ conventional linear
-regressions often find a positive relation between legislature size and
-government budgets, recent studies using new methods of causal inference,
-specially those with regression discontinuity designs, provide consistent
-evidence for a negative relation. This goes in contrast with the original theory
-and supports the existence of a "reverse law of $1/n$". Additionally, we find
-that non-majoritarian voting systems decrease government spending as a
-percentage of GDP, which is also evidence against the theoretical expectations
-of the "law of $1/n$". In summary, we do not find support for the theory as
-originally conceived, and causal inference models suggest that larger
-legislatures are associated with lower public spending.
+Aggregate results show that legislative size has no significant impact on
+public spending. However, the meta-regressions suggest that our study sample
+has high levels of heterogeneity, and effects differ substantially according to
+study specifications. We find that one reliable predictor of effect size is the
+research method employed in the original paper. While papers that employ
+conventional linear regressions often find a positive relation between
+legislature size and government budgets, recent studies using modern methods of
+causal inference, specially those with regression discontinuity designs,
+provide consistent evidence for a negative relation. This goes in contrast with
+the original theory and supports the existence of a "reverse law of $1/n$".
+Additionally, we find that non-majoritarian voting systems decrease government
+spending as a percentage of GDP, which is also evidence against the theoretical
+expectations of the "law of $1/n$", and they do not have a relevant impact on
+the other measures of public expenditure. In summary, our analysis does not
+provide robust support for the theory as originally conceived, and causal
+inference models suggest that larger legislatures are associated with lower
+public spending.
 
 # Methods
 
-We collected the study sample using three criteria. First, the study should cite
-\citet{weingast1981political} as their work is foundational to the distributive
-politics literature. Second, the study had to use quantitative methods to
-estimate the relationship between our variables of interest.\footnote{As
-meta-analysis requires a single estimate per observation, we excluded articles
-that use interaction terms or quadratic specifications of our independent
-variables.} Third, the study should be written in the English language. We
-conducted a primary search using Scopus, Microsoft Academic, and Google Scholar,
-three large academic databases.\footnote{See the Supplementary Material for code.}
+We collected the study sample using three criteria. First, the study should
+cite \citet{weingast1981political} as their work is foundational to the
+distributive politics literature. Second, the study had to use quantitative
+methods to estimate the relationship between our variables of
+interest.\footnote{As meta-analysis requires a single estimate per observation,
+we excluded articles that use interaction terms or quadratic specifications of
+our independent variables.} Third, the study should be written in the English
+language. We conducted a primary search using Scopus, Microsoft Academic, and
+Google Scholar, three large academic databases.\footnote{See the Supplementary
+Material for code.}
 
-After applying our exclusion criteria, the search produced a dataset of `r length(unique(dat$id))` 
-studies as of the 21\textsuperscript{st} of November, 2019. Table
-\ref{tab:papers} contains the full list of articles from which we drew data. A
-PRISMA\footnote{The Preferred Reporting Items for Systematic Reviews and
-  Meta-Analyses (PRISMA) statement provides a checklist designed to improve the
-quality and transparency of study selection processes in meta-analyses. For more
-information on the PRISMA framework, see \citet{liberati2009prisma}.} flow
-diagram showing the number of resulting papers after each review step is
-available in the Supplementary Material.
+After applying our exclusion criteria, the search produced a dataset of 
+`r length(unique(dat$id))` studies as of the 21\textsuperscript{st} of November,
+2019. Table \ref{tab:papers} contains the full list of articles from which we
+drew data. A PRISMA\footnote{The Preferred Reporting Items for Systematic
+Reviews and Meta-Analyses (PRISMA) statement provides a checklist designed
+to improve the quality and transparency of study selection processes in
+meta-analyses. For more information on the PRISMA framework, see
+\citet{liberati2009prisma}.} flow diagram showing the number of resulting
+papers after each review step is available in the Supplementary Material.
 
 \footnotesize
 \begin{longtable}{>{\raggedright\arraybackslash}p{2.9cm}>{\raggedright\arraybackslash}p{4.5cm}>{\centering\arraybackslash}p{1.3cm}>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{1.4cm}>{\centering\arraybackslash}p{2.4cm}}
@@ -391,9 +394,9 @@ only started a few years later, as dates of publishing range from `r min(dat$yea
 to `r max(dat$year)`. Most studies focus on the United States (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='USA')])`), but our sample also contains
 papers on Australia (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='AUS')])`), Brazil (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='BRA')])`), Germany (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='DEU')])`), Indonesia (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='IDN')])`), Italy (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='ITA')])`), and
 Switzerland (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='CHE')])`). Five articles use cross-national data and analyse from 2 to 110
-countries. Early studies employed OLS and panel data methods to analyse the
+countries. Early studies used OLS and panel data methods to estimate the
 results, whereas the use of regression discontinuity designs is a recent
-addition to the literature, starting in 2012.
+addition to the literature, as the first paper to apply it was published in 2012.
 
 Regarding the dependent variables included in the sample, `r as.numeric(table(unique(dat[,c('id','depvar2')])$depvar2)[which(names(table(unique(dat[,c('id','depvar2')])$depvar2))=='ExpPC')])` studies employ
 public expenditure per capita, `r as.numeric(table(unique(dat[,c('id','depvar2')])$depvar2)[which(names(table(unique(dat[,c('id','depvar2')])$depvar2))=='logExpPC')])` papers use its natural logarithm, and `r as.numeric(table(unique(dat[,c('id','depvar2')])$depvar2)[which(names(table(unique(dat[,c('id','depvar2')])$depvar2))=='PCTGDP')])` of them
@@ -511,7 +514,7 @@ sampling process and for the complete results.
 The "law of $1/n$" states that more legislators increase government expenditure.
 Here we employ three methods to assess the empirical validity of that
 relationship. First, we run a binomial one-proportion z-test to determine
-whether the study coefficients have a positive or negative sign. Then, we fit 7
+whether the study coefficients have a positive or negative sign. Then, we fit 9
 random-effect models using the \texttt{meta} \citep{balduzzi2019perform} and the
 \texttt{dmetar} \citep{dmetar2019} packages for the \texttt{R} statistical
 language \citep{rstats2019}. We estimate the true effect size variance
@@ -555,18 +558,8 @@ We then proceed to the meta-analysis. We matched the house size variables with
 our measures of government spending and created a theoretical $3 \times 3$
 matrix. Out of the 9 possible variable combinations, we found only 7 in
 the article pool. Our sample includes no papers that analyse the relationships
-between log($n$), and public expenditure per capita and between $k$ and the
+between log($n$) and public expenditure per capita or between $k$ and the
 logarithm of public expenditure per capita.
-
-Figure \ref{fig:plots} shows the forest plots for our restricted sample, the one
-which includes only the main `r dim(dat)[1]` coefficients for the 
-`r length(unique(dat$id))` selected papers. On the left side of the plots are 
-the name of the study authors and the paper publication year. For unpublished
-studies, we included the first year the paper was available online. The bars in
-the middle show the reported effect sizes and the vertical lines indicate their
-average, weighted by standard errors. The length of the lines represent the
-precision of the estimates. The red line at the bottom of the figures displays
-the aggregate coefficients plus their respective confidence intervals.
 
 ```{r, echo = FALSE, message = FALSE, warning = FALSE, cache=TRUE}
 mod <- list()
@@ -700,6 +693,27 @@ mod[[9]] <- metagen(coef, SE, data=aux,
           sm="SMD")
 ```
 
+\begin{landscape}
+\begin{figure}[htb]
+\begin{center}
+\caption{Forest plots of the relationship between legislature size and government spending (reduced sample)}
+\vspace{.3cm}
+\includegraphics[width=25cm,height=17cm]{../graphs/graph1.pdf}
+\label{fig:plots}
+\end{center}
+\end{figure}
+\end{landscape}
+
+Figure \ref{fig:plots} shows the forest plots for our restricted sample,
+which includes only the `r dim(dat)[1]` main coefficients of the 
+`r length(unique(dat$id))` selected papers. On the left side of the plots are 
+the name of the study authors and the paper publication year. For unpublished
+studies, we included the first year the paper was available online. The bars in
+the middle show the reported effect sizes and the vertical lines indicate their
+average, weighted by standard errors. The length of the lines represent the
+precision of the estimates. The red line at the bottom of the figures displays
+the aggregate coefficients plus their respective confidence intervals.
+
 The first column of the graph reports the results for $n$, lower chamber size.
 In the first model, which correlates $n$ and expenditure per capita, we find a
 standardised mean difference (SMD) of `r round(mod[[1]]$TE.random,3)` and a standard error of `r round(mod[[1]]$seTE.random,3)`
@@ -724,17 +738,6 @@ sample and the coefficient is statistically significant at the 10\% level
 `r round(mod[[8]]$pval.random,3)`, prediction interval = [`r round(mod[[8]]$lower.predict,3)`; `r round(mod[[8]]$upper.predict,3)`], $I^2$ = `r round(mod[[8]]$I2*100, 2)`\%). The 
 result supports the "law of 1/$n$", but the evidence is moderate
 as the prediction interval include zero.
-
-\begin{landscape}
-\begin{figure}[p]
-\begin{center}
-\caption{Forest plots of the relationship between legislature size and government spending (reduced sample)}
-\vspace{.3cm}
-\includegraphics[width=25cm,height=17cm]{../graphs/graph1.pdf}
-\label{fig:plots}
-\end{center}
-\end{figure}
-\end{landscape}
 
 Next, we present the meta-analyses using log($n$), the logarithm of lower house
 size, as the main explanatory variable. We start with the relationship between
@@ -767,7 +770,7 @@ significant, indicating a null effect (studies = `r mod[[7]]$k`, SMD = `r round(
 = [`r round(mod[[7]]$lower.random,3)`; `r round(mod[[7]]$upper.random,3)`], $p$-value = `r round(mod[[7]]$pval.random,3)`, prediction interval = [`r round(mod[[7]]$lower.predict,3)`; `r round(mod[[7]]$upper.predict,3)`],
 $I^2$ = `r round(mod[[7]]$I2*100, 2)`\%). The result is very similar in the extended sample.
 
-In a nutshell, we find no robust evidence in favour of the "law of $1/n$".
+In a nutshell, we do not find strong evidence in favour of the "law of $1/n$".
 While some models do show a positive and statistically significant result, none
 of the prediction intervals are totally positive or negative. The studies also
 have considerable heterogeneity, what indicates that the original coefficients
@@ -776,27 +779,29 @@ do not point consistently towards the same direction.
 One reason why we have not detected any strong effects may be due to the
 identification strategy authors use in their models. On the one hand, OLS and
 panel data models require too many controls to make units comparable, and they
-are also vulnerable to omitted variable bias or post-treatment bias
+are vulnerable to omitted variable bias or post-treatment bias
 [@cinelli2020making; @pearl2015conditioning]. On the other hand, estimation
-methods such as instrumental variables and, in particular, regression
-discontinuity designs have become popular because of their internal validity
-[@angrist2008mostly]. Figure \ref{fig:plots2} shows the disaggregated effects for
-two sets of models that employ causal estimation techniques. They measure the
-impact of lower house size on expenditure per capita (left) and on the natural
-logarithm of expenditure per capita (right).
+methods such as instrumental variables and regression discontinuity designs
+have become popular because of their high internal validity
+[@angrist2008mostly]. Figure \ref{fig:plots2} shows the disaggregated effects
+for two sets of models that employ causal estimation techniques. They measure
+the impact of lower house size on expenditure per capita (left) and on the
+natural logarithm of expenditure per capita (right).
 
-\newpage 
+\vspace{.06cm}
 
-\begin{figure}[htb!]
+\begin{figure}[htb]
 \begin{center}
 \caption{Forest plots of the relationship between legislature size and government spending with regression method heterogeneity (restricted sample)}
 \vspace{.3cm}
-\includegraphics[width=1\linewidth]{../graphs/graph2.pdf}
+\includegraphics[width=1\linewidth, height=7.5cm]{../graphs/graph2.pdf}
 \label{fig:plots2}
 \end{center}
 \end{figure}
 
-Papers that employed instrumental variables show an interesting variation: out
+\newpage 
+
+Papers that employed instrumental variables show some interesting variation: out
 of the four coefficients listed, two are positive and two are negative. Two of
 these four coefficients are significant, again one positive and one negative.
 The subgroup analysis presents a SMD which is negative but insignificant. In
@@ -821,12 +826,6 @@ coefficients that are smaller or larger than those from majoritarian countries.
 Our last covariate is a categorical variable indicating the statistical
 procedure used in the original models (panel data, instrumental variables,
 OLS, or regression discontinuity design).
-
-Table \ref{tabregressions} presents the meta-regression results for our
-restricted and extended samples. Each column represents one of the three
-measures of public spending we discuss in this paper. To reduce the risk of
-false positives in our analyses, we use permutation tests to calculate
-significance levels for the meta-regressions \citep{higgins2004controlling}.
 
 ```{r, echo = FALSE, warning = FALSE, message = FALSE, results = 'hide', cache = TRUE}
 res <- list()
@@ -1048,6 +1047,14 @@ Intercept & `r round(res[[3]][1,2],3)` & `r round(res[[4]][1,2],3)` & `r round(r
 \end{table}
 ```
 
+\newpage 
+
+Table \ref{tabregressions} presents the meta-regression results for our
+restricted and extended samples. Each column represents one of the three
+measures of public spending we discuss in this paper. To reduce the risk of
+false positives in our analyses, we use permutation tests to calculate
+significance levels for the meta-regressions \citep{higgins2004controlling}.
+
 The first two models show the results for public expenditure per capita. No
 variable reaches conventional levels of statistical significance in the
 restricted sample. In the extended sample, we find that models that use $n$ as
@@ -1100,12 +1107,12 @@ validity, consistently indicate a negative relationship between lower house size
 and the logarithm of expenditure per capita [@hohmann2017effect;
 @lewis2019legislature; @petterssonlidbom2012size].
 
-The meta-regressions indicate that study characteristics have a considerable
-influence on reported results. Factors such as the electoral system affects the
-relationship between legislature size and public expenditure, but the results
-are not replicable in all estimations. Publication year also produces
-conflicting findings in our models. Nevertheless, the meta-regressions confirm
-that RDDs produce negative effects more frequently than OLS regressions.
+The meta-regressions show that study characteristics have a considerable
+influence on reported results. Electoral system affects the relationship
+between legislature size and public expenditure, but the results are not
+replicable in all estimations. Publication year generates conflicting findings
+in our models. Nevertheless, the meta-regressions confirm that RDDs produce
+negative effects more frequently than OLS regressions.
 
 Why is there no clear-cut evidence in favour or against the "law of $1/n$"? A
 plausible reason may be that there are few incentives for the pure accumulation
