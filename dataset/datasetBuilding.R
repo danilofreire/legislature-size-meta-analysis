@@ -1,7 +1,7 @@
 ##################################################################
 ## Script: Building the Dataset for Distributive Politics Paper ##
 ## Authors: Alptekin, Freire, Mignozzetti, and Roman            ##
-## Last Modified: Nov 10, 2020                                  ##
+## Last Modified: MAr 12, 2021                                  ##
 ##################################################################
 
 # Needed packages
@@ -4617,6 +4617,74 @@ dat <- rbind(dat,
                scoef = 'N',
                scoefsig = 'N',
                SE = 1.314
+             ))
+
+# Paper A258
+dat <- rbind(dat,
+             data.frame(
+               id = 'A258',
+               published = 'Yes',
+               usemeta = 1, 
+               method = 'PANEL',
+               method2 = 'OLS/PANEL',
+               elecsys = 'Maj',
+               elecsys2 = 'Maj', 
+               elecsys3 = 'M',
+               agglevel = 'Local',
+               location = 'US',
+               locationISO = 'USA',
+               title = 'Government Form and Public Spending: Theory and Evidence from US Municipalities',
+               author = 'Coate and Knight',
+               authorCite = 'S. Coate & B. Knight',
+               year = 2011,
+               authoryear = 'Coate and Knight (2011)',
+               journal = 'American Economic Journal: Economic Policy',
+               journalCode = 'AEJ',
+               web = 'https://www.aeaweb.org/articles?id=10.1257/pol.3.3.82',
+               table = 4,
+               column = 2,
+               indepvar = 'Log Council Size',
+               indepvar2 = 'logN',
+               depvar = 'Log Public Spending Per Capita',
+               depvar2 = 'logExpPC',
+               coef = 0.1716,
+               scoef = 'P',
+               scoefsig = 'P',
+               SE = 0.0427
+             ))
+
+# Paper A117
+dat <- rbind(dat,
+             data.frame(
+               id = 'A117',
+               published = 'No',
+               usemeta = 1, 
+               method = 'RDD',
+               method2 = 'RDD',
+               elecsys = 'Mixed',
+               elecsys2 = 'Non-Maj', 
+               elecsys3 = 'NM',
+               agglevel = 'Local',
+               location = 'Italy',
+               locationISO = 'ITA',
+               title = 'The Effect of Council Size on Municipal Expenditures: Evidence from Italian Municipalities',
+               author = 'De Benedetto',
+               authorCite = 'M. De Benedetto',
+               year = 2018,
+               authoryear = 'De Benedetto (2018)',
+               journal = NA,
+               journalCode = 'Unpub',
+               web = 'http://eprints.bbk.ac.uk/26853/',
+               table = 4,
+               column = 2,
+               indepvar = 'Council Size',
+               indepvar2 = 'N',
+               depvar = 'Log Public Spending Per Capita',
+               depvar2 = 'logExpPC',
+               coef = -0.0048,
+               scoef = 'N',
+               scoefsig = 'N',
+               SE = 0.0025
              ))
 
 # Processing
