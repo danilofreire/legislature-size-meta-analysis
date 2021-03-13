@@ -4722,4 +4722,3 @@ dat <- dat %>%
 
 ## Saving
 save.image('./dataset/dataCoefs.RData')
-
