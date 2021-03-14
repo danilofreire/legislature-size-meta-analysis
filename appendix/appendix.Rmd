@@ -55,7 +55,8 @@ set.seed(732578) # From random.org
 pkgs <- c("tidyverse", "meta", "metafor",
           "readxl", "devtools", "data.table",
           "knitr", "gridGraphics", "gridExtra",
-          "ggpubr", "kableExtra", "magick")
+          "ggpubr", "kableExtra", "magick",
+          'stargazer', 'pander', 'broom')
 
 # Install if not already installed
 install <- function(x) {
@@ -475,7 +476,7 @@ For the number of legislators in the lower house ($N$), the results follow below
 ```{r, size="footnotesize", echo = FALSE, cache=TRUE}
 aux <- filter(dat, indepvar2 == "N")
 aux2 <- binom.test(table(aux$scoef)[2], sum(table(aux$scoef)), p = 0.5)
-aux2
+pander(tidy(aux2)[,-c(2,4,5,6)][,c(3,4,1,2)])
 ```
 
 Under the null hypothesis of $p=0.5$, we find that `r as.numeric(table(aux$scoef)[2])` studies, out of `r sum(table(aux$scoef))`, had a positive sign. The chance of a distribution with $p=0.5$ generate this sample is equal to p-value = `r round(as.numeric(aux2$p.value), 3)`. Therefore, we `r ifelse(as.numeric(aux2$p.value)<0.1, 'accept', 'reject')` the hypothesis that $p \neq 0.5$.
@@ -485,7 +486,7 @@ For the log of the number of legislators in the lower house ($\log(N)$), the res
 ```{r, size="footnotesize", echo = FALSE, cache=TRUE}
 aux <- filter(dat, indepvar2 == "logN")
 aux2 <- binom.test(table(aux$scoef)[2], sum(table(aux$scoef)), p = 0.5)
-aux2
+pander(tidy(aux2)[,-c(2,4,5,6)][,c(3,4,1,2)])
 ```
 
 Out of `r sum(table(aux$scoef))`, `r as.numeric(table(aux$scoef)[2])` had a positive sign. The chance of a distribution with $p=0.5$ generate this sample is equal to p-value = `r round(as.numeric(aux2$p.value), 3)`. So we `r ifelse(as.numeric(aux2$p.value)<0.1, 'accept', 'reject')` the hypothesis that $p \neq 0.5$.
@@ -495,7 +496,7 @@ Finally, for the number of legislators in the upper house ($K$), the results are
 ```{r, size="footnotesize", echo = FALSE, cache=TRUE}
 aux <- filter(dat, indepvar2=='K')
 aux2 <- binom.test(table(aux$scoef)[2], sum(table(aux$scoef)), p=0.5)
-aux2
+pander(tidy(aux2)[,-c(2,4,5,6)][,c(3,4,1,2)])
 ```
 
 Here we see that `r as.numeric(table(aux$scoef)[2])` out of `r sum(table(aux$scoef))` had a positive sign. The p-value for this test is `r round(as.numeric(aux2$p.value), 3)`. Therefore, we `r ifelse(as.numeric(aux2$p.value)<0.1, 'accept', 'reject')` the hypothesis that $p \neq 0.5$. This is the only test that presents evidence of an association between the legislature size and expenditure.
