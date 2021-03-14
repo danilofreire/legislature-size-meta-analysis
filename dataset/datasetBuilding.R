@@ -6,7 +6,7 @@
 
 # Needed packages
 rm(list=ls())
-pkgs <- c('tidyverse')
+pkgs <- c('tidyverse', 'data.table')
 
 # Install if not already installed
 installIfNot <- function(x) {
@@ -4653,6 +4653,140 @@ dat <- rbind(dat,
                SE = 0.0427
              ))
 
+# Paper A258
+dat <- rbind(dat,
+             data.frame(
+               id = 'A258',
+               published = 'Yes',
+               usemeta = 0, 
+               method = 'PANEL',
+               method2 = 'OLS/PANEL',
+               elecsys = 'Maj',
+               elecsys2 = 'Maj', 
+               elecsys3 = 'M',
+               agglevel = 'Local',
+               location = 'US',
+               locationISO = 'USA',
+               title = 'Government Form and Public Spending: Theory and Evidence from US Municipalities',
+               author = 'Coate and Knight',
+               authorCite = 'S. Coate & B. Knight',
+               year = 2011,
+               authoryear = 'Coate and Knight (2011)',
+               journal = 'American Economic Journal: Economic Policy',
+               journalCode = 'AEJ',
+               web = 'https://www.aeaweb.org/articles?id=10.1257/pol.3.3.82',
+               table = 4,
+               column = 1,
+               indepvar = 'Log Council Size',
+               indepvar2 = 'logN',
+               depvar = 'Log Public Spending Per Capita',
+               depvar2 = 'logExpPC',
+               coef = 0.1772,
+               scoef = 'P',
+               scoefsig = 'P',
+               SE = 0.0439
+             ))
+
+dat <- rbind(dat,
+             data.frame(
+               id = 'A258',
+               published = 'Yes',
+               usemeta = 0, 
+               method = 'PANEL',
+               method2 = 'OLS/PANEL',
+               elecsys = 'Maj',
+               elecsys2 = 'Maj', 
+               elecsys3 = 'M',
+               agglevel = 'Local',
+               location = 'US',
+               locationISO = 'USA',
+               title = 'Government Form and Public Spending: Theory and Evidence from US Municipalities',
+               author = 'Coate and Knight',
+               authorCite = 'S. Coate & B. Knight',
+               year = 2011,
+               authoryear = 'Coate and Knight (2011)',
+               journal = 'American Economic Journal: Economic Policy',
+               journalCode = 'AEJ',
+               web = 'https://www.aeaweb.org/articles?id=10.1257/pol.3.3.82',
+               table = 4,
+               column = 3,
+               indepvar = 'Log Council Size',
+               indepvar2 = 'logN',
+               depvar = 'Log Public Spending Per Capita',
+               depvar2 = 'logExpPC',
+               coef = 0.1558,
+               scoef = 'P',
+               scoefsig = 'P',
+               SE = 0.0448
+             ))
+
+dat <- rbind(dat,
+             data.frame(
+               id = 'A258',
+               published = 'Yes',
+               usemeta = 0, 
+               method = 'PANEL',
+               method2 = 'OLS/PANEL',
+               elecsys = 'Maj',
+               elecsys2 = 'Maj', 
+               elecsys3 = 'M',
+               agglevel = 'Local',
+               location = 'US',
+               locationISO = 'USA',
+               title = 'Government Form and Public Spending: Theory and Evidence from US Municipalities',
+               author = 'Coate and Knight',
+               authorCite = 'S. Coate & B. Knight',
+               year = 2011,
+               authoryear = 'Coate and Knight (2011)',
+               journal = 'American Economic Journal: Economic Policy',
+               journalCode = 'AEJ',
+               web = 'https://www.aeaweb.org/articles?id=10.1257/pol.3.3.82',
+               table = 4,
+               column = 4,
+               indepvar = 'Log Council Size',
+               indepvar2 = 'logN',
+               depvar = 'Log Public Spending Per Capita',
+               depvar2 = 'logExpPC',
+               coef = 0.2132,
+               scoef = 'P',
+               scoefsig = 'P',
+               SE = 0.0491
+             ))
+
+dat <- rbind(dat,
+             data.frame(
+               id = 'A258',
+               published = 'Yes',
+               usemeta = 0, 
+               method = 'PANEL',
+               method2 = 'OLS/PANEL',
+               elecsys = 'Maj',
+               elecsys2 = 'Maj', 
+               elecsys3 = 'M',
+               agglevel = 'Local',
+               location = 'US',
+               locationISO = 'USA',
+               title = 'Government Form and Public Spending: Theory and Evidence from US Municipalities',
+               author = 'Coate and Knight',
+               authorCite = 'S. Coate & B. Knight',
+               year = 2011,
+               authoryear = 'Coate and Knight (2011)',
+               journal = 'American Economic Journal: Economic Policy',
+               journalCode = 'AEJ',
+               web = 'https://www.aeaweb.org/articles?id=10.1257/pol.3.3.82',
+               table = 4,
+               column = 4,
+               indepvar = 'Log Council Size',
+               indepvar2 = 'logN',
+               depvar = 'Log Public Spending Per Capita',
+               depvar2 = 'logExpPC',
+               coef = 0.2132,
+               scoef = 'P',
+               scoefsig = 'P',
+               SE = 0.0491
+             ))
+
+
 # Paper A117
 dat <- rbind(dat,
              data.frame(
@@ -4687,6 +4821,39 @@ dat <- rbind(dat,
                SE = 0.0025
              ))
 
+dat <- rbind(dat,
+             data.frame(
+               id = 'A117',
+               published = 'No',
+               usemeta = 0, 
+               method = 'RDD',
+               method2 = 'RDD',
+               elecsys = 'Mixed',
+               elecsys2 = 'Non-Maj', 
+               elecsys3 = 'NM',
+               agglevel = 'Local',
+               location = 'Italy',
+               locationISO = 'ITA',
+               title = 'The Effect of Council Size on Municipal Expenditures: Evidence from Italian Municipalities',
+               author = 'De Benedetto',
+               authorCite = 'M. De Benedetto',
+               year = 2018,
+               authoryear = 'De Benedetto (2018)',
+               journal = NA,
+               journalCode = 'Unpub',
+               web = 'http://eprints.bbk.ac.uk/26853/',
+               table = 4,
+               column = 1,
+               indepvar = 'Council Size',
+               indepvar2 = 'N',
+               depvar = 'Log Public Spending Per Capita',
+               depvar2 = 'logExpPC',
+               coef = -0.0046,
+               scoef = 'N',
+               scoefsig = 'N',
+               SE = 0.0024
+             ))
+
 # Processing
 dat <- unique(dat)
 dat <- dat[order(dat$id),]
@@ -4714,6 +4881,16 @@ dat$scoefnd[dat$scoefsig=='Positive'&dat$scoef=='Positive'&!is.na(dat$scoefsig)]
 dat$scoefnd[dat$scoefnd=='Positive'] = 'Positive Insignificant'
 dat$scoefnd[dat$scoefsig=='Negative'&dat$scoef=='Negative'&!is.na(dat$scoefsig)] = 'Negative Significant'
 dat$scoefnd[dat$scoefnd=='Negative'] = 'Negative Insignificant'
+
+# Create indicator
+dat <- arrange(dat, id) %>%
+  mutate(id_paper = rleid(id)) %>%
+  group_by(id_paper) %>%
+  mutate(id_model = row_number()) %>%
+  ungroup() %>%
+  relocate(id_paper, .after = id) %>%
+  relocate(id_model, .before = id_paper) %>%
+  mutate(VAR = SE^2)
 
 # Full data and partial data
 fulldat <- dat
