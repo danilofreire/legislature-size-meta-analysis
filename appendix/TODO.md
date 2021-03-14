@@ -12,3 +12,6 @@
 
 6. Section G1: add citations supporting why REML is best for continuous data.
 
+7. Section G1: Explain three-level meta-analysis.
+
+8. Section G1: Explain Funnel Plots and publication bias.
