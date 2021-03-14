@@ -622,6 +622,16 @@ And the forest plot:
 build_forest(mod, NULL)
 ```
 
+And to assess the possibility of publication bias, we add funnel plot below:
+
+```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of upper house size (K) on per capita government expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
+funnel(mod, contour = c(.95,.975,.99),
+       col.contour=c("darkblue","blue","lightblue"))
+legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
+       fill=c("darkblue","blue","lightblue"))
+```
+
+
 ```{r, include=FALSE, warning=FALSE, echo = FALSE}
 f2 <- build_forest(mod, NULL, 15, ttl = 'Upper House Size\nand Expenditure Per Capita')
 ```
@@ -631,6 +641,7 @@ Highlights:
 1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Lower House Size and Log Expenditure Per Capita
 
@@ -662,6 +673,16 @@ The forest plot is as follows:
 build_forest(mod, NULL)
 ```
 
+And to assess the possibility of publication bias, we add funnel plot below:
+
+```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on log of per capita expenditure (logExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
+funnel(mod, contour = c(.95,.975,.99),
+       col.contour=c("darkblue","blue","lightblue"))
+legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
+       fill=c("darkblue","blue","lightblue"))
+```
+
+
 ```{r,include=F, echo = FALSE, warning=F, cache=TRUE}
 f3 <- build_forest(mod, NULL, 15, ttl = 'Lower House Size\nand Log Expenditure Per Capita')
 ```
@@ -671,6 +692,7 @@ Highlights:
 1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Log of Lower House Size and Log of Expenditure Per Capita
 
@@ -699,6 +721,16 @@ The forest plot is available below:
 build_forest(mod, NULL)
 ```
 
+And to assess the possibility of publication bias, we add funnel plot below:
+
+```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of log lower houses size (N) on log of per capita government expenditure (logExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
+funnel(mod, contour = c(.95,.975,.99),
+       col.contour=c("darkblue","blue","lightblue"))
+legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
+       fill=c("darkblue","blue","lightblue"))
+```
+
+
 ```{r,include=F, echo = FALSE, warning=F, cache=TRUE}
 f4  <- build_forest(mod, NULL, 15, ttl = 'Log of Lower House Size\nand Log of Expenditure Per Capita')
 ```
@@ -708,6 +740,7 @@ Highlights:
 1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`). **This model is significant at the 10% confidence level.**
 3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Upper House Size and Log of Expenditure Per Capita
 
@@ -740,6 +773,15 @@ Below, you may find the forest plot:
 build_forest(mod, NULL)
 ```
 
+And to assess the possibility of publication bias, we add funnel plot below:
+
+```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on percentage of public expenditure GDP (PCTGDP)", warning=FALSE, cache=TRUE, echo = FALSE}
+funnel(mod, contour = c(.95,.975,.99),
+       col.contour=c("darkblue","blue","lightblue"))
+legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
+       fill=c("darkblue","blue","lightblue"))
+```
+
 ```{r, include=F, warning=F, echo = FALSE, cache=TRUE}
 f5 <- build_forest(mod, NULL, 15, ttl = 'Lower House Size\nand Expenditure as Percentage of GDP')
 ```
@@ -749,6 +791,7 @@ Highlights:
 1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Log Lower House Size and Expenditure as Percentage of GDP
 
@@ -780,6 +823,16 @@ The forest plot follows below:
 build_forest(mod, NULL)
 ```
 
+And to assess the possibility of publication bias, we add funnel plot below:
+
+```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of log lower houses size (N) on the GDP share of public expenditure (PCTGDP)", warning=FALSE, cache=TRUE, echo = FALSE}
+funnel(mod, contour = c(.95,.975,.99),
+       col.contour=c("darkblue","blue","lightblue"))
+legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
+       fill=c("darkblue","blue","lightblue"))
+```
+
+
 ```{r, include=F, warning=F, cache=TRUE, echo = FALSE}
 f6 <- build_forest(mod, NULL, 15, ttl = 'Log Lower House Size\nand Expenditure as Percentage of GDP')
 ```
@@ -789,6 +842,7 @@ Highlights:
 1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Upper House Size and Expenditure as Percentage of GDP
 
@@ -817,6 +871,16 @@ The forest plot follows below:
 build_forest(mod, NULL)
 ```
 
+And to assess the possibility of publication bias, we add funnel plot below:
+
+```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of upper house size (K) on the public expenditure share of the GDP (PCTGDP)", warning=FALSE, cache=TRUE, echo = FALSE}
+funnel(mod, contour = c(.95,.975,.99),
+       col.contour=c("darkblue","blue","lightblue"))
+legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
+       fill=c("darkblue","blue","lightblue"))
+```
+
+
 ```{r, include=F, warning=F, cache=TRUE, echo = FALSE}
 f7 <- build_forest(mod, NULL, 15, ttl = 'Upper House Size\nand Expenditure as Percentage of GDP')
 ```
@@ -826,6 +890,7 @@ Highlights:
 1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Lower House Size and Expenditure per Capita (IV)
 
@@ -853,6 +918,16 @@ And the forest plot:
 build_forest(mod, NULL)
 ```
 
+And to assess the possibility of publication bias, we add funnel plot below:
+
+```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
+funnel(mod, contour = c(.95,.975,.99),
+       col.contour=c("darkblue","blue","lightblue"))
+legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
+       fill=c("darkblue","blue","lightblue"))
+```
+
+
 ```{r, include=F, warning=F, cache=TRUE, echo = FALSE}
 aux <- dat %>%
   filter(indepvar2 == 'N',
@@ -874,6 +949,7 @@ Highlights:
 1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ### Regression Method Subgroup Analysis
 
@@ -945,6 +1021,7 @@ Highlights:
 1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ### Regression Method Subgroup Analysis
 
@@ -1015,6 +1092,16 @@ The forest plot:
 ```{r, fig.width=12, fig.height=11, fig.cap="Effect of Lower House Size (N) on Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
 build_forest(mod, NULL)
 ```
+
+And to assess the possibility of publication bias, we add funnel plot below:
+
+```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
+funnel(mod, contour = c(.95,.975,.99),
+       col.contour=c("darkblue","blue","lightblue"))
+legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
+       fill=c("darkblue","blue","lightblue"))
+```
+
 
 Highlights:
 
@@ -1107,11 +1194,22 @@ And the forest plot:
 build_forest(mod, NULL)
 ```
 
+And to assess the possibility of publication bias, we add funnel plot below:
+
+```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of upper houses size (K) on Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
+funnel(mod, contour = c(.95,.975,.99),
+       col.contour=c("darkblue","blue","lightblue"))
+legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
+       fill=c("darkblue","blue","lightblue"))
+```
+
+
 Highlights:
 
 1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Lower House Size and Log of Expenditure Per Capita
 
@@ -1140,11 +1238,22 @@ The forest plot is shown below:
 build_forest(mod, NULL)
 ```
 
+And to assess the possibility of publication bias, we add funnel plot below:
+
+```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on log of Per Capita Expenditure (logExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
+funnel(mod, contour = c(.95,.975,.99),
+       col.contour=c("darkblue","blue","lightblue"))
+legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
+       fill=c("darkblue","blue","lightblue"))
+```
+
+
 Highlights:
 
 1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Log of Lower House Size and Log of Expenditure Per Capita
 
@@ -1173,11 +1282,22 @@ The forest plot:
 build_forest(mod, NULL)
 ```
 
+And to assess the possibility of publication bias, we add funnel plot below:
+
+```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of log of lower houses size (logN) on log of Per Capita Expenditure (logExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
+funnel(mod, contour = c(.95,.975,.99),
+       col.contour=c("darkblue","blue","lightblue"))
+legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
+       fill=c("darkblue","blue","lightblue"))
+```
+
+
 Highlights:
 
 1.  The results are highly heterogeneous: \$I\^2 = \$ `r round(mod$I2*100, 2)`.
 2.  The estimated SMD in the random effects model is \$g = \$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`). **This model is significant at the 10% confidence level.**
 3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Upper House Size and Log of Expenditure Per Capita
 
@@ -1210,11 +1330,22 @@ Here is the forest plot:
 build_forest(mod, NULL)
 ```
 
+And to assess the possibility of publication bias, we add funnel plot below:
+
+```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on percentage of public expenditure GDP (PCTGDP)", warning=FALSE, cache=TRUE, echo = FALSE}
+funnel(mod, contour = c(.95,.975,.99),
+       col.contour=c("darkblue","blue","lightblue"))
+legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
+       fill=c("darkblue","blue","lightblue"))
+```
+
+
 Highlights:
 
 1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Log of Lower House Size and Expenditure as Percentage of GDP
 
@@ -1243,11 +1374,22 @@ The forest plot:
 build_forest(mod, NULL)
 ```
 
+And to assess the possibility of publication bias, we add funnel plot below:
+
+```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of log of lower houses size (logN) on log of Per Capita Expenditure (logExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
+funnel(mod, contour = c(.95,.975,.99),
+       col.contour=c("darkblue","blue","lightblue"))
+legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
+       fill=c("darkblue","blue","lightblue"))
+```
+
+
 Highlights:
 
 1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Upper House Size and Expenditure as Percentage of GDP
 
@@ -1276,11 +1418,22 @@ And the forest plot:
 build_forest(mod, NULL)
 ```
 
+And to assess the possibility of publication bias, we add funnel plot below:
+
+```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of upper houses size (K) on the public expenditure share of GDP (PCTGDP)", warning=FALSE, cache=TRUE, echo = FALSE}
+funnel(mod, contour = c(.95,.975,.99),
+       col.contour=c("darkblue","blue","lightblue"))
+legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
+       fill=c("darkblue","blue","lightblue"))
+```
+
+
 Highlights:
 
 1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Lower House Size and Expenditure per Capita (IV)
 
@@ -1308,11 +1461,21 @@ And the forest plot:
 build_forest(mod, NULL)
 ```
 
+And to assess the possibility of publication bias, we add funnel plot below:
+
+```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
+funnel(mod, contour = c(.95,.975,.99),
+       col.contour=c("darkblue","blue","lightblue"))
+legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
+       fill=c("darkblue","blue","lightblue"))
+```
+
 Highlights:
 
 1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Lower House Size and Log of Expenditure per Capita (RDD)
 
@@ -1336,15 +1499,26 @@ mod
 
 And the forest plot:
 
-```{r, fig.width=8, fig.height=4, fig.cap="Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)",warning=FALSE, cache=TRUE, echo = FALSE}
+```{r, fig.width=8, fig.height=4, fig.cap="Effect of lower houses size (N) on log of Per Capita Expenditure (logExpPC)",warning=FALSE, cache=TRUE, echo = FALSE}
 build_forest(mod, NULL)
 ```
+
+And to assess the possibility of publication bias, we add funnel plot below:
+
+```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on log of Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
+funnel(mod, contour = c(.95,.975,.99),
+       col.contour=c("darkblue","blue","lightblue"))
+legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
+       fill=c("darkblue","blue","lightblue"))
+```
+
 
 Highlights:
 
 1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
 2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
 3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 # Meta-Regressions
 
