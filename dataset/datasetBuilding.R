@@ -1,7 +1,7 @@
 ##################################################################
 ## Script: Building the Dataset for Distributive Politics Paper ##
 ## Authors: Alptekin, Freire, Mignozzetti, and Roman            ##
-## Last Modified: Mar 12, 2021                                  ##
+## Last Modified: Mar 14, 2021                                  ##
 ##################################################################
 
 # Needed packages

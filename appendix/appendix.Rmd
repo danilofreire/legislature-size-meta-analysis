@@ -26,6 +26,14 @@ output:
     template: template.latex
 ---
 
+[^alptekin]: Research Associate, Contemporary Brazilian History Research and Documentation Center, School of Social Sciences, Fundação Getulio Vargas, <huzeyfealptekin@gmail.com>.
+
+[^freire]: Independent Researcher, <danilofreire@gmail.com>, <https://danilofreire.github.io>. Corresponding author.
+
+[^mignozzetti]: Visiting Assistant Professor, Quantitative Theory and Methods Department, Emory University, <umberto.mignozzetti@emory.edu>, <http://umbertomig.com>.
+
+[^roman]: Research Associate, School of International Relations, Fundação Getulio Vargas, <catarinamroman@gmail.com>, <http://catarinaroman.github.io>.
+
 \appendix
 
 ```{r, include=FALSE}
