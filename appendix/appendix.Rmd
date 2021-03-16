@@ -75,8 +75,38 @@ library("compareGroups"); library(dmetar)
 # Load datasets
 load("../dataset/dataCoefs.RData")
 
+# Broom the multi-level model
+broom_mod <- function(mod) {
+  aux <- data.frame(predict(mod))
+  mod2 <- tibble(
+    TE = as.numeric(mod$yi),
+    seTE = sqrt(mod$vi),
+    studlab = mod$slab,
+    lower = as.numeric(mod$yi)-1.96*sqrt(mod$vi),
+    upper = as.numeric(mod$yi)+1.96*sqrt(mod$vi),
+    group = 'A') %>%
+    bind_rows(.,
+              aux = tibble(
+                TE = c(aux$pred, NA),
+                seTE = c(aux$se, NA),
+                studlab = c("Overall Effect",
+                            "Prediction Interval"),
+                lower = c(aux$ci.lb,
+                          aux$cr.lb),
+                upper = c(aux$ci.ub,
+                          aux$cr.ub),
+                group = "B")) %>%
+    group_by(studlab) %>%
+    mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
+    ungroup()
+  return(mod2)
+}
+
 # Build plot function for forest plots
 build_forest <- function(mod, capt, lsize = 22, ttl = NULL) {
+  if(class(mod)[1] == "rma.mv") {
+    mod2 <- broom_mod(mod)
+  } else {
   # Build dataset for plot
   mod2 <- tibble(
     TE = mod$TE,
@@ -99,6 +129,7 @@ build_forest <- function(mod, capt, lsize = 22, ttl = NULL) {
     group_by(studlab) %>%
     mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
     ungroup()
+  }
 
   # Graph limits
   limg <- max(abs(c(mod2$lower, mod2$upper)))
@@ -510,7 +541,7 @@ Here we see that `r as.numeric(table(aux$scoef)[2])` out of `r sum(table(aux$sco
 
 In general terms, there are two main ways to conduct a meta-analysis, either by using fixed effects or by employing random effects models. The fixed effects model assumes that there is one true effect in reality, and that all estimates are an attempt to uncover this true effect. The random effects model, in contrast, assumes that there is a distribution of true effects, and that the coefficients vary based on sample and tests characteristics.
 
-In this paper, we use the random effects model. The empirical papers testing the *law of 1/n* are very diverse. We tried to capture some of this diversity by considering the main dependent and independent variables separately, but they have at least three other important sources of dispersion:
+In this paper, we use a multi-level random effects model. The difference between a simple random effects model, and a multi-level random effects model is that we can specify multiple levels of empirical dependency in the data (). The empirical papers testing the *law of 1/n* are very diverse. We tried to capture some of this diversity by considering the main dependent and independent variables separately, but they have at least three other important sources of dispersion:
 
 1.  **Subjects**: Counties, Municipalities, States, Provinces, Countries.
 2.  **Electoral systems**: Majoritarian, PR, Mixed.
@@ -532,7 +563,7 @@ $$
 
 And the random effects model estimates the parameter $\mu$, under the challenge of estimating both the within-and-between-study sampling errors.
 
-In all empirical estimates, we use the package `meta`, and the package `dmetar`, described in [Doing Meta-Analysis with R](https://bookdown.org/MathiasHarrer/Doing_Meta_Analysis_in_R/random.html). To empirically implement the random effects model, we need to choose a method to estimate the true effect size variance, $\tau^2$, which in our formulation, represents the variance of $\xi_i$. We selected the **Restricted Maximum Likelihood Estimator**, as the literature regards it the most precise when analysing continuous measures, such as we have in our data (XXXX TO UMBERTO: PUT CITATION HERE).
+In all empirical estimates, we use the package `meta`, and the package `dmetar`, described in [Doing Meta-Analysis with R](https://bookdown.org/MathiasHarrer/Doing_Meta_Analysis_in_R/random.html). To empirically implement the random effects model, we need to choose a method to estimate the true effect size variance, $\tau^2$, which in our formulation, represents the variance of $\xi_i$. We selected the **Restricted Maximum Likelihood Estimator**, as the literature regards it the most precise when analysing continuous measures, such as we have in our data (@veroniki2016methods).
 
 We combined the three independent variables ($N$, $\log(N)$, and $K$) with our dependent variables of interest (Expenditure Per Capita, Log of Expenditure Per Capita, Expenditure as a Percentage of the GDP). This formed a $3 \times 3$ table, and in the following pages we present the results for each of these combinations.
 
@@ -1046,19 +1077,12 @@ build_forest_het(mod, capt = NULL, hetvar = aux$method)
 
 For the RDD subgroup analysis, we can see a much clearer picture. All estimates are negative, and the subgroup effect is -0.11. This suggests that improving the estimation renders to a negative result that is likely to hold conditional on more papers using the technique displaying the same effect size and sign.
 
-# Code for the Main Graphs
-
-## Figure 1
-
-```{r, echo=T, warning=F, cache=TRUE, echo = FALSE}
+```{r, warning=F, cache=TRUE, echo = FALSE}
+## Plot 1
 pdf('../graphs/graph1.pdf', width = 16, height = 11)
 ggarrange(f1,f3,f5,f4,f6,f2,f7, align = 'hv')
 dev.off()
-```
-
-## Figure 2
-
-```{r, echo=T, warning=F, cache=TRUE, echo = FALSE}
+## Plot 2
 pdf('../graphs/graph2.pdf', width = 12, height = 6)
 ggarrange(f8, f9, align = 'hv')
 dev.off()

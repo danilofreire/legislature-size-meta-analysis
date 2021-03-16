@@ -1,16 +1,16 @@
 # TODO Appendix
 
-1. Section A: Change the numbers to add new matched files
+1. Section A: Change the numbers to add new matched files. **To Catarina and Huzeyfe**
 
-2. Section B: Check if automated code is getting the article numbers rights. Should be 31 now.
+2. Section B: Check if automated code is getting the article numbers rights. Should be 31 now. **To Catarina and Huzeyfe**
 
-3. Section B: Change the Flow Chart to the new numbers of selected, and change the numbers in each step.
+3. Section B: Change the Flow Chart to the new numbers of selected, and change the numbers in each step. **To Catarina and Huzeyfe**
 
-4. Section C: check if the numbers are correct
+4. Section C: check if the numbers are correct. **To Catarina and Huzeyfe**
 
-5. Section C: describe new approach using three-level models.
+5. Section C: describe new approach using three-level models. **DONE**
 
-6. Section G1: add citations supporting why REML is best for continuous data.
+6. Section G1: add citations supporting why REML is best for continuous data. **DONE**
 
 7. Section G1: Explain three-level meta-analysis.
 
