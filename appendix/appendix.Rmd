@@ -76,8 +76,22 @@ library("compareGroups"); library(dmetar)
 load("../dataset/dataCoefs.RData")
 
 # Broom the multi-level model
-broom_mod <- function(mod) {
+broom_mod <- function(mod, subgroup = FALSE) {
   aux <- data.frame(predict(mod))
+  if (subgroup) {
+    teeff = aux$pred
+    seteeff = aux$se
+    labeff = c("Subgroup Effect")
+    loeff = c(aux$ci.lb)
+    upeff = c(aux$ci.ub)
+  } else {
+    teeff = c(aux$pred, NA)
+    seteeff = c(aux$se, NA)
+    labeff = c("Overall Effect",
+               "Prediction Interval")
+    loeff = c(aux$ci.lb, aux$cr.lb)
+    upeff = c(aux$ci.ub, aux$cr.ub)
+  }
   mod2 <- tibble(
     TE = as.numeric(mod$yi),
     seTE = sqrt(mod$vi),
@@ -87,19 +101,59 @@ broom_mod <- function(mod) {
     group = 'A') %>%
     bind_rows(.,
               aux = tibble(
-                TE = c(aux$pred, NA),
-                seTE = c(aux$se, NA),
-                studlab = c("Overall Effect",
-                            "Prediction Interval"),
-                lower = c(aux$ci.lb,
-                          aux$cr.lb),
-                upper = c(aux$ci.ub,
-                          aux$cr.ub),
+                TE = teeff,
+                seTE = seteeff,
+                studlab = labeff,
+                lower = loeff,
+                upper = upeff,
                 group = "B")) %>%
     group_by(studlab) %>%
     mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
     ungroup()
   return(mod2)
+}
+
+# Estimation of the 
+estim_het <- function(dat, yi, v, random, slab, hetvar = NULL) {
+  if (is.null(hetvar)) {
+    print('Hetvar should be different than null.')
+    break
+  }
+  levshetvar <- unique(hetvar)
+  fullmod <- rma.mv(yi = yi, V = v, random = random,
+                    data = dat, slab = slab, method = 'REML',
+                    test = 't', tdist = T)
+  res <- tibble()
+  for (i in levshetvar) {
+    partmod <- rma.mv(yi = yi, V = v, 
+                      random = random,
+                      data = dat, slab = slab, 
+                      method = 'REML',
+                      test = 't', tdist = T, 
+                      subset = hetvar == i)
+    partmod <- broom_mod(partmod, subgroup = T)
+    partmod$byvar = i
+    partmod <- bind_rows(
+      tibble(TE = NA, seTE = NA,
+             studlab = toupper(i), lower = NA,
+             upper = NA, group = "B", byvar = i),
+      partmod
+    )
+    res <- bind_rows(res, partmod)
+  }
+  aux <- data.frame(predict(fullmod))
+  res <- bind_rows(res,
+                   tibble(
+                     byvar = NA,
+                     TE = c(aux$pred, NA),
+                     seTE = c(aux$se, NA),
+                     studlab = c("Overall Effect", "Prediction Interval"),
+                     lower = c(aux$ci.lb, aux$cr.lb),
+                     upper = c(aux$ci.ub, aux$cr.ub),
+                     group = "B"))
+  res <- data.frame(res)
+  res$byvar <- toupper(res$byvar)
+  return(res)
 }
 
 # Build plot function for forest plots
@@ -171,7 +225,7 @@ build_forest <- function(mod, capt, lsize = 22, ttl = NULL) {
 
 # Build forest plot for heterogeneous analysis
 # Build plot function for forest plots
-build_forest_het <- function(mod, capt, lsize = 22, ttl = NULL, hetvar = NULL) {
+build_forest_het <- function(estims, capt, lsize = 22, ttl = NULL, hetvar = NULL) {
   mod <- update(mod, byvar = hetvar, print.byvar = F)
 
   # Build dataset for plot
