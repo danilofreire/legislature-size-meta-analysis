@@ -1448,9 +1448,115 @@ Highlights:
 
 # Meta-Regressions
 
-## Meta-Regressions for Expenditure as a Percentage of the GDP
+In the meta-regressions, we study the effects of a group of moderators on the reported government spending data. We select the following moderators:
 
-In this section, we show the coefficients for our meta-regressions. We start with expenditure as a percentage of GDP as the dependent variable.
+1. The independent variable (variable `indepvar2`):
+  - `K`: Upper House Size
+  - `N`: Lower House Size
+  - `logN`: Log of Lower House Size
+  
+2. Year that the paper was published (for working papers, the year it was posted online; variable `year`)
+
+3. A dummy indicating whether the paper was published or not (variable `published`).
+
+4. A dummy for non-majoritarian electoral systems (variable `elecsys2`).
+
+5. The estimation method used in the papers (variable `method`):
+  - `OLS`: Ordinary-Least Squares in Cross-Sectional data.
+  - `PANEL`: Time-Series Cross-Section models, with estimated fixed effects.
+  - `IV`: Instrumental Variables models.
+  - `RDD`: Regression Discontinuity Designs.
+  
+The results follows below, for the three combinations of dependent variables: Expenditure Per Capita, Log of Expenditure Per Capita, and Expenditure as a Percentage of the GDP.
+
+## Meta-Regressions for Expenditure Per Capita
+
+Here we study the expenditure per capita as the main outcome, aggregating all types of independent variables.
+
+```{r, size="footnotesize", error=F, warning=F, cache=T, echo = FALSE}
+mod <- rma.mv(yi = coef,
+              V = VAR,
+              data = dat,
+              method = "REML",
+              random = ~ 1 | id_level1/id_level2, 
+              mods = ~indepvar2+year+published+elecsys2+method,
+              test = "knha",
+              tdist = TRUE,
+              subset = dat$depvar2=='ExpPC',
+              slab = dat$authoryear)
+
+summary(mod)
+```
+
+For the meta-regressions of Expenditure Per Capita, we find no significant moderator. We also run the meta-regressions adding all coefficients in the papers. The results follow below:
+
+```{r, size="footnotesize", warning=F, cache=T, echo = FALSE}
+mod <- rma.mv(yi = coef,
+              V = VAR,
+              data = fulldat,
+              method = "REML",
+              random = ~ 1 | id_level1/id_level2, 
+              mods = ~indepvar2+year+published+elecsys2+method,
+              test = "knha",
+              tdist = TRUE,
+              subset = fulldat$depvar2=='ExpPC',
+              slab = fulldat$authoryear)
+
+summary(mod)
+```
+With all coefficients, the results of the effect sizes on the Expenditure Per Capita regressions are the following:
+
+1.  Compared with `K`, models with `N` tend to detect significantly smaller effects.
+
+2.  Year has now a positive effect on coefficient sizes.
+
+3.  All other coeffients were not significant.
+
+## Meta-Regressions for Log of Expenditure Per Capita
+
+```{r, size="footnotesize", warning=F, cache=T, echo = FALSE}
+mod <- rma.mv(yi = coef,
+              V = VAR,
+              data = dat,
+              method = "REML",
+              random = ~ 1 | id_level1/id_level2, 
+              mods = ~indepvar2+year+published+elecsys2+method,
+              test = "knha",
+              tdist = TRUE,
+              subset = dat$depvar2=='logExpPC',
+              slab = dat$authoryear)
+
+summary(mod)
+```
+
+The only significant result points that published papers tend to report a smaller coefficient than unpublished papers.
+
+Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
+
+```{r, size="footnotesize", warning=F, cache=T, echo = FALSE}
+mod <- rma.mv(yi = coef,
+              V = VAR,
+              data = fulldat,
+              method = "REML",
+              random = ~ 1 | id_level1/id_level2, 
+              mods = ~indepvar2+year+published+elecsys2+method,
+              test = "knha",
+              tdist = TRUE,
+              subset = fulldat$depvar2=='logExpPC',
+              slab = fulldat$authoryear)
+
+summary(mod)
+```
+
+With all coefficients, the results of the effect sizes on the Log of Expenditure Per Capita Regressions are the following:
+
+1. In terms of the modeling, passing from `OLS` to `PANEL` or `RDD` decreases the detected effects.
+
+2. Having the log of lower house seats (`logN`) as the main independent variable increases the detected effect.
+
+All other results are insignificant.
+
+## Meta-Regressions for Expenditure as a Percentage of the GDP
 
 ```{r, size="footnotesize", warning=F, cache=T, echo = FALSE}
 mod <- rma.mv(yi = coef,
@@ -1467,21 +1573,11 @@ mod <- rma.mv(yi = coef,
 summary(mod)
 ```
 
-As we have considerable heterogeneity in our sample, we run a permutation test to ensure the validity of our estimates. The results follow below.
-
-```{r, size="footnotesize", warning=F, cache=T, echo = FALSE}
-mod <- permutest(mod, progbar = F)
-mod
-```
-
 We have the following results for the meta-regressions of Expenditure as a Percentage of GDP:
 
-1.  Compared with `K`, models with `N` and `logN` find significantly negative coefficients.
-2.  Year has null effect.
-3.  Unpublished papers tend to have higher coefficients than published papers.
-4.  Passing from `Majoritarian` to `Non-Majoritarian`, decreases significantly the effects found in our models.
-5.  In terms of modelling, passing from `OLS` to `PANEL` increases the detected effects.
-6.  When passing from `Country` to `Cross-Country`, it has no effect on the estimated coefficients.
+1. Passing from `Majoritarian` to `Non-Majoritarian`, decreases significantly the effects found in our models.
+
+2. All other moderators remain insignificant.
 
 Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
 
@@ -1499,176 +1595,71 @@ mod <- rma.mv(yi = coef,
 summary(mod)
 ```
 
-```{r, size="footnotesize", warning=F, cache=T, echo = FALSE}
-mod <- permutest(mod, progbar = F)
-mod
-```
-
 For all the coefficients, we have the following results:
 
-1.  Compared with `K`, models with `N` and `logN` tend to have significantly negative coefficients.
-2.  Year has a positive effect: the younger the publication, the higher the detected coefficient.
-3.  Unpublished papers tend to have higher coefficients than published papers.
-4.  Passing from `Majoritarian` to `Non-Majoritarian` significantly decreases the effects found in our models.
-5.  Regarding statistical models, passing from `OLS` to `PANEL` increases the detected effects.
+1. Passing from `Majoritarian` to `Non-Majoritarian`, decreases significantly the effects found in our models.
 
-## Meta-Regressions for Expenditure Per Capita
-
-Here we do the same exercise with expenditure per capita as the main outcome.
-
-```{r, size="footnotesize", error=F, warning=F, cache=T, echo = FALSE}
-mod <-  rma(yi = coef,
-              sei = SE,
-              data = dat,
-              method = "REML",
-              mods = ~indepvar2+year+published+elecsys2+method,
-              test = "knha",
-            subset = dat$depvar2=='ExpPC',
-            slab = dat$authoryear,
-            control=list(maxiter=1000))
-summary(mod)
-```
-
-As we have considerable heterogeneity in our sample, we run a permutation test to ensure the validity of our estimates. The results follow below.
-
-```{r, size="footnotesize", error=F, warning=F, cache=T, echo = FALSE}
-mod <- permutest(mod, progbar = F)
-mod
-```
-
-We have the following results for the meta-regressions of Expenditure Per Capita:
-
-1.  Compared with `K`, models with `N` tend to detect significantly smaller effects.
-2.  Year has null effect.
-3.  `Majoritarian`, when compared to `Non-Majoritarian` electoral systems, significantly increase per capita expenditure.
-4.  Regarding statistical models, passing from `OLS` to `PANEL` or `IV` increases the detected effects.
-
-We also run the meta-regressions adding all coefficients in the papers. The results follow below:
-
-```{r, size="footnotesize", warning=F, cache=T, echo = FALSE}
-mod <- rma(yi = coef,
-              sei = SE,
-              data = fulldat,
-              method = "REML",
-              mods = ~ indepvar2+year+published+elecsys2+method,
-              test = "knha",
-            subset = fulldat$depvar2=='ExpPC',
-            slab = fulldat$authoryear)
-summary(mod)
-```
-
-```{r, size="footnotesize", warning=F, cache=T, echo = FALSE}
-mod <- permutest(mod, progbar = F, iter = 100)
-mod
-```
-
-With all coefficients, the results of the effect sizes on the Expenditure Per Capita regressions are the following:
-
-1.  Compared with `K`, models with `N` tend to detect significantly smaller effects.
-2.  Year has now a positive effect on coefficient sizes.
-3.  `Majoritarian`, when compared to `Non-Majoritarian` electoral systems, significantly increase per capita expenditure.
-4.  Regarding statistical models, passing from `OLS` to `PANEL` decreases the detected effects.
-5.  All other coeffients were not significant.
-
-## Meta-Regressions for Log of Expenditure Per Capita
-
-Lastly, we run the model with the natural logarithm of expenditure per capita.
-
-```{r, size="footnotesize", warning=F, cache=T, echo = FALSE}
-mod <- rma(yi = coef,
-              sei = SE,
-              data = dat,
-              method = "REML",
-              mods = ~indepvar2+year+published+elecsys2+method,
-              test = "knha",
-            subset = dat$depvar2=='logExpPC',
-            slab = dat$authoryear)
-summary(mod)
-```
-
-As we have considerable heterogeneity in our sample, we run a permutation test to ensure the validity of our estimates. The results follow below.
-
-```{r, size="footnotesize", warning=F, cache=T, echo = FALSE}
-mod <- permutest(mod, progbar = F)
-mod
-```
-
-For the meta-regressions of Log of Expenditure Per Capita we find no significant results.
-
-Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
-
-```{r, size="footnotesize", warning=F, cache=T, echo = FALSE}
-mod <- rma(yi = coef,
-              sei = SE,
-              data = fulldat,
-              method = "REML",
-              mods = ~ indepvar2+year+published+elecsys2+method,
-              test = "knha",
-            subset = fulldat$depvar2=='logExpPC',
-            slab = fulldat$authoryear)
-summary(mod)
-```
-
-```{r, warning=F, cache=T, echo = FALSE}
-mod <- permutest(mod, progbar = F)
-```
-
-With all coefficients, the results of the effect sizes on the Log of Expenditure Per Capita Regressions are the following:
-
-1.  In terms of the modelling, passing from `OLS` to `PANEL` or `RDD` decreases the detected effects.
-2.  All other coefficients remained insignificant.
+2. All other moderators remain insignificant.
 
 # Robustness: Meta-Regressions (All Coefficients)
 
 In this section, we aggregate all the coefficients and run a multivariate meta-regression, controlling for:
 
-1.  The type of the dependent variable in the study (expenditure per capita, log of the expenditure per capita, and share of government expenditure in the GDP)
-2.  The type of the independent variable in the study ($N$, $K$, $log (N)$);
-3.  The electoral system (Majoritarian, Proportional Representation, and Mixed).
+1. The type of the dependent variable in the study (expenditure per capita, log of the expenditure per capita, and share of government expenditure in the GDP).
+
+2. The type of the independent variable in the study (lower house size, upper house size, or log of lower house size).
+
+3. The electoral system (Majoritarian versus Non-Majoritarian).
+
+4. The year when the study was published.
+
+5. Whether the study is a working paper or published work.
+
+6. The estimation method used in the paper (OLS, PANEL, IV, or RDD).
 
 The results follow below, and show null effects for all variables, including the intercept.
 
 ```{r, size="footnotesize", warning=F, cache=T, echo = FALSE}
-mod <-  rma(yi = coef,
-              sei = SE,
+mod <- rma.mv(yi = coef,
+              V = VAR,
               data = dat,
               method = "REML",
-              mods = ~ depvar2+indepvar2+year+published+elecsys2+method,
-              test = "knha")
+              random = ~ 1 | id_level1/id_level2, 
+              mods = ~depvar2+indepvar2+year+
+                published+elecsys2+method,
+              test = "knha",
+              tdist = TRUE,
+              slab = dat$authoryear)
+
 summary(mod)
 ```
-
-As we have considerable heterogeneity in our sample, we run a permutation test to ensure the validity of our estimates. The results follow below.
-
-```{r, size="footnotesize", cache=T, echo = FALSE}
-permutest(mod, progbar = F)
-```
-
-In the main text, we selected coefficients based on the regressions that had most observations and presented a full model (with fixed effects or intermediate bandwidth in RDD). We also run the meta-regressions adding all coefficients in the papers. The results follow below:
+In the restricted model, with only the main coefficients in the selected papers, no moderator has a significant effect. We also run the meta-regressions adding all coefficients in the papers. The results follow below:
 
 ```{r, size="footnotesize", warning=F, cache=T, echo = FALSE}
-mod <- rma(yi = coef,
-              sei = SE,
+mod <- rma.mv(yi = coef,
+              V = VAR,
               data = fulldat,
               method = "REML",
-              mods = ~ depvar2+indepvar2+year+published+elecsys2+method,
-              test = "knha")
+              random = ~ 1 | id_level1/id_level2, 
+              mods = ~depvar2+indepvar2+year+
+                published+elecsys2+method,
+              test = "knha",
+              tdist = TRUE,
+              slab = fulldat$authoryear)
 summary(mod)
 ```
+In the full model, we can see that:
 
-```{r, size="footnotesize", cache=T, echo = FALSE}
-permutest(mod, progbar = F)
-```
+1. For the dependent variable, models with Log of Per Capita Expenditure tend to report significantly smaller effects than models with Per Capita Expenditure.
 
-```{=html}
-<!---
-# Auxiliary Functions
+2. For the independent variable, models with Log of Lower House Size tend to report significantly larger effects than models with Upper House Size.
 
-## Webscraping Code
-\label{sub:scrap}
+3. Over time, the reported coefficients have been increasing in size.
 
-The code we used to download the articles cited in our paper are in the appendix, under the file name `building_metadata_dataset.R`. --->
-```
+4. Compared with OLS, Panel and RDD report significantly smaller coefficients.
+
+5. All other moderators are insignificant.
+
 # Session Information
 
 ```{r, size="footnotesize", echo = FALSE}

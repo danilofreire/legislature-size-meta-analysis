@@ -24,8 +24,12 @@
 
 12. Section H: Remove the section and make the code not echo. **DONE**
 
-13. Fix meta-regressions to add the multilevel estimation.
+13. Fix meta-regressions to add the multilevel estimation. **DONE**
 
-14. Remove permutation tests. No permutation tests for the multilevel meta regressions.
+14. Remove permutation tests. No permutation tests for the multilevel meta regressions. **DONE**
 
-15. Change the interpretation of the meta-regressions.
+15. Change the interpretation of the meta-regressions. **DONE**
+
+16. Do a final sweep to check if it is all ok.
+
+17. Add the model section with info about weingast + other models like Primo, Lee, and others.
