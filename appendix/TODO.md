@@ -12,14 +12,16 @@
 
 6. Section G1: add citations supporting why REML is best for continuous data. **DONE**
 
-7. Section G1: Explain three-level meta-analysis.
+7. Section G1: Explain three-level meta-analysis. **DONE**
 
-8. Section G1: Explain Funnel Plots and publication bias.
+8. Section G1: Explain Funnel Plots and publication bias. **DONE**
 
-9. Sections G and I: Names of the models in the graphs, regressions, and plots are inconsistently used.
+9. Sections G and I: Names of the models in the graphs, regressions, and plots are inconsistently used. **DONE**
 
-10. Sections G and I: Check if all funnel plots were added.
+10. Sections G and I: Check if all funnel plots were added. **DONE**
 
-11. Section I: Remove all the funnel plots and funnel tests. Preferably: think what to do with this section.
+11. Section I: Remove all the funnel plots and funnel tests. Preferably: think what to do with this section. **DONE**
 
-12. Section H: Remove the section and make the code not echo.
+12. Section H: Remove the section and make the code not echo. **DONE**
+
+13. Fix meta-regressions to add the multilevel estimation.

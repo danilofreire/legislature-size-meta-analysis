@@ -223,50 +223,16 @@ build_forest <- function(mod, capt, lsize = 22, ttl = NULL) {
 }
 
 # Build forest plot for heterogeneous analysis
-# Build plot function for forest plots
-build_forest_het <- function(estims, capt, lsize = 22, ttl = NULL, hetvar = NULL) {
-  mod <- update(mod, byvar = hetvar, print.byvar = F)
-
-  # Build dataset for plot
-  mod2 <- tibble(
-    byvar = mod$byvar,
-    TE = mod$TE,
-    seTE = mod$seTE,
-    studlab = mod$studlab,
-    lower = mod$lower,
-    upper = mod$upper,
-    group = "A") %>%
-    arrange(byvar)
-  auxmod <- tibble()
-  for (i in rev(mod$bylevs)){
-    auxmod <- rbind(auxmod, tibble(byvar = i,
-                    TE = NA,
-                    seTE = NA,
-                    studlab = toupper(i),
-                    lower = NA,
-                    upper = NA,
-                    group = "B"))
-    auxmod <- rbind(auxmod,
-                    filter(mod2, byvar==i) %>%
-                      arrange(desc(TE)))
-    auxmod <- rbind(auxmod, tibble(
-      byvar = i,
-      TE = mod$TE.random.w[which(mod$bylevs==i)],
-      seTE = mod$seTE.random.w[which(mod$bylevs==i)],
-      studlab = 'Subgroup Effect',
-      lower = mod$lower.random.w[which(mod$bylevs==i)],
-      upper = mod$upper.random.w[which(mod$bylevs==i)],
-      group = "B"))
-  }
-  auxmod <- rbind(auxmod, tibble(
-    byvar = NA,
-    TE = c(mod$TE.random, NA),
-    seTE = c(mod$seTE.random, NA),
-    studlab = c("Overall Effect", "Prediction Interval"),
-    lower = c(mod$lower.random, mod$lower.predict),
-    upper = c(mod$upper.random, mod$upper.predict),
-    group = "B"))
-  mod2 <- data.frame(auxmod)
+build_forest_het <- function(dat, coef, v, slab, capt, lsize = 22, ttl = NULL, hetvar = NULL) {
+  
+  mod2 <- estim_het(dat = dat, 
+                    yi = coef, 
+                    v = v, 
+                    random = ~ 1 | id_level1/id_level2, 
+                    slab = slab, 
+                    hetvar = hetvar)
+  
+  mod2 <- data.frame(mod2)
   mod2$byvar <- toupper(mod2$byvar)
   TEaux <- mod2$TE
   TEaux[mod2$studlab== 'Subgroup Effect'] = TEaux[mod2$studlab== 'Subgroup Effect'] - 100
@@ -592,9 +558,9 @@ Here we see that `r as.numeric(table(aux$scoef)[2])` out of `r sum(table(aux$sco
 
 ## Estimation Method
 
-In general terms, there are two main ways to conduct a meta-analysis, either by using fixed effects or by employing random effects models. The fixed effects model assumes that there is one true effect in reality, and that all estimates are an attempt to uncover this true effect. The random effects model, in contrast, assumes that there is a distribution of true effects, and that the coefficients vary based on sample and tests characteristics.
+In general terms, there are two main ways to conduct a meta-analysis, either by using fixed effects or by employing random effects models. The fixed effects model assumes that there exists only one true effect, and that all estimates are an attempt to uncover this effect. The random effects model, in contrast, assumes that there is a distribution of true effects, and that the coefficients vary based on sampling and tests characteristics.
 
-In this paper, we use a multi-level random effects model. The difference between a simple random effects model, and a multi-level random effects model is that we can specify multiple levels of empirical dependency in the data (). The empirical papers testing the *law of 1/n* are very diverse. We tried to capture some of this diversity by considering the main dependent and independent variables separately, but they have at least three other important sources of dispersion:
+In this paper, we a random-effects model. The empirical papers testing the *law of 1/n* are very diverse. We tried to capture some of this diversity by considering the main dependent and independent variables separately, but they have at least three other important sources of dispersion:
 
 1.  **Subjects**: Counties, Municipalities, States, Provinces, Countries.
 2.  **Electoral systems**: Majoritarian, PR, Mixed.
@@ -616,7 +582,21 @@ $$
 
 And the random effects model estimates the parameter $\mu$, under the challenge of estimating both the within-and-between-study sampling errors.
 
-In all empirical estimates, we use the package `meta`, and the package `dmetar`, described in [Doing Meta-Analysis with R](https://bookdown.org/MathiasHarrer/Doing_Meta_Analysis_in_R/random.html). To empirically implement the random effects model, we need to choose a method to estimate the true effect size variance, $\tau^2$, which in our formulation, represents the variance of $\xi_i$. We selected the **Restricted Maximum Likelihood Estimator**, as the literature regards it the most precise when analysing continuous measures, such as we have in our data (@veroniki2016methods).
+Another crucial assumption in the meta-analysis is the independence between the results (@harrer2019doing, @cheung2019guide, @veroniki2016methods, @borenstein2011introduction). This assumption states that for our findings be consistent and efficient, the coefficients used in the meta-analysis have to come from different sources of variation. However, in the political economy literature, authors frequently use similar datasets, and almost all papers fit more than one model for the same variable. While our short dataset contains `r nrow(dat)` estimates, our full dataset has `r nrow(fulldat)` coefficients. This because the papers report an average of `r mean(as.numeric(table(fulldat$id)))` coefficients. Between robustness tests, multiple dependent and independent variables, and the papers that share similar datasets, the independence assumption is violated. To correct for this problem, we use a multi-level random effects model (@cheung2014modeling). The main difference from the single-level random effects model is that we add two extra levels of dependence: the participants and the studies levels. All these levels are assumed to absorb the dependence in the data, leaving for the main coefficient, the independent effect of legislature size on public spending.
+
+There are two levels in the main models. First, we build a common index for papers that share the same dataset specifications. The papers with common indexing are:
+
+| Paper IDs                                   | Source of Dependence                                                     |
+|---------------------------------------------|--------------------------------------------------------------------------|
+| 3, 42, 132, <br>165, 439, 441, <br>467, 505 | US States Dataset                                                        |
+| 408, 208, A258                              | US Municipalities Dataset                                                |
+| 849, 578                                    | US Municipalities Dataset<br>and Same Author in two<br>Different Studies |
+
+All the remaining papers receive a unique index. As the number of the papers with these dependencies are not very high, and many characteristics within papers vary (e. g., state-wise ad-hoc exclusions, start and end points variations, region selection, etc), we show that it makes little difference to change from this index to the paper IDs. In the case of the full dataset, the results change considerably, because authors fit several models within the same paper. In the case In any case, we use multi-level random effects for all the estimated models in this paper.
+
+To study the possibility of of publication bias, for all models we add a funnel plot and an @egger1997bias test for distribution asymmetry. The funnel plot displays the possibility of having a file-drawer effect, meaning that null results are disproportionately less represented in our sample. In this plot, under the assumption of no file-drawer effect, the coefficients are expected to lie symmetrically around the mean observed outcome. If they are asymmetric, it evidences a possible file-drawer effect.
+
+In all empirical estimates, we use the package `meta`, and the package `dmetar`, described in [@harrer2019doing](https://bookdown.org/MathiasHarrer/Doing_Meta_Analysis_in_R/random.html). To empirically implement the random effects model, we need to choose a method to estimate the true effect size variance, $\tau^2$, which in our formulation, represents the variance of $\xi_i$. We selected the **Restricted Maximum Likelihood Estimator**, as the literature regards it the most precise when analysing continuous measures, such as we have in our data (@veroniki2016methods).
 
 We combined the three independent variables ($N$, $\log(N)$, and $K$) with our dependent variables of interest (Expenditure Per Capita, Log of Expenditure Per Capita, Expenditure as a Percentage of the GDP). This formed a $3 \times 3$ table, and in the following pages we present the results for each of these combinations.
 
@@ -628,14 +608,12 @@ aux <- dat %>%
   filter(indepvar2 == 'N',
          depvar2 == 'ExpPC')
 
-mod <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
 mod
 ```
 
@@ -651,26 +629,24 @@ f1 <- build_forest(mod, NULL, lsize = 15, ttl = 'Lower House Size\nand Expenditu
 
 And to assess the possibility of publication bias, we add funnel plot below:
 
-```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
-funnel(mod, contour = c(.95,.975,.99),
-       col.contour=c("darkblue","blue","lightblue"))
-legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
-       fill=c("darkblue","blue","lightblue"))
+```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of Lower House Size (N) on Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
+funnel(mod)
 ```
 
 Highlights:
 
-1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
-2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
-3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
+1.  The results are highly heterogeneous: $Q =$ `r round(mod$QE, 2)`.
+2.  The estimated SMD in the random effects model is $g =$ `r round(predict(mod)$pred,2)` ($SE =$ `r round(predict(mod)$se,3)`).
+3.  The prediction interval ranges from `r round(predict(mod)$cr.lb,2)` to `r round(predict(mod)$cr.ub,2)`. Therefore, it `r ifelse(((predict(mod)$cr.lb)*(predict(mod)$cr.ub))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(ranktest(mod)$pval<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ### Electoral System Subgroup Analysis
 
 The *law of 1/n* was created for majoritarian systems. In the theoretical section below, we explain why the argument have potential issues when applied to non-majoritarian electoral systems. We estimated a subgroup analysis using a binary electoral system.
 
 ```{r, fig.width=8, fig.height=6, fig.cap="Subgroup Analysis of (N) x (ExpPC), controlling by electoral system", warning=FALSE, cache=TRUE, echo = FALSE}
-build_forest_het(mod, capt = NULL, hetvar = aux$elecsys2)
+build_forest_het(aux, aux$coef, aux$VAR, slab = aux$authoryear,
+                 capt = NULL, hetvar = aux$elecsys2)
 ```
 
 Therefore, we can see that the hypothesis that majoritarian systems produce systematic positive effects was disproved. Both are non-significant, and they reassure us that the absense of effect is not caused by pooling multiple types of electoral systems.
@@ -689,14 +665,12 @@ aux <- dat %>%
   filter(indepvar2 == 'K',
          depvar2 == 'ExpPC')
 
-mod <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
 mod
 ```
 
@@ -709,10 +683,7 @@ build_forest(mod, NULL)
 And to assess the possibility of publication bias, we add funnel plot below:
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of upper house size (K) on per capita government expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
-funnel(mod, contour = c(.95,.975,.99),
-       col.contour=c("darkblue","blue","lightblue"))
-legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
-       fill=c("darkblue","blue","lightblue"))
+funnel(mod)
 ```
 
 
@@ -722,10 +693,10 @@ f2 <- build_forest(mod, NULL, 15, ttl = 'Upper House Size\nand Expenditure Per C
 
 Highlights:
 
-1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
-2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
-3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
+1.  The results are highly heterogeneous: $Q =$ `r round(mod$QE, 2)`.
+2.  The estimated SMD in the random effects model is $g =$ `r round(predict(mod)$pred,2)` ($SE =$ `r round(predict(mod)$se,3)`).
+3.  The prediction interval ranges from `r round(predict(mod)$cr.lb,2)` to `r round(predict(mod)$cr.ub,2)`. Therefore, it `r ifelse(((predict(mod)$cr.lb)*(predict(mod)$cr.ub))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(ranktest(mod)$pval<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Lower House Size and Log Expenditure Per Capita
 
@@ -737,16 +708,12 @@ aux <- dat %>%
   filter(indepvar2 == 'N',
          depvar2 == 'logExpPC')
 
-mod <- metagen(
-  coef, SE, data=aux,
-  studlab=paste(authoryear),
-  comb.fixed = FALSE,
-  comb.random = TRUE,
-  method.tau = "REML",
-  hakn = TRUE,
-  prediction = TRUE,
-  sm="SMD"
-  )
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
 
 mod
 ```
@@ -760,10 +727,7 @@ build_forest(mod, NULL)
 And to assess the possibility of publication bias, we add funnel plot below:
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on log of per capita expenditure (logExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
-funnel(mod, contour = c(.95,.975,.99),
-       col.contour=c("darkblue","blue","lightblue"))
-legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
-       fill=c("darkblue","blue","lightblue"))
+funnel(mod)
 ```
 
 
@@ -773,10 +737,10 @@ f3 <- build_forest(mod, NULL, 15, ttl = 'Lower House Size\nand Log Expenditure P
 
 Highlights:
 
-1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
-2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
-3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
+1.  The results are highly heterogeneous: $Q =$ `r round(mod$QE, 2)`.
+2.  The estimated SMD in the random effects model is $g =$ `r round(predict(mod)$pred,2)` ($SE =$ `r round(predict(mod)$se,3)`).
+3.  The prediction interval ranges from `r round(predict(mod)$cr.lb,2)` to `r round(predict(mod)$cr.ub,2)`. Therefore, it `r ifelse(((predict(mod)$cr.lb)*(predict(mod)$cr.ub))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(ranktest(mod)$pval<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Log of Lower House Size and Log of Expenditure Per Capita
 
@@ -788,14 +752,12 @@ aux <- dat %>%
   filter(indepvar2 == 'logN',
          depvar2 == 'logExpPC')
 
-mod <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
 mod
 ```
 
@@ -808,10 +770,7 @@ build_forest(mod, NULL)
 And to assess the possibility of publication bias, we add funnel plot below:
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of log lower houses size (N) on log of per capita government expenditure (logExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
-funnel(mod, contour = c(.95,.975,.99),
-       col.contour=c("darkblue","blue","lightblue"))
-legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
-       fill=c("darkblue","blue","lightblue"))
+funnel(mod)
 ```
 
 
@@ -821,10 +780,10 @@ f4  <- build_forest(mod, NULL, 15, ttl = 'Log of Lower House Size\nand Log of Ex
 
 Highlights:
 
-1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
-2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`). **This model is significant at the 10% confidence level.**
-3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
+1.  The results are highly heterogeneous: $Q =$ `r round(mod$QE, 2)`.
+2.  The estimated SMD in the random effects model is $g =$ `r round(predict(mod)$pred,2)` ($SE =$ `r round(predict(mod)$se,3)`).
+3.  The prediction interval ranges from `r round(predict(mod)$cr.lb,2)` to `r round(predict(mod)$cr.ub,2)`. Therefore, it `r ifelse(((predict(mod)$cr.lb)*(predict(mod)$cr.ub))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(ranktest(mod)$pval<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Upper House Size and Log of Expenditure Per Capita
 
@@ -840,14 +799,12 @@ aux <- dat %>%
   filter(indepvar2 == 'N',
          depvar2 == 'PCTGDP')
 
-mod <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
 mod
 ```
 
@@ -860,10 +817,7 @@ build_forest(mod, NULL)
 And to assess the possibility of publication bias, we add funnel plot below:
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on percentage of public expenditure GDP (PCTGDP)", warning=FALSE, cache=TRUE, echo = FALSE}
-funnel(mod, contour = c(.95,.975,.99),
-       col.contour=c("darkblue","blue","lightblue"))
-legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
-       fill=c("darkblue","blue","lightblue"))
+funnel(mod)
 ```
 
 ```{r, include=F, warning=F, echo = FALSE, cache=TRUE}
@@ -872,10 +826,10 @@ f5 <- build_forest(mod, NULL, 15, ttl = 'Lower House Size\nand Expenditure as Pe
 
 Highlights:
 
-1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
-2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
-3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
+1.  The results are highly heterogeneous: $Q =$ `r round(mod$QE, 2)`.
+2.  The estimated SMD in the random effects model is $g =$ `r round(predict(mod)$pred,2)` ($SE =$ `r round(predict(mod)$se,3)`).
+3.  The prediction interval ranges from `r round(predict(mod)$cr.lb,2)` to `r round(predict(mod)$cr.ub,2)`. Therefore, it `r ifelse(((predict(mod)$cr.lb)*(predict(mod)$cr.ub))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(ranktest(mod)$pval<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Log Lower House Size and Expenditure as Percentage of GDP
 
@@ -887,16 +841,12 @@ aux <- dat %>%
   filter(indepvar2 == 'logN',
          depvar2 == 'PCTGDP')
 
-mod <- metagen(
-  coef, SE, data=aux,
-  studlab=paste(authoryear),
-  comb.fixed = FALSE,
-  comb.random = TRUE,
-  method.tau = "REML",
-  hakn = TRUE,
-  prediction=TRUE,
-  sm="SMD"
-  )
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
 
 mod
 ```
@@ -910,10 +860,7 @@ build_forest(mod, NULL)
 And to assess the possibility of publication bias, we add funnel plot below:
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of log lower houses size (N) on the GDP share of public expenditure (PCTGDP)", warning=FALSE, cache=TRUE, echo = FALSE}
-funnel(mod, contour = c(.95,.975,.99),
-       col.contour=c("darkblue","blue","lightblue"))
-legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
-       fill=c("darkblue","blue","lightblue"))
+funnel(mod)
 ```
 
 
@@ -923,10 +870,10 @@ f6 <- build_forest(mod, NULL, 15, ttl = 'Log Lower House Size\nand Expenditure a
 
 Highlights:
 
-1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
-2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
-3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
+1.  The results are highly heterogeneous: $Q =$ `r round(mod$QE, 2)`.
+2.  The estimated SMD in the random effects model is $g =$ `r round(predict(mod)$pred,2)` ($SE =$ `r round(predict(mod)$se,3)`).
+3.  The prediction interval ranges from `r round(predict(mod)$cr.lb,2)` to `r round(predict(mod)$cr.ub,2)`. Therefore, it `r ifelse(((predict(mod)$cr.lb)*(predict(mod)$cr.ub))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(ranktest(mod)$pval<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Upper House Size and Expenditure as Percentage of GDP
 
@@ -938,14 +885,12 @@ aux <- dat %>%
   filter(indepvar2 == 'K',
          depvar2 == 'PCTGDP')
 
-mod <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
 mod
 ```
 
@@ -958,10 +903,7 @@ build_forest(mod, NULL)
 And to assess the possibility of publication bias, we add funnel plot below:
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of upper house size (K) on the public expenditure share of the GDP (PCTGDP)", warning=FALSE, cache=TRUE, echo = FALSE}
-funnel(mod, contour = c(.95,.975,.99),
-       col.contour=c("darkblue","blue","lightblue"))
-legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
-       fill=c("darkblue","blue","lightblue"))
+funnel(mod)
 ```
 
 
@@ -971,10 +913,10 @@ f7 <- build_forest(mod, NULL, 15, ttl = 'Upper House Size\nand Expenditure as Pe
 
 Highlights:
 
-1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
-2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
-3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
+1.  The results are highly heterogeneous: $Q =$ `r round(mod$QE, 2)`.
+2.  The estimated SMD in the random effects model is $g =$ `r round(predict(mod)$pred,2)` ($SE =$ `r round(predict(mod)$se,3)`).
+3.  The prediction interval ranges from `r round(predict(mod)$cr.lb,2)` to `r round(predict(mod)$cr.ub,2)`. Therefore, it `r ifelse(((predict(mod)$cr.lb)*(predict(mod)$cr.ub))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(ranktest(mod)$pval<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Lower House Size and Expenditure per Capita (IV)
 
@@ -985,14 +927,12 @@ aux <- dat %>%
          depvar2 == 'ExpPC',
          method %in% c('IV'))
 
-mod <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
 mod
 ```
 
@@ -1005,10 +945,7 @@ build_forest(mod, NULL)
 And to assess the possibility of publication bias, we add funnel plot below:
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
-funnel(mod, contour = c(.95,.975,.99),
-       col.contour=c("darkblue","blue","lightblue"))
-legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
-       fill=c("darkblue","blue","lightblue"))
+funnel(mod)
 ```
 
 
@@ -1017,23 +954,26 @@ aux <- dat %>%
   filter(indepvar2 == 'N',
          depvar2 == 'ExpPC')
 
-mod <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
-f8 <- build_forest_het(mod, NULL, lsize = 15, ttl = 'Lower House Size and Expenditure per Capita\n(subgrouping by the estimation technique)', hetvar = aux$method)
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
+
+f8 <- build_forest_het(aux, aux$coef, 
+                       aux$VAR, slab = aux$authoryear,
+                       capt = NULL, lsize = 15, 
+                       ttl = 'Lower House Size and Expenditure per Capita\n(subgrouping by the estimation technique)', 
+                       hetvar = aux$method)
 ```
 
 Highlights:
 
-1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
-2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
-3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
+1.  The results are highly heterogeneous: $Q =$ `r round(mod$QE, 2)`.
+2.  The estimated SMD in the random effects model is $g =$ `r round(predict(mod)$pred,2)` ($SE =$ `r round(predict(mod)$se,3)`).
+3.  The prediction interval ranges from `r round(predict(mod)$cr.lb,2)` to `r round(predict(mod)$cr.ub,2)`. Therefore, it `r ifelse(((predict(mod)$cr.lb)*(predict(mod)$cr.ub))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(ranktest(mod)$pval<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ### Regression Method Subgroup Analysis
 
@@ -1044,16 +984,15 @@ aux <- dat %>%
   filter(indepvar2 == 'N',
          depvar2 == 'ExpPC')
 
-mod <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
 
-build_forest_het(mod, capt = NULL, hetvar = aux$method)
+build_forest_het(aux, aux$coef, aux$VAR, slab = aux$authoryear,
+                 capt = NULL, hetvar = aux$method)
 ```
 
 Although all methods generate a null effect, the IV method seems to be well distributed, with two papers with positive effects and two papers negative displaying negative effects. The random effects model for the subgroup is 0.22, which is negative but non-significant. Improve the estimation technique, for the case of IVs, render still a null effect of legislature size on per capita government expenditure.
@@ -1067,14 +1006,12 @@ aux <- dat %>%
          depvar2 == 'logExpPC',
          method == 'RDD')
 
-mod <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
 mod
 ```
 
@@ -1087,25 +1024,26 @@ build_forest(mod, NULL)
 ```{r, include=F, warning=F, cache=TRUE, echo = FALSE}
 aux <- dat %>%
   filter(indepvar2 == 'N',
-         depvar2 == 'logExpPC')
+         depvar2 == 'logExpPC',
+         method == 'RDD')
 
-mod <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
-f9 <- build_forest_het(mod, NULL, lsize = 15, ttl = 'Lower House Size and Log of Expenditure per Capita\n(subgrouping by the estimation technique)', hetvar = aux$method)
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
+
+f9 <- build_forest(mod, capt = NULL, 
+                       lsize = 15, ttl = 'Lower House Size and Log of Expenditure per Capita\n(subgrouping by RDD)')
 ```
 
 Highlights:
 
-1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
-2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
-3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
+1.  The results are highly heterogeneous: $Q =$ `r round(mod$QE, 2)`.
+2.  The estimated SMD in the random effects model is $g =$ `r round(predict(mod)$pred,2)` ($SE =$ `r round(predict(mod)$se,3)`).
+3.  The prediction interval ranges from `r round(predict(mod)$cr.lb,2)` to `r round(predict(mod)$cr.ub,2)`. Therefore, it `r ifelse(((predict(mod)$cr.lb)*(predict(mod)$cr.ub))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(ranktest(mod)$pval<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ### Regression Method Subgroup Analysis
 
@@ -1114,21 +1052,20 @@ Over time, the literature evolved to use causally identified techniques for dete
 ```{r, fig.width=8, fig.height=6, fig.cap="Subgroup Analysis of (N) x (logExpPC), controlling by the regression methods", warning=FALSE, cache=TRUE, echo = FALSE}
 aux <- dat %>%
   filter(indepvar2 == 'N',
-         depvar2 == 'logExpPC')
+         depvar2 == 'logExpPC', 
+         method == 'RDD')
 
-mod <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
 
-build_forest_het(mod, capt = NULL, hetvar = aux$method)
+build_forest(mod, capt = NULL, ttl = NULL)
 ```
 
-For the RDD subgroup analysis, we can see a much clearer picture. All estimates are negative, and the subgroup effect is -0.11. This suggests that improving the estimation renders to a negative result that is likely to hold conditional on more papers using the technique displaying the same effect size and sign.
+For the RDD subgroup analysis, we can see a much clearer picture. The subgroup effect is -0.085. This suggests that improving the estimation renders to a negative result that is likely to hold conditional on more papers using the technique displaying the same effect size and sign.
 
 ```{r, warning=F, cache=TRUE, echo = FALSE}
 ## Plot 1
@@ -1153,14 +1090,12 @@ aux <- fulldat %>%
   filter(indepvar2 == 'N',
          depvar2 == 'ExpPC')
 
-mod <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
 mod
 ```
 
@@ -1173,69 +1108,23 @@ build_forest(mod, NULL)
 And to assess the possibility of publication bias, we add funnel plot below:
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
-funnel(mod, contour = c(.95,.975,.99),
-       col.contour=c("darkblue","blue","lightblue"))
-legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
-       fill=c("darkblue","blue","lightblue"))
+funnel(mod)
 ```
-
 
 Highlights:
 
-1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
-2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
-3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
+1.  The results are highly heterogeneous: $Q =$ `r round(mod$QE, 2)`.
+2.  The estimated SMD in the random effects model is $g =$ `r round(predict(mod)$pred,2)` ($SE =$ `r round(predict(mod)$se,3)`).
+3.  The prediction interval ranges from `r round(predict(mod)$cr.lb,2)` to `r round(predict(mod)$cr.ub,2)`. Therefore, it `r ifelse(((predict(mod)$cr.lb)*(predict(mod)$cr.ub))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(ranktest(mod)$pval<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ### Electoral System Subgroup Analysis
 
 The *law of 1/n* was formulated to analyse the budgetary allocation in majoritarian systems. In the theoretical section below, we explain why the argument have potential issues when applied to non-majoritarian electoral systems. We estimated a subgroup analysis using a dummy variable indicating the electoral system included in each model.
 
 ```{r, fig.width=8, fig.height=9, fig.cap="Subgroup Analysis of (N) x (ExpPC), controlling by electoral system", warning=FALSE, cache=T, echo = FALSE}
-mod2 <- tibble(
-  TE = mod$TE,
-  seTE = mod$seTE,
-  studlab = mod$studlab,
-  lower = mod$lower,
-  upper = mod$upper,
-  group = "A") %>%
-  bind_rows(.,
-            aux = tibble(
-              TE = c(mod$TE.random, NA),
-              seTE = c(mod$seTE.random, NA),
-              studlab = c("Overall Effect", "Prediction Interval"),
-              lower = c(mod$lower.random, mod$lower.predict),
-              upper = c(mod$upper.random, mod$upper.predict),
-              group = "B")) %>%
-  group_by(studlab) %>%
-  mutate(studlab2 = paste0(studlab, "_", 1:n())) %>%
-  ungroup()
-
-f8b <- mod2 %>%
-  ggplot(aes(y = reorder(studlab2,TE), x = TE, xmin = lower, xmax = upper)) +
-  # Studies coefs
-  geom_point(aes(color = group)) +
-  # Error Bars
-  geom_errorbarh(aes(color = group), height = 0.1) +
-  # Colors
-  scale_color_manual(values = c("#000000", "#8b0000")) +
-  # X-axis limit
-  scale_x_continuous(limits=c(1.2*(min(mod2$lower)), 1.2*(max(mod2$upper)))) +
-  # Y-axis names
-  scale_y_discrete(labels = function(x) str_replace(x, "_[0-9]*$", "")) +
-  # Vertical dashed line
-  geom_vline(xintercept=0, color="#000000", linetype="dashed") +
-  # Labels
-  labs(x = "",
-       y = "") +
-  # Facet - Separating Studies from Overall Effect
-  facet_grid(group~., scales = "free", space = "free") +
-  # Theme
-  theme_minimal() %+replace%
-  theme(strip.text.y = element_blank(),
-        legend.position = "none",
-        axis.text.y = element_text(size = 13, hjust = 1.1),
-        axis.text.x = element_text(size = 15, hjust = 1.1))
-f8b
+build_forest_het(aux, aux$coef, aux$VAR, slab = aux$authoryear,
+                 capt = NULL, hetvar = aux$elecsys2)
 ```
 
 Therefore, we see that majoritarian systems do not have a clear positive effect on budgetary spending. The majoritarian systems in the sample had a random effects model estimate of -0.25, while the random effects model in the non-majoritarian subgroup fitted a value of 0.08. Both are not statistically significant, but they reassure us that the absence of effect is not caused by pooling multiple types of electoral systems.
@@ -1254,14 +1143,12 @@ aux <- fulldat %>%
   filter(indepvar2 == 'K',
          depvar2 == 'ExpPC')
 
-mod <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
 mod
 ```
 
@@ -1274,19 +1161,16 @@ build_forest(mod, NULL)
 And to assess the possibility of publication bias, we add funnel plot below:
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of upper houses size (K) on Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
-funnel(mod, contour = c(.95,.975,.99),
-       col.contour=c("darkblue","blue","lightblue"))
-legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
-       fill=c("darkblue","blue","lightblue"))
+funnel(mod)
 ```
 
 
 Highlights:
 
-1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
-2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
-3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
+1.  The results are highly heterogeneous: $Q =$ `r round(mod$QE, 2)`.
+2.  The estimated SMD in the random effects model is $g =$ `r round(predict(mod)$pred,2)` ($SE =$ `r round(predict(mod)$se,3)`).
+3.  The prediction interval ranges from `r round(predict(mod)$cr.lb,2)` to `r round(predict(mod)$cr.ub,2)`. Therefore, it `r ifelse(((predict(mod)$cr.lb)*(predict(mod)$cr.ub))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(ranktest(mod)$pval<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Lower House Size and Log of Expenditure Per Capita
 
@@ -1298,14 +1182,12 @@ aux <- fulldat %>%
   filter(indepvar2 == 'N',
          depvar2 == 'logExpPC')
 
-mod <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
 mod
 ```
 
@@ -1318,19 +1200,16 @@ build_forest(mod, NULL)
 And to assess the possibility of publication bias, we add funnel plot below:
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on log of Per Capita Expenditure (logExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
-funnel(mod, contour = c(.95,.975,.99),
-       col.contour=c("darkblue","blue","lightblue"))
-legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
-       fill=c("darkblue","blue","lightblue"))
+funnel(mod)
 ```
 
 
 Highlights:
 
-1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
-2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
-3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
+1.  The results are highly heterogeneous: $Q =$ `r round(mod$QE, 2)`.
+2.  The estimated SMD in the random effects model is $g =$ `r round(predict(mod)$pred,2)` ($SE =$ `r round(predict(mod)$se,3)`).
+3.  The prediction interval ranges from `r round(predict(mod)$cr.lb,2)` to `r round(predict(mod)$cr.ub,2)`. Therefore, it `r ifelse(((predict(mod)$cr.lb)*(predict(mod)$cr.ub))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(ranktest(mod)$pval<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Log of Lower House Size and Log of Expenditure Per Capita
 
@@ -1342,14 +1221,12 @@ aux <- fulldat %>%
   filter(indepvar2 == 'logN',
          depvar2 == 'logExpPC')
 
-mod <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
 mod
 ```
 
@@ -1362,19 +1239,16 @@ build_forest(mod, NULL)
 And to assess the possibility of publication bias, we add funnel plot below:
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of log of lower houses size (logN) on log of Per Capita Expenditure (logExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
-funnel(mod, contour = c(.95,.975,.99),
-       col.contour=c("darkblue","blue","lightblue"))
-legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
-       fill=c("darkblue","blue","lightblue"))
+funnel(mod)
 ```
 
 
 Highlights:
 
-1.  The results are highly heterogeneous: \$I\^2 = \$ `r round(mod$I2*100, 2)`.
-2.  The estimated SMD in the random effects model is \$g = \$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`). **This model is significant at the 10% confidence level.**
-3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
+1.  The results are highly heterogeneous: $Q =$ `r round(mod$QE, 2)`.
+2.  The estimated SMD in the random effects model is $g =$ `r round(predict(mod)$pred,2)` ($SE =$ `r round(predict(mod)$se,3)`).
+3.  The prediction interval ranges from `r round(predict(mod)$cr.lb,2)` to `r round(predict(mod)$cr.ub,2)`. Therefore, it `r ifelse(((predict(mod)$cr.lb)*(predict(mod)$cr.ub))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(ranktest(mod)$pval<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Upper House Size and Log of Expenditure Per Capita
 
@@ -1390,14 +1264,12 @@ aux <- fulldat %>%
   filter(indepvar2 == 'N',
          depvar2 == 'PCTGDP')
 
-mod <- metagen(coef, SE, data = aux,
-          studlab = paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm = "SMD")
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
 mod
 ```
 
@@ -1410,19 +1282,16 @@ build_forest(mod, NULL)
 And to assess the possibility of publication bias, we add funnel plot below:
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on percentage of public expenditure GDP (PCTGDP)", warning=FALSE, cache=TRUE, echo = FALSE}
-funnel(mod, contour = c(.95,.975,.99),
-       col.contour=c("darkblue","blue","lightblue"))
-legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
-       fill=c("darkblue","blue","lightblue"))
+funnel(mod)
 ```
 
 
 Highlights:
 
-1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
-2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
-3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
+1.  The results are highly heterogeneous: $Q =$ `r round(mod$QE, 2)`.
+2.  The estimated SMD in the random effects model is $g =$ `r round(predict(mod)$pred,2)` ($SE =$ `r round(predict(mod)$se,3)`).
+3.  The prediction interval ranges from `r round(predict(mod)$cr.lb,2)` to `r round(predict(mod)$cr.ub,2)`. Therefore, it `r ifelse(((predict(mod)$cr.lb)*(predict(mod)$cr.ub))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(ranktest(mod)$pval<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Log of Lower House Size and Expenditure as Percentage of GDP
 
@@ -1434,14 +1303,12 @@ aux <- fulldat %>%
   filter(indepvar2 == 'logN',
          depvar2 == 'PCTGDP')
 
-mod <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
 mod
 ```
 
@@ -1454,19 +1321,16 @@ build_forest(mod, NULL)
 And to assess the possibility of publication bias, we add funnel plot below:
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of log of lower houses size (logN) on log of Per Capita Expenditure (logExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
-funnel(mod, contour = c(.95,.975,.99),
-       col.contour=c("darkblue","blue","lightblue"))
-legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
-       fill=c("darkblue","blue","lightblue"))
+funnel(mod)
 ```
 
 
 Highlights:
 
-1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
-2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
-3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
+1.  The results are highly heterogeneous: $Q =$ `r round(mod$QE, 2)`.
+2.  The estimated SMD in the random effects model is $g =$ `r round(predict(mod)$pred,2)` ($SE =$ `r round(predict(mod)$se,3)`).
+3.  The prediction interval ranges from `r round(predict(mod)$cr.lb,2)` to `r round(predict(mod)$cr.ub,2)`. Therefore, it `r ifelse(((predict(mod)$cr.lb)*(predict(mod)$cr.ub))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(ranktest(mod)$pval<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Upper House Size and Expenditure as Percentage of GDP
 
@@ -1478,14 +1342,12 @@ aux <- fulldat %>%
   filter(indepvar2 == 'K',
          depvar2 == 'PCTGDP')
 
-mod <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
 mod
 ```
 
@@ -1498,19 +1360,16 @@ build_forest(mod, NULL)
 And to assess the possibility of publication bias, we add funnel plot below:
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of upper houses size (K) on the public expenditure share of GDP (PCTGDP)", warning=FALSE, cache=TRUE, echo = FALSE}
-funnel(mod, contour = c(.95,.975,.99),
-       col.contour=c("darkblue","blue","lightblue"))
-legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
-       fill=c("darkblue","blue","lightblue"))
+funnel(mod)
 ```
 
 
 Highlights:
 
-1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
-2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
-3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
+1.  The results are highly heterogeneous: $Q =$ `r round(mod$QE, 2)`.
+2.  The estimated SMD in the random effects model is $g =$ `r round(predict(mod)$pred,2)` ($SE =$ `r round(predict(mod)$se,3)`).
+3.  The prediction interval ranges from `r round(predict(mod)$cr.lb,2)` to `r round(predict(mod)$cr.ub,2)`. Therefore, it `r ifelse(((predict(mod)$cr.lb)*(predict(mod)$cr.ub))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(ranktest(mod)$pval<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Lower House Size and Expenditure per Capita (IV)
 
@@ -1521,14 +1380,12 @@ aux <- fulldat %>%
          depvar2 == 'ExpPC',
          method %in% c('IV'))
 
-mod <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
 mod
 ```
 
@@ -1541,18 +1398,15 @@ build_forest(mod, NULL)
 And to assess the possibility of publication bias, we add funnel plot below:
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
-funnel(mod, contour = c(.95,.975,.99),
-       col.contour=c("darkblue","blue","lightblue"))
-legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
-       fill=c("darkblue","blue","lightblue"))
+funnel(mod)
 ```
 
 Highlights:
 
-1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
-2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
-3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
+1.  The results are highly heterogeneous: $Q =$ `r round(mod$QE, 2)`.
+2.  The estimated SMD in the random effects model is $g =$ `r round(predict(mod)$pred,2)` ($SE =$ `r round(predict(mod)$se,3)`).
+3.  The prediction interval ranges from `r round(predict(mod)$cr.lb,2)` to `r round(predict(mod)$cr.ub,2)`. Therefore, it `r ifelse(((predict(mod)$cr.lb)*(predict(mod)$cr.ub))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(ranktest(mod)$pval<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 ## Lower House Size and Log of Expenditure per Capita (RDD)
 
@@ -1563,14 +1417,12 @@ aux <- fulldat %>%
          depvar2 == 'logExpPC',
          method == 'RDD')
 
-mod <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
+mod <- rma.mv(coef, VAR, data=aux,
+          slab=paste(authoryear),
+          test = 't',
+          random = ~ 1 | id_level1/id_level2, 
+          tdist = TRUE,
+          method = "REML")
 mod
 ```
 
@@ -1583,19 +1435,16 @@ build_forest(mod, NULL)
 And to assess the possibility of publication bias, we add funnel plot below:
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on log of Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
-funnel(mod, contour = c(.95,.975,.99),
-       col.contour=c("darkblue","blue","lightblue"))
-legend(1.4, 0, c("p < 0.05", "p < 0.025", "p < 0.01"),bty = "n",
-       fill=c("darkblue","blue","lightblue"))
+funnel(mod)
 ```
 
 
 Highlights:
 
-1.  The results are highly heterogeneous: $I^2 =$ `r round(mod$I2*100, 2)`.
-2.  The estimated SMD in the random effects model is $g =$ `r round(mod$TE.random,2)` ($SE =$ `r round(mod$seTE.random,3)`).
-3.  The prediction interval ranges from `r round(mod$lower.predict,2)` to `r round(mod$upper.predict,2)`. Therefore, it `r ifelse(((mod$lower.predict)*(mod$upper.predict))>0,'does not emcompasses zero.','emcompasses zero.')`
-4. The @egger1997bias test `r ifelse(eggers.test(mod)$p<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
+1.  The results are highly heterogeneous: $Q =$ `r round(mod$QE, 2)`.
+2.  The estimated SMD in the random effects model is $g =$ `r round(predict(mod)$pred,2)` ($SE =$ `r round(predict(mod)$se,3)`).
+3.  The prediction interval ranges from `r round(predict(mod)$cr.lb,2)` to `r round(predict(mod)$cr.ub,2)`. Therefore, it `r ifelse(((predict(mod)$cr.lb)*(predict(mod)$cr.ub))>0,'does not emcompasses zero.','emcompasses zero.')`
+4. The @egger1997bias test `r ifelse(ranktest(mod)$pval<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
 
 # Meta-Regressions
 
