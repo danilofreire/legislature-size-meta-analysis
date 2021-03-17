@@ -25,3 +25,7 @@
 12. Section H: Remove the section and make the code not echo. **DONE**
 
 13. Fix meta-regressions to add the multilevel estimation.
+
+14. Remove permutation tests. No permutation tests for the multilevel meta regressions.
+
+15. Change the interpretation of the meta-regressions.

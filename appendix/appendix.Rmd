@@ -1453,14 +1453,17 @@ Highlights:
 In this section, we show the coefficients for our meta-regressions. We start with expenditure as a percentage of GDP as the dependent variable.
 
 ```{r, size="footnotesize", warning=F, cache=T, echo = FALSE}
-mod <-  rma(yi = coef,
-              sei = SE,
+mod <- rma.mv(yi = coef,
+              V = VAR,
               data = dat,
               method = "REML",
+              random = ~ 1 | id_level1/id_level2, 
               mods = ~indepvar2+year+published+elecsys2+method,
               test = "knha",
-            subset = dat$depvar2=='PCTGDP',
-            slab = dat$authoryear)
+              tdist = TRUE,
+              subset = dat$depvar2=='PCTGDP',
+              slab = dat$authoryear)
+
 summary(mod)
 ```
 
@@ -1483,12 +1486,14 @@ We have the following results for the meta-regressions of Expenditure as a Perce
 Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
 
 ```{r, size="footnotesize", warning=F, cache=T, echo = FALSE}
-mod <- rma(yi = coef,
-              sei = SE,
+mod <- rma.mv(yi = coef,
+              V = VAR,
               data = fulldat,
               method = "REML",
-              mods = ~ indepvar2+year+published+elecsys2+method,
+              random = ~ 1 | id_level1/id_level2, 
+              mods = ~indepvar2+year+published+elecsys2+method,
               test = "knha",
+              tdist = TRUE,
             subset = fulldat$depvar2=='PCTGDP',
             slab = fulldat$authoryear)
 summary(mod)
