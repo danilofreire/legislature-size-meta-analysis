@@ -1,7 +1,7 @@
 ##################################################################
 ## Script: Building the Dataset for Distributive Politics Paper ##
 ## Authors: Alptekin, Freire, Mignozzetti, and Roman            ##
-## Last Modified: Mar 14, 2021                                  ##
+## Last Modified: Mar 17, 2021                                  ##
 ##################################################################
 
 # Needed packages
@@ -4885,11 +4885,20 @@ dat$scoefnd[dat$scoefnd=='Negative'] = 'Negative Insignificant'
 # Create indicator
 dat <- arrange(dat, id) %>%
   mutate(id_paper = rleid(id)) %>%
+  mutate(id_level1 = ifelse(id %in% c('3', '42', '132', '165',
+                                      '439', '441', '467', '505'), '3-505', 
+                            ifelse(id %in% c('408', '208', 'A258'), '408-A258', 
+                                   ifelse(id %in% c('849', '578'), '849-578', id)))) %>%
   group_by(id_paper) %>%
   mutate(id_model = row_number()) %>%
   ungroup() %>%
+  group_by(id_level1) %>%
+  mutate(id_level2 = row_number()) %>%
+  ungroup() %>%
   relocate(id_paper, .after = id) %>%
-  relocate(id_model, .before = id_paper) %>%
+  relocate(id_model, .after = id_paper) %>%
+  relocate(id_level1, .after = id_model) %>%
+  relocate(id_level2, .after = id_level1) %>%
   mutate(VAR = SE^2)
 
 # Full data and partial data

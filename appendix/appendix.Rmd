@@ -116,8 +116,7 @@ broom_mod <- function(mod, subgroup = FALSE) {
 # Estimation of the 
 estim_het <- function(dat, yi, v, random, slab, hetvar = NULL) {
   if (is.null(hetvar)) {
-    print('Hetvar should be different than null.')
-    break
+    stop('Hetvar should be different than null.')
   }
   levshetvar <- unique(hetvar)
   fullmod <- rma.mv(yi = yi, V = v, random = random,
@@ -317,7 +316,7 @@ build_forest_het <- function(estims, capt, lsize = 22, ttl = NULL, hetvar = NULL
 
 The first step in our systematic review consisted in gathering a study sample. We started our data collection with a manual search based on a set of keywords we scouted from the distributive politics literature. This search produced a database with many entries that were unrelated to our subject of investigation. To reduce the number of false positives in our sample, we restricted our search to studies that cited Weingast, Shepsle and Johnsen's 1981 paper "*The Political Economy of Benefits and Costs: A Neoclassical Approach to Distributive Politics*", which is a seminal contribution to the field. Although \href{https://scholar.google.com/}{Google Scholar} reports the article has received \href{https://scholar.google.com/scholar?um=1&ie=UTF-8&lr&cites=13117579863846712459}{2,180} citations, our search resulted in 2,664 records on the 21^st^ of November 2019.
 
-We webscraped three large academic databases: \href{https://scholar.google.com/}{Google Scholar} (n = 1001); \href{https://academic.microsoft.com/home}{Microsoft Academic} (n = 927); and \href{https://www.scopus.com/}{Scopus} (n = 736). The `R` script we wrote extracted the article title, abstract, authors, year, journal of publication, and database from which the record originated. Our code is available in section \ref{sub:scrap} below. We screened these results with an English language and article restriction, that is, we excluded all records written in other languages and all that were not academic papers, such as book chapters or doctoral theses. We set no restriction to unpublished articles.
+We webscraped three large academic databases: \href{https://scholar.google.com/}{Google Scholar} (n = 1001); \href{https://academic.microsoft.com/home}{Microsoft Academic} (n = 927); and \href{https://www.scopus.com/}{Scopus} (n = 736). The `R` script we wrote extracted the article title, abstract, authors, year, journal of publication, and database from which the record originated. Our code is available in section \ref{sub:scrap} below. We screened these results with an English language and article restriction, that is, we excluded all records written in other languages and all that were not academic papers, such as book chapters or doctoral theses. We set no restriction to unpublished articles. XXXX CATARINA AND HUZEYFE: FIX THIS
 
 # Article Selection
 
@@ -468,8 +467,8 @@ dat %>%
                                      "Log Per Capita Expenditure"))) %>%
   ggplot(aes(x = depvar2)) +
     geom_bar(color = "black") +
-  labs(x = "Dependent Variables",
-       y = "") +
+  labs(x = "",
+       y = "Dependent Variables") +
   coord_flip() +
   theme_bw()
 ```
@@ -487,8 +486,8 @@ dat %>%
                                                   "Log N"))) %>%
   ggplot(aes(x = indepvar2)) +
     geom_bar(color = "black") +
-  labs(x = "Independent Variables",
-       y = "") +
+  labs(x = "",
+       y = "Independent Variables") +
   coord_flip() +
   theme_bw()
 ```
@@ -503,7 +502,7 @@ Coefficients:
 dat %>%
   ggplot(aes(x = coef)) +
   geom_histogram(bins = 15, color = "black") +
-  labs(x = "Coefficients") +
+  labs(x = "Coefficients", y = '') +
   theme_bw()
 ```
 
@@ -513,7 +512,7 @@ Standard errors:
 dat %>%
   ggplot(aes(x = SE)) +
   geom_histogram(bins = 10, color = "black") +
-  labs(x = "Standard Errors") +
+  labs(x = "Standard Errors", y = '') +
   theme_bw()
 ```
 
