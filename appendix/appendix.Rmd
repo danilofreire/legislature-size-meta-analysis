@@ -278,19 +278,25 @@ build_forest_het <- function(dat, coef, v, slab, capt, lsize = 22, ttl = NULL, h
 
 \newpage
 
+
 # Search Criteria
 
-The first step in our systematic review consisted in gathering a study sample. We started our data collection with a manual search based on a set of keywords we scouted from the distributive politics literature. This search produced a database with many entries that were unrelated to our subject of investigation. To reduce the number of false positives in our sample, we restricted our search to studies that cited Weingast, Shepsle and Johnsen's 1981 paper "*The Political Economy of Benefits and Costs: A Neoclassical Approach to Distributive Politics*", which is a seminal contribution to the field. Although \href{https://scholar.google.com/}{Google Scholar} reports the article has received \href{https://scholar.google.com/scholar?um=1&ie=UTF-8&lr&cites=13117579863846712459}{2,180} citations, our search resulted in 2,664 records on the 21^st^ of November 2019.
+The first step in our systematic review consisted in gathering a study sample. We started our data collection with a manual search based on a set of keywords we scouted from the distributive politics literature. This search produced a database with many entries that were unrelated to our subject of investigation. To reduce the number of false positives in our sample, we restricted our search to studies that cited Weingast, Shepsle and Johnsen's 1981 paper "_The Political Economy of Benefits and Costs: A Neoclassical Approach to Distributive Politics_", which is a seminal contribution to the field. Although \href{https://scholar.google.com/}{Google Scholar} reports the article has received \href{https://scholar.google.com/scholar?um=1&ie=UTF-8&lr&cites=13117579863846712459}{2,180} citations, our search resulted in 2,664 records on the 21^st^ of November 2019.
 
-We webscraped three large academic databases: \href{https://scholar.google.com/}{Google Scholar} (n = 1001); \href{https://academic.microsoft.com/home}{Microsoft Academic} (n = 927); and \href{https://www.scopus.com/}{Scopus} (n = 736). The `R` script we wrote extracted the article title, abstract, authors, year, journal of publication, and database from which the record originated. Our code is available in section \ref{sub:scrap} below. We screened these results with an English language and article restriction, that is, we excluded all records written in other languages and all that were not academic papers, such as book chapters or doctoral theses. We set no restriction to unpublished articles. XXXX CATARINA AND HUZEYFE: FIX THIS
+We webscraped three large academic databases: \href{https://scholar.google.com/}{Google Scholar} (n = 1001); \href{https://academic.microsoft.com/home}{Microsoft Academic} (n = 927); and \href{https://www.scopus.com/}{Scopus} (n = 736). The `R` script we wrote extracted the article title, abstract, authors, year, journal of publication, and database from which the record originated. Our code is available in section \ref{sub:scrap} below. We screened these results with an English language and article restriction, that is, we excluded all records written in other languages and all that were not academic papers, such as book chapters or doctoral theses. We set no restriction to unpublished articles.
+
+We complemented this by doing a term search on Google Scholar after having finished the entire eligibility procedure on the first sample. We formulated the search string based on the terms and expressions that appeared most commonly in the articles included in our meta-analysis. The choice of string translates the central point of our inquiry: the relationship between legislature size and public spending. The search string was as follows: *(“upper chamber size” OR "lower chamber size" OR “council size” OR “parliament size” OR “legislature size” OR “number of legislators” OR “legislative size") AND (“spending” OR “expenditure" OR “government size”)*. We scraped Google Scholar on March 5th, 2021. Using the titles of this new database's records, we did a fuzzy matching with the database of @weingast1981political citations mentioned previously. We then performed the exact same eligibility procedures, further explained below. This resulted in 3,041 additional records. 
+
+Combining the two search strategies, we assessed a total of 5,705 records.
 
 # Article Selection
 
-The selection process was conducted by two authors in three phases. In the first round, we excluded all titles that were clearly unrelated to our topic of interest. For instance, we curiously found articles about car motors amidst our sample. We consider this a preliminary step, since we were not able to eliminate a large number of entries. Then, we read all abstracts. We chose to maintain those which indicated that either government expenditure or legislative structures were the main subject of the paper. For instance, if the paper sought to identify variables that increased government size, it was maintained. Abstracts that indicated the paper discussed or estimated the impacts of representative institutions, elections, or chamber dynamics were also included. This allowed us to significantly reduce our sample to 376 records.
+The selection process was conducted by the authors in three phases. In the first round, we excluded all titles that were clearly unrelated to our topic of interest. For instance, we curiously found articles about car motors amidst our sample. Then, we read all abstracts. We chose to maintain those which indicated that either government expenditure or legislative structures were the main subject of the paper. For instance, if the paper sought to identify variables that increased government size, it was maintained. Abstracts that indicated the paper discussed or estimated the impacts of representative institutions, elections, or chamber dynamics were also included. This allowed us to significantly reduce our sample to 475 records, combining the two search strategies.
 
-In the second phase, we assessed full texts. To remain in our sample, the paper should (i) conduct a quantitative analysis, (ii) report data on the number of legislators, and (iii) also include data on public expenditure. If the publication had all three, it was maintained. Disagreements in this phase were discussed among the authors, and a third investigator was consulted when needed.
+In the second phase, we assessed full texts. To remain in our sample, the paper should (i) conduct a quantitative analysis, (ii) report data on the number of legislators, and (iii) also include data on public expenditure. If the publication had all three, it was maintained. Disagreements in this phase were discussed among the authors.
 
-The third phase consisted of filling out tables for each of the remaining 47 articles to systematically evaluate their eligibility. Since authors use different measures for government spending and the number of lower/upper house members, we extracted all coefficients that provided this information. We decided which variables to keep by following the current practices of the literature. In this phase, we also collected information on whether or not the paper had been published, and if it explicitly discussed the \textit{law of 1/n}. Upon choosing the variables, we excluded the non-conforming studies, arriving at our final sample of `r length(unique(dat$authoryear))` articles.
+The third phase consisted of filling out tables for each of the remaining articles to systematically evaluate their eligibility. Since authors use different measures for government spending and the number of lower/upper house members, we extracted all coefficients that provided this information. We decided which variables to keep by following the most current practices of the literature. In this phase, we also collected information on whether or not the paper had been published, and if it explicitly discussed the \textit{law of 1/n}. Upon choosing the variables, we excluded the non-conforming studies, arriving at our final sample of `r length(unique(dat$authoryear))` articles. Since the citation search was conducted first, it provided us with 29 papers, while with the term search we arrived at only 2 articles to add to our sample.
+
 
 ## Exclusion Analysis
 
@@ -319,7 +325,7 @@ The diagram below shows each step of our article selection process. We followed 
 ```{tikz tikz-ex, echo=FALSE, cache=FALSE, eval=TRUE, engine.opts = list(template = "tikz2pdf.tex")}
 \usetikzlibrary{shapes.arrows,arrows.meta,positioning,shapes.geometric}
   \begin{tikzpicture} [node distance = 2.7cm, xshift = 1.5]
-
+\caption{"PRISMA Flow Chart for First Search Strategy: Weingast et al. Citations"}
   \footnotesize
   \linespread{1.0}
 
@@ -359,6 +365,39 @@ The diagram below shows each step of our article selection process. We followed 
 
  \end{tikzpicture}
 ```
+
+\bigskip
+
+```{tikz tikz-ex2, echo=FALSE, cache=FALSE, eval=TRUE, engine.opts = list(template = "tikz2pdf.tex")}
+\usetikzlibrary{shapes.arrows,arrows.meta,positioning,shapes.geometric}
+  \begin{tikzpicture} [node distance = 2.7cm, xshift = 1.5]
+\caption{"PRISMA Flow Chart for First Search Strategy: Search String with Terms"}
+  \footnotesize
+  \linespread{1.0}
+  \node (ID) [stage, rotate = 90, yshift = 2cm, xshift = 2.5cm] {\normalsize{Screening 1}};
+  \node (SC) [stage, below of = ID, rotate = 90] {\normalsize{Screening 2}};
+  \node (EL) [stage, below of = SC, rotate = 90] {\normalsize{Eligibility}};
+  \node (INC) [stage2, below of = EL, rotate = 90, xshift = -1.2cm] {\normalsize{Included}};
+  \node (id) [phase, right of = ID, xshift = 1cm] {Clean records identified through webscraping  \\ \textbf{(n = 3041)}};
+  \node (1st) [exc, right of = id, xshift = 3cm] {Records excluded after reading title, or in languages other than English, book chapters, doctoral theses, and duplicates \\ \textbf{(n = 2603)}};
+  \node (screen) [phase, below of = id] {Abstracts assessed for Eligibility \\ \textbf{(n = 483)}};
+  \node (2nd) [exc, right of = screen, xshift = 3cm] {Records excluded after reading abstract \\ \textbf{(n = 339)}};
+  \node (elig) [phase, below of = screen] {Full-text articles assessed for Eligibility \\ \textbf{(n = 99)}};
+  \node (3rd) [exc, right of = elig, xshift = 3cm] {Non-quantitative studies or records using unrelated variables excluded \\ \textbf{(n = 86)}};
+  \node (inc_1) [phase, below of = elig] {Preliminary included articles \\ \textbf{(n = 13)}};
+  \node (4th) [exc, right of = inc_1, xshift = 3cm] {Articles excluded during analysis due to nonconforming variables \\ \textbf{(n = 10)}};
+\node (inc_2) [phase, below of = inc_1] {Included articles \\ \textbf{(n = 3)}};
+  \draw [arrow] (id) -- (1st);
+  \draw [arrow] (id) -- (screen);
+  \draw [arrow] (screen) -- (2nd);
+  \draw [arrow] (screen) -- (elig);
+  \draw [arrow] (elig) -- (3rd);
+  \draw [arrow] (elig) -- (inc_1);
+  \draw [arrow] (inc_1) -- (4th);
+  \draw [arrow] (inc_1) -- (inc_2);
+ \end{tikzpicture}
+```
+
 
 # Meta-Analysis Dataset
 
