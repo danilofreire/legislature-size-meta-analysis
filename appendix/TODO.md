@@ -30,6 +30,8 @@
 
 15. Change the interpretation of the meta-regressions. **DONE**
 
-16. Do a final sweep to check if it is all ok.
+16. Do a final sweep to check if it is all ok. **DONE**
 
-17. Add the model section with info about weingast + other models like Primo, Lee, and others.
+17. Add the model section with info about weingast. **DONE**
+
+18. Check others such as Primo, Lee, and others.
