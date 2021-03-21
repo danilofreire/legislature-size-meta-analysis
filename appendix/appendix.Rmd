@@ -280,7 +280,7 @@ build_forest_het <- function(dat, coef, v, slab, capt, lsize = 22, ttl = NULL, h
 
 # Law of 1/n Model
 
-In this section, we present the @weingast1981political theoretical arguments behind the law of 1/n, and their rebuttal by @primo2008distributive. Many of the papers included in this meta-analysis also have their own version of why we need a refined version of the XXXX, but these two papers, in our view, present the most elementary theoretical argument 
+In this section, we present the @weingast1981political theoretical arguments behind the law of 1/n, and their rebuttal by @primo2008distributive. Many of the papers included in this meta-analysis also have their own version of why we need a refined version of the original law of 1/n, but these two papers, in our view, present the most elementary theoretical argument 
 
 In their seminal paper, @weingast1981political argue that the number of legislators will increase public spending more than the optimal economic benchmark. Politicians have the incentive to over-provide concentrated benefits to the constituencies, spreading the costs throughout the entire tax pool (all constituencies). The corollary of their suggestion is that larger legislatures generate more expenditure.
 
@@ -312,9 +312,37 @@ And rearranging the terms, yields to the following expression for $\dfrac{dx}{dn
 
 Note that the numerator is always positive, as the marginal investment costs inside and outside the district increases with project size. The law of 1/n holds when the denominator is negative. $b''(x) < 0$ by assumption, and $-n^{-1}[c_1''(x) + c_2''(x)] - c_3''(x) < 0$ as $c_1'', c_2'', c_3'' > 0$. Then, the law of 1/n is true when $c_1''(x)$ is smaller than $n^{-1}[c_1''(x) + c_2''(x)] + c_3''(x) - b''(x)$.
 
-XXXX PAREI AQUI
+As the above condition suggests, the law of 1/n holds only in specific situations. @primo2008distributive advances the theory by considering other situations where the law may not hold, and also situations when a reverse prediction of the law of 1/n holds, i. e., larger legislatures leading to lower expenditures. 
+Following @primo2008distributive, let $n$ be the number of districts, $m$ the number of citizens in each district, and $nm$ is the total population in the country. Consider a local public good that generates a per capita benefit, according to its size $x$ of $b(x, m) = x^\alpha m^{\beta-1}$, where $\beta$ is the degree of congestion of the public good, i. e. how much the addition of individuals reduce the benefits for other individuals (note that the lower the $\beta$, the higher the congestion). In terms of costs, consider a linear cost $C(x) = x$, and in terms of taxation, assume that the people in the district share taxes between their payments and the central government's. The degree that taxes are shared is denoted by $s$. Moreover, there is a deadweight loss of the taxes $\theta \geq 1$. The tax then becomes: $t = \left(\dfrac{(n – ns + s)x + (ns – s)X}{nm}\right)^\theta$. Collecting terms, the citizens receive the following net benefit of a project with size $x$:
 
-As the above condition suggests, the law of 1/n holds in specific situations. @primo2008distributive XXXX cost is when the suppose that we have a set of representatives, indexed in districts $i \in \{1, \cdots, n \}$. 
+\[
+\pi = x^\alpha m^{\beta-1} - \left(\dfrac{(n – ns + s)x + (ns – s)X}{nm}\right)^\theta
+\]
+
+Maximizing this function, and solving for the symmetric Nash equilibrium where $x = X$ for all projects yield to the following optimal project size:
+
+\[
+x^* = \left[\left(\dfrac{\alpha}{\theta}\right)^{\dfrac{1}{\theta-\alpha}}\right]\left[\left(nm\right)^{\dfrac{\beta+\theta-1}{\theta - \alpha}}\right]\left[\left( \dfrac{n^{2-\beta-\theta}}{n-ns+s}\right)^{\dfrac{1}{\theta-\alpha}}\right]
+\]
+
+And in the graph below, we show simulations for $n$ varying from 10 to 20, holding constant $\beta = 0.35$, $\theta \in \{0.65, 0.75\}$, $s = 0.5$, $m = 100$, and $\alpha = 0.7$.
+
+```{r, echo=FALSE, cache=TRUE, fig.align='center'}
+xstar <- function(x, beta, theta, alpha = 0.7, s = 0.5, m = 10) {
+  n = x
+  a = (alpha/theta)^(1/(theta-alpha))
+  b = (n*m)^((beta+theta-1)/(theta-alpha))
+  c = ((n^(2-beta-theta))/(n-n*s+s))^(1/(theta-alpha))
+  return (a*b*c)
+}
+
+curve(xstar(x, beta = 0.35, theta = 0.8), from = 10, to = 20,
+      main = 'Increasing project size when varying legislature size \n (high deadweight losses)', xlab = 'Project Size', ylab = 'Number of Districts (legislature size)')
+curve(xstar(x, beta = 0.35, theta = 0.5), from = 10, to = 20,
+      main = 'Decreasing project size when varying legislature size \n (low deadweight losses)', xlab = 'Project Size', ylab = 'Number of Districts (legislature size)')
+```
+
+Therefore, there are possibilities for having the law of 1/n in the direction predicted by @weingast1981political, and in a reverse direction, as in @primo2008distributive. Here, we showed the variation changing only the deadweight losses, but there are many other theoretical reasons, such as the limiting power of the upper houses [@malhotra], the XXXX, and XXXX. Most of the literature after @weingast1981political, attempted to find the empirical complements to this original formulation.
 
 # Search Criteria
 
@@ -1480,7 +1508,12 @@ In the meta-regressions, we study the effects of a group of moderators on the re
 
 4. A dummy for non-majoritarian electoral systems (variable `elecsys2`).
 
-5. The estimation method used in the papers (variable `method`):
+5. A institution design variable, with:
+ - `Unicameral` (e.g., US Municipalities)
+ - `Bicameral` (e.g., US States)
+ - `Mixed` (e.g., countries with unicameral and bicameral in the same dataset).
+
+6. The estimation method used in the papers (variable `method`):
   - `OLS`: Ordinary-Least Squares in Cross-Sectional data.
   - `PANEL`: Time-Series Cross-Section models, with estimated fixed effects.
   - `IV`: Instrumental Variables models.
@@ -1583,7 +1616,7 @@ mod <- rma.mv(yi = coef,
               data = dat,
               method = "REML",
               random = ~ 1 | id_level1/id_level2, 
-              mods = ~indepvar2+year+published+elecsys2+method,
+              mods = ~indepvar2+year+published+method,
               test = "knha",
               tdist = TRUE,
               subset = dat$depvar2=='PCTGDP',
@@ -1592,11 +1625,7 @@ mod <- rma.mv(yi = coef,
 summary(mod)
 ```
 
-We have the following results for the meta-regressions of Expenditure as a Percentage of GDP:
-
-1. Passing from `Majoritarian` to `Non-Majoritarian`, decreases significantly the effects found in our models.
-
-2. All other moderators remain insignificant.
+All moderators are insignificant in the meta-regressions of Expenditure as a Percentage of GDP.
 
 Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
 
@@ -1614,11 +1643,7 @@ mod <- rma.mv(yi = coef,
 summary(mod)
 ```
 
-For all the coefficients, we have the following results:
-
-1. Passing from `Majoritarian` to `Non-Majoritarian`, decreases significantly the effects found in our models.
-
-2. All other moderators remain insignificant.
+Even for all the coefficients, all moderators remain insignificant.
 
 # Robustness: Meta-Regressions (All Coefficients)
 
@@ -1634,7 +1659,9 @@ In this section, we aggregate all the coefficients and run a multivariate meta-r
 
 5. Whether the study is a working paper or published work.
 
-6. The estimation method used in the paper (OLS, PANEL, IV, or RDD).
+6. The institution design: whether the legislature in the analysis is unicameral, bicameral, or mixed.
+
+7. The estimation method used in the paper (OLS, PANEL, IV, or RDD).
 
 The results follow below, and show null effects for all variables, including the intercept.
 
