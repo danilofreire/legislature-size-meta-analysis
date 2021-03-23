@@ -72,9 +72,6 @@ devtools::install_github("MathiasHarrer/dmetar")
 lapply(pkgs, require, character.only = T)
 library("compareGroups"); library(dmetar)
 
-# Load datasets
-load("../dataset/dataCoefs.RData")
-
 # Broom the multi-level model
 broom_mod <- function(mod, subgroup = FALSE) {
   aux <- data.frame(predict(mod))
@@ -274,13 +271,16 @@ build_forest_het <- function(dat, coef, v, slab, capt, lsize = 22, ttl = NULL, h
           panel.grid.major = element_blank())
   return(p)
 }
+
+# Load datasets
+load("../dataset/dataCoefs.RData")
 ```
 
 \newpage
 
 # Law of 1/n Model
 
-In this section, we present the law of 1/n as in @weingast1981political, and the refinement proposed by @primo2008distributive. In our view, these two papers present the most theoretically  argument 
+In this section, we present the law of 1/n as formulated by @weingast1981political, and the refinement proposed by @primo2008distributive.
 
 In their seminal paper, @weingast1981political argue that the number of legislators will increase public spending more than the optimal economic benchmark. Politicians have the incentive to over-provide concentrated benefits to the constituencies, spreading the costs throughout all constituencies. The corollary of their model is that larger legislatures generate more public spending.
 
