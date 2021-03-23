@@ -3225,7 +3225,7 @@ dat <- rbind(dat,
                coef = 0.1594,
                scoef = 'P',
                scoefsig = 'P',
-               SE = 0.1443/3.05
+               SE = 0.1594/3.05
              ))
 
 dat <- rbind(dat,
@@ -5420,40 +5420,6 @@ dat <- rbind(dat,
                SE = 0.0491
              ))
 
-# dat <- rbind(dat,
-#              data.frame(
-#                id = 'A258',
-#                published = 'Yes',
-#                usemeta = 0, 
-#                method = 'PANEL',
-#                method2 = 'OLS/PANEL',
-#                elecsys = 'Maj',
-#                elecsys2 = 'Maj', 
-#                elecsys3 = 'M',
-#                agglevel = 'Local',
-#                location = 'US',
-#                locationISO = 'USA',
-#                instdesign = 'Unicameral',
-#                title = 'Government Form and Public Spending: Theory and Evidence from US Municipalities',
-#                author = 'Coate and Knight',
-#                authorCite = 'S. Coate & B. Knight',
-#                year = 2011,
-#                authoryear = 'Coate and Knight (2011)',
-#                journal = 'American Economic Journal: Economic Policy',
-#                journalCode = 'AEJ',
-#                web = 'https://www.aeaweb.org/articles?id=10.1257/pol.3.3.82',
-#                table = 4,
-#                column = 4,
-#                indepvar = 'Log Council Size',
-#                indepvar2 = 'logN',
-#                depvar = 'Log Public Spending Per Capita',
-#                depvar2 = 'logExpPC',
-#                coef = 0.2132,
-#                scoef = 'P',
-#                scoefsig = 'P',
-#                SE = 0.0491
-#              ))
-
 dat <- rbind(dat,
              data.frame(
                id = 'A117',
@@ -5568,9 +5534,6 @@ dat <- arrange(dat, id) %>%
   relocate(id_level1, .after = id_model) %>%
   relocate(id_level2, .after = id_level1) %>%
   mutate(VAR = SE^2)
-
-# Unicameralism dummy
-dat$unicamOnly <- ifelse(dat$instdesign == 'Unicameral', 1, 0)
 
 # Full data and partial data
 fulldat <- dat
