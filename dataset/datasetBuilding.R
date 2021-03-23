@@ -5569,6 +5569,9 @@ dat <- arrange(dat, id) %>%
   relocate(id_level2, .after = id_level1) %>%
   mutate(VAR = SE^2)
 
+# Unicameralism dummy
+dat$unicamOnly <- ifelse(dat$instdesign == 'Unicameral', 1, 0)
+
 # Full data and partial data
 fulldat <- dat
 dat <- dat %>%
