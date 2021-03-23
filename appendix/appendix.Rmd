@@ -1532,8 +1532,9 @@ mod <- rma.mv(yi = coef,
               data = dat,
               method = "REML",
               random = ~ 1 | id_level1/id_level2, 
-              mods = ~indepvar2+year+published+elecsys2+method,
+              mods = ~indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
+              sparse = TRUE,
               tdist = TRUE,
               subset = dat$depvar2=='ExpPC',
               slab = dat$authoryear)
@@ -1549,9 +1550,10 @@ mod <- rma.mv(yi = coef,
               data = fulldat,
               method = "REML",
               random = ~ 1 | id_level1/id_level2, 
-              mods = ~indepvar2+year+published+elecsys2+method,
+              mods = ~indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
               tdist = TRUE,
+              sparse = TRUE,
               subset = fulldat$depvar2=='ExpPC',
               slab = fulldat$authoryear)
 
@@ -1573,9 +1575,10 @@ mod <- rma.mv(yi = coef,
               data = dat,
               method = "REML",
               random = ~ 1 | id_level1/id_level2, 
-              mods = ~indepvar2+year+published+elecsys2+method,
+              mods = ~indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
               tdist = TRUE,
+              sparse = TRUE,
               subset = dat$depvar2=='logExpPC',
               slab = dat$authoryear)
 
@@ -1592,9 +1595,10 @@ mod <- rma.mv(yi = coef,
               data = fulldat,
               method = "REML",
               random = ~ 1 | id_level1/id_level2, 
-              mods = ~indepvar2+year+published+elecsys2+method,
+              mods = ~indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
               tdist = TRUE,
+              sparse = TRUE,
               subset = fulldat$depvar2=='logExpPC',
               slab = fulldat$authoryear)
 
@@ -1617,9 +1621,10 @@ mod <- rma.mv(yi = coef,
               data = dat,
               method = "REML",
               random = ~ 1 | id_level1/id_level2, 
-              mods = ~indepvar2+year+published+method,
+              mods = ~indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
               tdist = TRUE,
+              sparse = TRUE,
               subset = dat$depvar2=='PCTGDP',
               slab = dat$authoryear)
 
@@ -1636,9 +1641,10 @@ mod <- rma.mv(yi = coef,
               data = fulldat,
               method = "REML",
               random = ~ 1 | id_level1/id_level2, 
-              mods = ~indepvar2+year+published+elecsys2+method,
+              mods = ~indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
               tdist = TRUE,
+              sparse = TRUE,
             subset = fulldat$depvar2=='PCTGDP',
             slab = fulldat$authoryear)
 summary(mod)
@@ -1672,10 +1678,10 @@ mod <- rma.mv(yi = coef,
               data = dat,
               method = "REML",
               random = ~ 1 | id_level1/id_level2, 
-              mods = ~depvar2+indepvar2+year+
-                published+elecsys2+method,
+              mods = ~depvar2+indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
               tdist = TRUE,
+              sparse = TRUE,
               slab = dat$authoryear)
 
 summary(mod)
@@ -1688,10 +1694,10 @@ mod <- rma.mv(yi = coef,
               data = fulldat,
               method = "REML",
               random = ~ 1 | id_level1/id_level2, 
-              mods = ~depvar2+indepvar2+year+
-                published+elecsys2+method,
+              mods = ~depvar2+indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
               tdist = TRUE,
+              sparse = TRUE,
               slab = fulldat$authoryear)
 summary(mod)
 ```
