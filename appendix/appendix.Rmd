@@ -343,7 +343,7 @@ curve(xstar(x, beta = 0.35, theta = 0.5), from = 10, to = 20,
       main = 'Decreasing project size when varying legislature size \n (low deadweight losses)', xlab = 'Project Size', ylab = 'Number of Districts (legislature size)')
 ```
 
-Therefore, there are possibilities for having the law of 1/n in the direction predicted by @weingast1981political, and in a reverse direction, as proposed by @primo2008distributive. Here, we showed the variation in deadweight losses, but there are many other theoretical reasons, such as the existence of upper houses [@chen_malhotra_2007], the popular initiatives [@XXXX], and XXXX. Most of the literature after @weingast1981political, focused on complement their original formulation.
+Therefore, there are possibilities for having the law of 1/n in the direction predicted by @weingast1981political, and in a reverse direction, as proposed by @primo2008distributive. Here, we showed the variation in deadweight losses, but there are many other theoretical reasons, such as the existence of upper houses [@chen_malhotra_2007], the popular initiatives [@matsusaka2005endogeneity], the type of government [@coate2011government], the existence of supermajorities [@lee2015supermajority], political fragmentation [@lledo2003electoral], ideological positions [@bjedov2014impact], among other characteristics. Most of the literature after @weingast1981political, focused on complement their original formulation.
 
 # Search Criteria
 
