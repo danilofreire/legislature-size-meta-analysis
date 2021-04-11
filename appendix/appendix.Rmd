@@ -345,7 +345,7 @@ The first step in our systematic review consisted in gathering a study sample. W
 
 We webscraped three large academic databases: \href{https://scholar.google.com/}{Google Scholar} (n = 1001); \href{https://academic.microsoft.com/home}{Microsoft Academic} (n = 927); and \href{https://www.scopus.com/}{Scopus} (n = 736). The `R` script we wrote extracted the article title, abstract, authors, year, journal of publication, and database from which the record originated. Our code is available in section \ref{sub:scrap} below. We screened these results with an English language and article restriction, that is, we excluded all records written in other languages and all that were not academic papers, such as book chapters or doctoral theses. We set no restriction to unpublished articles.
 
-We complemented this by doing a term search on Google Scholar after having finished the entire eligibility procedure on the first sample. We formulated the search string based on the terms and expressions that appeared most commonly in the articles included in our meta-analysis. The choice of string translates the central point of our inquiry: the relationship between legislature size and public spending. The search string was as follows: *(“upper chamber size” OR "lower chamber size" OR “council size” OR “parliament size” OR “legislature size” OR “number of legislators” OR “legislative size") AND (“spending” OR “expenditure" OR “government size”)*. We scraped Google Scholar on March 5th, 2021. Using the titles of this new database's records, we did a fuzzy matching with the database of @weingast1981political citations mentioned previously. We then performed the exact same eligibility procedures, further explained below. This resulted in 3,041 additional records. 
+We complemented this by doing a term search on Google Scholar after having finished the entire eligibility procedure on the first sample. We formulated the search string based on the terms and expressions that appeared most commonly in the articles included in our meta-analysis. The choice of string translates the central point of our inquiry: the relationship between legislature size and public spending. The search string was as follows: `("upper chamber size" OR "lower chamber size" OR "council size" OR "parliament size" OR "legislature size" OR "number of legislators" OR "legislative size") AND ("spending" OR "expenditure" OR "government size")`. We scraped Google Scholar on March 5th, 2021. Using the titles of this new database's records, we did a fuzzy matching with the database of @weingast1981political citations mentioned previously. We then performed the exact same eligibility procedures, further explained below. This resulted in 3,041 additional records. 
 
 Combining the two search strategies, we assessed a total of 5,705 records.
 
@@ -381,10 +381,9 @@ The diagram below shows each step of our article selection process. We followed 
 
 \bigskip
 
-```{tikz tikz-ex, echo=FALSE, cache=FALSE, eval=TRUE, engine.opts = list(template = "tikz2pdf.tex")}
+```{tikz tikz-ex, echo=FALSE, cache=TRUE, eval=TRUE, engine.opts = list(template = "tikz2pdf.tex"), fig.cap = "PRISMA Flow Chart for First Search Strategy: Weingast et al. Citations"}
 \usetikzlibrary{shapes.arrows,arrows.meta,positioning,shapes.geometric}
   \begin{tikzpicture} [node distance = 2.7cm, xshift = 1.5]
-
   \footnotesize
   \linespread{1.0}
 
@@ -425,6 +424,37 @@ The diagram below shows each step of our article selection process. We followed 
  \end{tikzpicture}
 ```
 
+\bigskip
+
+```{tikz tikz-ex2, echo=FALSE, cache=TRUE, eval=TRUE, engine.opts = list(template = "tikz2pdf.tex"), fig.width=5, fig.height=2, fig.cap="PRISMA Flow Chart for First Search Strategy: Search String with Terms"}
+\usetikzlibrary{shapes.arrows,arrows.meta,positioning,shapes.geometric}
+  \begin{tikzpicture} [node distance = 2.7cm, xshift = 1.5]
+  \footnotesize
+  \linespread{1.0}
+  \node (ID) [stage, rotate = 90, yshift = 2cm, xshift = 2.5cm] {\normalsize{Screening 1}};
+  \node (SC) [stage, below of = ID, rotate = 90] {\normalsize{Screening 2}};
+  \node (EL) [stage, below of = SC, rotate = 90] {\normalsize{Eligibility}};
+  \node (INC) [stage2, below of = EL, rotate = 90, xshift = -1.2cm] {\normalsize{Included}};
+  \node (id) [phase, right of = ID, xshift = 1cm] {Clean records identified through webscraping  \\ \textbf{(n = 3041)}};
+  \node (1st) [exc, right of = id, xshift = 3cm] {Records excluded after reading title, or in languages other than English, book chapters, doctoral theses, and duplicates \\ \textbf{(n = 2603)}};
+  \node (screen) [phase, below of = id] {Abstracts assessed for Eligibility \\ \textbf{(n = 483)}};
+  \node (2nd) [exc, right of = screen, xshift = 3cm] {Records excluded after reading abstract \\ \textbf{(n = 339)}};
+  \node (elig) [phase, below of = screen] {Full-text articles assessed for Eligibility \\ \textbf{(n = 99)}};
+  \node (3rd) [exc, right of = elig, xshift = 3cm] {Non-quantitative studies or records using unrelated variables excluded \\ \textbf{(n = 86)}};
+  \node (inc_1) [phase, below of = elig] {Preliminary included articles \\ \textbf{(n = 13)}};
+  \node (4th) [exc, right of = inc_1, xshift = 3cm] {Articles excluded during analysis due to nonconforming variables \\ \textbf{(n = 10)}};
+\node (inc_2) [phase, below of = inc_1] {Included articles \\ \textbf{(n = 3)}};
+  \draw [arrow] (id) -- (1st);
+  \draw [arrow] (id) -- (screen);
+  \draw [arrow] (screen) -- (2nd);
+  \draw [arrow] (screen) -- (elig);
+  \draw [arrow] (elig) -- (3rd);
+  \draw [arrow] (elig) -- (inc_1);
+  \draw [arrow] (inc_1) -- (4th);
+  \draw [arrow] (inc_1) -- (inc_2);
+ \end{tikzpicture}
+```
+
 # Meta-Analysis Dataset
 
 Our meta-analytic data are comprised of two datasets. The first dataset has the main coefficients reported in the studies. These data include only the most rigorous model from each paper, that is, those estimated with the largest sample size, most control variables, and fixed effects if the authors added them. If the article employed a regression discontinuity design, we chose the coefficient from the optimal bandwidth or from the intermediate one. This sample encompasses `r dim(dat)[1]` estimates, as `r as.numeric(table(table(dat$id))[2])` articles analysed two dependent or independent variables of interest. Our second sample, in contrast, contains all the `r dim(fulldat)[1]` effect sizes reported in the `r length(unique(dat$id))` papers.
@@ -433,11 +463,11 @@ In the main text, we focus on the results for our restricted sample as we consid
 
 # Descriptive Statistics
 
-In this section, we show the descriptive statistics for our sample. We focus on the following paper characteristics: study year, whether the paper has been published or not, the electoral system of the country discussed in the original study, the data aggregation level, as well as the distribution of the dependent and independent variables of interest.
+Here we show the descriptive statistics for our sample. We focus on the following paper characteristics: study year; paper publication; the  electoral system mentioned in the publication; and the distribution of the dependent and independent variables of interest.
 
 ## Study Year
 
-For study year, we have an average of `r round(mean(dat$year), 2)`, with standard deviation of `r round(sd(dat$year), 2)`. The oldest study included in the paper is from `r min(dat$year)`, while the most recent paper was written in `r max(dat$year)`. Therefore, we cover `r max(dat$year)-min(dat$year)` years of tests of the *law of 1/n*.
+The average year of publication in our sample is `r round(mean(dat$year), 2)` with standard deviation of `r round(sd(dat$year), 2)`. The oldest study included in the paper is from `r min(dat$year)`, while the most recent paper was written in `r max(dat$year)`. Therefore, we cover `r max(dat$year)-min(dat$year)` years of tests of the *law of 1/n*.
 
 ```{r, fig.width=7, fig.height=3, fig.cap="Study Year Frequencies", cache=TRUE, size="footnotesize", echo = FALSE}
 dat %>%
@@ -454,7 +484,7 @@ dat %>%
 
 Studies were included in our sample regardless of their publication status. From the `r length(unique(dat$id))` papers in the sample, `r as.numeric(table(unique(select(dat, id, published))$published)[1])` were published while `r as.numeric(table(unique(select(dat, id, published))$published)[2])` were not published.
 
-```{r, fig.width=4, fig.height=3, fig.cap="Was the study published?", size="footnotesize", cache=TRUE, echo = FALSE}
+```{r, fig.width=4, fig.height=2.5, fig.cap="Was the study published?", size="footnotesize", cache=TRUE, echo = FALSE}
 dat %>%
   select(id, published) %>%
   unique() %>%
@@ -488,7 +518,7 @@ The outcome variables included in the paper are:
 -   `r as.numeric(table(unique(select(dat, id, depvar2))$depvar2)[3])` Natural Log of Per Capita Expenditure papers
 -   `r as.numeric(table(unique(select(dat, id, depvar2))$depvar2)[2])` Expenditure as a Percentage of the GDP papers
 
-```{r, fig.width=6, fig.height=3, fig.cap="Dependent variables across the law of 1/n studies", size="footnotesize", cache=TRUE, echo = FALSE}
+```{r, fig.width=6, fig.height=2.3, fig.cap="Dependent variables across the law of 1/n studies", size="footnotesize", cache=TRUE, echo = FALSE}
 dat %>%
   select(id, depvar2) %>%
   unique() %>%
@@ -529,7 +559,7 @@ The coefficients in the papers vary considerably. In this section, we plot a his
 
 Coefficients:
 
-```{r, size="footnotesize", cache=TRUE, fig.width=5, fig.height=4, echo = FALSE}
+```{r, size="footnotesize", cache=TRUE, fig.width=5, fig.height=3.3, echo = FALSE}
 dat %>%
   ggplot(aes(x = coef)) +
   geom_histogram(bins = 15, color = "black") +
@@ -537,9 +567,11 @@ dat %>%
   theme_bw()
 ```
 
+\newpage
+
 Standard errors:
 
-```{r, size="footnotesize", cache=TRUE, fig.width=5, fig.height=4, echo = FALSE}
+```{r, size="footnotesize", cache=TRUE, fig.width=5, fig.height=3.3, echo = FALSE}
 dat %>%
   ggplot(aes(x = SE)) +
   geom_histogram(bins = 10, color = "black") +
@@ -562,7 +594,7 @@ dat %>%
 
 # Descriptive Statistics of Moderators
 
-We chose a set of moderators that frequently appear in the literature and may help us interpret our results. We included them in our meta-regressions alongside an indicator for the type of independent variable used in the original study ($n$, log($n$), or $k$). The additional moderators are: electoral system; estimation method; publication year; paper publication in an academic journal. The descriptive statistics for the moderators are available below.
+We chose a set of moderators that frequently appear in the literature and may help us interpret our results. We included them in our meta-regressions alongside an indicator for the type of independent variable used in the original study ($n$, log($n$), or $k$). The additional moderators are: electoral system; estimation method; publication year; paper publication in an academic journal. 
 
 ```{r, warning=F, message=F, echo = FALSE, cache=TRUE, results='asis'}
 fulldat$usemeta2 <- factor(fulldat$usemeta)
@@ -599,7 +631,7 @@ aux2 <- binom.test(table(aux$scoef)[2], sum(table(aux$scoef)), p = 0.5)
 pander(tidy(aux2)[,-c(2,4,5,6)][,c(3,4,1,2)])
 ```
 
-Under the null hypothesis of $p=0.5$, we find that `r as.numeric(table(aux$scoef)[2])` out of `r sum(table(aux$scoef))` studies have a positive sign. The chance of a distribution with $p=0.5$ generate this sample is equal to p-value = `r round(as.numeric(aux2$p.value), 3)`. Therefore, we `r ifelse(as.numeric(aux2$p.value)<0.1, 'accept', 'reject')` the hypothesis that $p \neq 0.5$.
+Under the null hypothesis of $p=0.5$, we find that `r as.numeric(table(aux$scoef)[2])` out of `r sum(table(aux$scoef))` studies have a positive sign. The chance of a distribution with $p=0.5$ generate this sample is equal to p-value = `r round(as.numeric(aux2$p.value), 3)`. Thus, we `r ifelse(as.numeric(aux2$p.value)<0.1, 'accept', 'reject')` the hypothesis that $p \neq 0.5$.
 
 For the log of the number of legislators in the lower house ($\log(N)$), the results are as follows:
 
@@ -669,6 +701,8 @@ We combine the three independent variables ($n$, $\log(n)$, and $k$) with our de
 
 ## Lower House Size and Expenditure per Capita
 
+The results for the meta-analysis that compares lower house size (_n_) and expenditure per capita is available below.
+
 ```{r, cache=TRUE, echo = FALSE, size="footnotesize"}
 # Pooling effects analysis -- ExpPC x N
 aux <- dat %>%
@@ -687,7 +721,7 @@ mod
 
 The forest plot:
 
-```{r, fig.width=8, fig.height=4, fig.cap="Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
+```{r, fig.width=8, fig.height=4.5, fig.cap="Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
 build_forest(mod, NULL)
 ```
 
@@ -710,16 +744,16 @@ Highlights:
 
 ### Electoral System Subgroup Analysis
 
-The *law of 1/n* was introduced to describe majoritarian systems, but the theory has also been applied to non-majoritarian electoral systems. We estimated a subgroup analysis using a binary indicator for electoral system.
+The *law of 1/n* was introduced to describe majoritarian systems, but the theory has also been applied to non-majoritarian electoral systems. We estimated a subgroup analysis using a binary indicator for electoral system. The results may be seen below.
+
+We find little evidence that either majoritarian or non-majoritarian systems produce systematically positive effects on expenditure per capita. Both coefficients are not statistically significant, and they reassure us that the absense of effect is not caused by pooling multiple types of electoral systems.
 
 ```{r, fig.width=8, fig.height=6, fig.cap="Subgroup Analysis of Lower House Size x Expenditure Per Capita, controlling by Electoral System", warning=FALSE, cache=TRUE, echo = FALSE}
 build_forest_het(aux, aux$coef, aux$VAR, slab = aux$authoryear,
                  capt = NULL, hetvar = aux$elecsys2)
 ```
 
-Therefore, we find little evidence that either majoritarian or non-majoritarian systems produce systematically positive effects on expenditure per capita. Both coefficients are not statistically significant, and they reassure us that the absense of effect is not caused by pooling multiple types of electoral systems.
-
-## Log Lower House Size and Expenditure per Capita
+## Log of Lower House Size and Expenditure per Capita
 
 There are no studies that have per capita expenditure as the dependent variable and log of lower house size as the treatment variable.
 
@@ -742,15 +776,13 @@ mod <- rma.mv(coef, VAR, data=aux,
 mod
 ```
 
-And the forest plot:
-
-```{r, fig.width=7, fig.height=4, fig.cap="Effect of upper house size (K) on the per capita government expenditure (ExpPC)", warning=FALSE, echo = FALSE}
+```{r, fig.width=7, fig.height=3, fig.cap="Effect of upper house size (K) on the per capita government expenditure (ExpPC)", warning=FALSE, echo = FALSE}
 build_forest(mod, NULL)
 ```
 
-And to assess the possibility of publication bias, we add funnel plot below:
+We see no evidence of publication bias:
 
-```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of upper house size (K) on per capita government expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
+```{r, fig.width=4, fig.height=3.5, fig.cap="Funnel Plot -- Effect of upper house size (K) on per capita government expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
 funnel(mod)
 ```
 
@@ -792,7 +824,7 @@ The forest plot is as follows:
 build_forest(mod, NULL)
 ```
 
-And to assess the possibility of publication bias, we add funnel plot below:
+The funnel plot shows no evidence of publication bias.
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on log of per capita expenditure (logExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
 funnel(mod)
@@ -831,11 +863,11 @@ mod
 
 The forest plot is available below:
 
-```{r, fig.width=8, fig.height=4, fig.cap="Effect of log lower houses size (logN) on the log of per capita government expenditure (logExpPC)", echo = FALSE, warning=FALSE, cache=TRUE}
+```{r, fig.width=8, fig.height=10, fig.cap="Effect of log lower houses size (logN) on the log of per capita government expenditure (logExpPC)", echo = FALSE, warning=FALSE, cache=TRUE}
 build_forest(mod, NULL)
 ```
 
-And to assess the possibility of publication bias, we add funnel plot below:
+The funnel plot:
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of log lower houses size (N) on log of per capita government expenditure (logExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
 funnel(mod)
@@ -882,7 +914,7 @@ Below, you may find the forest plot:
 build_forest(mod, NULL)
 ```
 
-And to assess the possibility of publication bias, we add funnel plot below:
+The funnel plot to test for publication bias:
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on percentage of public expenditure GDP (PCTGDP)", warning=FALSE, cache=TRUE, echo = FALSE}
 funnel(mod)
@@ -919,13 +951,11 @@ mod <- rma.mv(coef, VAR, data=aux,
 mod
 ```
 
-The forest plot follows below:
-
-```{r, echo = FALSE, fig.width=8, fig.height=4, fig.cap="Effect of log lower houses size (logN) on the GDP share of public expenditure (PCTGDP)", warning=FALSE, cache=TRUE}
+```{r, echo = FALSE, fig.width=8, fig.height=3, fig.cap="Effect of log lower houses size (logN) on the GDP share of public expenditure (PCTGDP)", warning=FALSE, cache=TRUE}
 build_forest(mod, NULL)
 ```
 
-And to assess the possibility of publication bias, we add funnel plot below:
+The funnel plot is available below:
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of log lower houses size (N) on the GDP share of public expenditure (PCTGDP)", warning=FALSE, cache=TRUE, echo = FALSE}
 funnel(mod)
@@ -962,13 +992,11 @@ mod <- rma.mv(coef, VAR, data=aux,
 mod
 ```
 
-The forest plot follows below:
-
 ```{r, fig.width=8, fig.height=4, fig.cap="Effect of upper house size (K) on the public expenditure share of the GDP (PCTGDP)", warning=FALSE, cache=TRUE, echo = FALSE}
 build_forest(mod, NULL)
 ```
 
-And to assess the possibility of publication bias, we add funnel plot below:
+As in our previous estimations, we find no evidence of file-drawer effect.
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of upper house size (K) on the public expenditure share of the GDP (PCTGDP)", warning=FALSE, cache=TRUE, echo = FALSE}
 funnel(mod)
@@ -988,6 +1016,8 @@ Highlights:
 
 ## Lower House Size and Expenditure per Capita (IV)
 
+Here we estimate a meta-analysis of the papers which use instrumental variables. The results may be seen below.
+
 ```{r, size="footnotesize", cache=TRUE, echo = FALSE}
 # Pooling effects analysis -- ExpPC x N (IV only)
 aux <- dat %>%
@@ -1006,11 +1036,11 @@ mod
 
 And the forest plot:
 
-```{r, fig.width=8, fig.height=4, fig.cap="Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
+```{r, fig.width=8, fig.height=3, fig.cap="Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
 build_forest(mod, NULL)
 ```
 
-And to assess the possibility of publication bias, we add funnel plot below:
+No evidence of publication bias, as shown in the following tunnel plot:
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
 funnel(mod)
@@ -1067,6 +1097,8 @@ Although all methods generate a null effect, the IV method seems to be well dist
 
 ## Lower House Size and Log of Expenditure per Capita (RDD)
 
+In this subsection, we run a meta-analysis with papers that include regression discontinuity designs. 
+
 ```{r, size="footnotesize", cache=TRUE, echo = FALSE}
 # Pooling effects analysis -- logExpPC x N (RDD only)
 aux <- dat %>%
@@ -1085,7 +1117,7 @@ mod
 
 Forest plot:
 
-```{r, fig.width=8, fig.height=4, fig.cap="Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
+```{r, fig.width=8, fig.height=3, fig.cap="Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
 build_forest(mod, NULL)
 ```
 
@@ -1151,9 +1183,9 @@ The forest plot:
 build_forest(mod, NULL)
 ```
 
-And to assess the possibility of publication bias, we add funnel plot below:
+And to assess the possibility of publication bias, we add the funnel plot below:
 
-```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
+```{r, fig.width=4, fig.height=3, fig.cap="Funnel Plot -- Effect of lower houses size (N) on Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
 funnel(mod)
 ```
 
@@ -1168,12 +1200,12 @@ Highlights:
 
 The *law of 1/n* was formulated to analyse the budgetary allocation in majoritarian systems. In the theoretical section below, we explain why the argument have potential issues when applied to non-majoritarian electoral systems. We estimated a subgroup analysis using a dummy variable indicating the electoral system included in each model.
 
-```{r, fig.width=8, fig.height=9, fig.cap="Subgroup Analysis of (N) x (ExpPC), controlling by electoral system", warning=FALSE, cache=T, echo = FALSE}
+We see that majoritarian systems do not have a clear positive effect on budgetary spending. The majoritarian systems in the sample had a random effects model estimate of -0.25, while the random effects model in the non-majoritarian subgroup fitted a value of 0.08. Both are not statistically significant, but they reassure us that the absence of effect is not caused by pooling multiple types of electoral systems.
+
+```{r, fig.width=8, fig.height=12, fig.cap="Subgroup Analysis of (N) x (ExpPC), controlling by electoral system", warning=FALSE, cache=T, echo = FALSE}
 build_forest_het(aux, aux$coef, aux$VAR, slab = aux$authoryear,
                  capt = NULL, hetvar = aux$elecsys2)
 ```
-
-Therefore, we see that majoritarian systems do not have a clear positive effect on budgetary spending. The majoritarian systems in the sample had a random effects model estimate of -0.25, while the random effects model in the non-majoritarian subgroup fitted a value of 0.08. Both are not statistically significant, but they reassure us that the absence of effect is not caused by pooling multiple types of electoral systems.
 
 ## Log of Lower House Size and Expenditure Per Capita
 
@@ -1198,18 +1230,17 @@ mod <- rma.mv(coef, VAR, data=aux,
 mod
 ```
 
-And the forest plot:
+The forest plot:
 
-```{r, fig.width=9, fig.height=8, fig.cap="Effect of upper house size (K) on the per capita government expenditure (ExpPC)",warning=FALSE, cache=TRUE, echo = FALSE}
+```{r, fig.width=9, fig.height=10, fig.cap="Effect of upper house size (K) on the per capita government expenditure (ExpPC)",warning=FALSE, cache=TRUE, echo = FALSE}
 build_forest(mod, NULL)
 ```
 
-And to assess the possibility of publication bias, we add funnel plot below:
+The funnel plot suggests no publication bias.
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of upper houses size (K) on Per Capita Expenditure (ExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
 funnel(mod)
 ```
-
 
 Highlights:
 
@@ -1243,12 +1274,9 @@ The forest plot is shown below:
 build_forest(mod, NULL)
 ```
 
-And to assess the possibility of publication bias, we add funnel plot below:
-
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on log of Per Capita Expenditure (logExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
 funnel(mod)
 ```
-
 
 Highlights:
 
@@ -1278,13 +1306,13 @@ mod
 
 The forest plot:
 
-```{r, fig.width=8, fig.height=4, fig.cap="Effect of log lower houses size (logN) on the log of per capita government expenditure (logExpPC)",warning=FALSE, cache=TRUE, echo = FALSE}
+```{r, fig.width=8, fig.height=7, fig.cap="Effect of log lower houses size (logN) on the log of per capita government expenditure (logExpPC)",warning=FALSE, cache=TRUE, echo = FALSE}
 build_forest(mod, NULL)
 ```
 
-And to assess the possibility of publication bias, we add funnel plot below:
+And the funnel plot: 
 
-```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of log of lower houses size (logN) on log of Per Capita Expenditure (logExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
+```{r, fig.width=4, fig.height=3.5, fig.cap="Funnel Plot -- Effect of log of lower houses size (logN) on log of Per Capita Expenditure (logExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
 funnel(mod)
 ```
 
@@ -1321,13 +1349,13 @@ mod
 
 Here is the forest plot:
 
-```{r, fig.width=8, fig.height=6, fig.cap="Effect of lower houses size (N) on percentage of public expenditure GDP (PCTGDP)",warning=FALSE, cache=TRUE, echo = FALSE}
+```{r, fig.width=8, fig.height=7, fig.cap="Effect of lower houses size (N) on percentage of public expenditure GDP (PCTGDP)",warning=FALSE, cache=TRUE, echo = FALSE}
 build_forest(mod, NULL)
 ```
 
-And to assess the possibility of publication bias, we add funnel plot below:
+And here is the funnel plot to assess the possibility of publication bias:
 
-```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on percentage of public expenditure GDP (PCTGDP)", warning=FALSE, cache=TRUE, echo = FALSE}
+```{r, fig.width=4, fig.height=3.75, fig.cap="Funnel Plot -- Effect of lower houses size (N) on percentage of public expenditure GDP (PCTGDP)", warning=FALSE, cache=TRUE, echo = FALSE}
 funnel(mod)
 ```
 
@@ -1360,11 +1388,11 @@ mod
 
 The forest plot:
 
-```{r, fig.width=8, fig.height=4, fig.cap="Effect of log lower houses size (logN) on the GDP share of public expenditure (PCTGDP)",warning=FALSE, cache=TRUE, echo = FALSE}
+```{r, fig.width=8, fig.height=5, fig.cap="Effect of log lower houses size (logN) on the GDP share of public expenditure (PCTGDP)",warning=FALSE, cache=TRUE, echo = FALSE}
 build_forest(mod, NULL)
 ```
 
-And to assess the possibility of publication bias, we add funnel plot below:
+And the funnel plot:
 
 ```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of log of lower houses size (logN) on log of Per Capita Expenditure (logExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
 funnel(mod)
