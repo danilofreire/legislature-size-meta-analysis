@@ -544,7 +544,7 @@ dat %>%
 
 ## Independent Variables
 
-Most papers in our sample analyse the number of legislators in the lower house (`r as.numeric(table(dat$indepvar2)[3])`). The second most frequent independent variable is the number of legislators in the upper house (`r as.numeric(table(dat$indepvar2)[1])`). Finally, the minority of papers use the natural log of the number of legislators in the lower house as an independent variable (`r as.numeric(table(dat$indepvar2)[1])`). As we noted above, some papers had multiple coefficients, and thus the total number of coefficients is `r dim(dat)[1]`, while the number of papers is only `r length(unique(dat$id))`.
+Most papers in our sample analyse the number of legislators in the lower house (`r as.numeric(table(dat$indepvar2)[3])`). The second most frequent independent variable is the number of legislators in the upper house (`r as.numeric(table(dat$indepvar2)[1])`). Finally, the minority of papers use the natural log of the number of legislators in the lower house as an independent variable (`r as.numeric(table(dat$indepvar2)[2])`). As we noted above, some papers had multiple coefficients, and thus the total number of coefficients is `r dim(dat)[1]`, while the number of papers is only `r length(unique(dat$id))`.
 
 ```{r, fig.width=6, fig.height=3, fig.cap="Independent variables across the law of 1/n studies", size="footnotesize", echo = FALSE, cache=TRUE}
 dat %>%
