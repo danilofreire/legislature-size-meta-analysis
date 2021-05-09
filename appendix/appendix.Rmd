@@ -417,9 +417,9 @@ The diagram below shows each step of our article selection process. We followed 
 
   \node (inc_1) [phase, below of = elig] {Preliminary included articles \\ \textbf{(n = 47)}};
 
-  \node (4th) [exc, right of = inc_1, xshift = 3cm] {Articles excluded during analysis due to nonconforming variables \\ \textbf{(n = 18)}};
+  \node (4th) [exc, right of = inc_1, xshift = 3cm] {Articles excluded during analysis due to nonconforming variables \\ \textbf{(n = 19)}};
 
-\node (inc_2) [phase, below of = inc_1] {Included articles \\ \textbf{(n = 29)}};
+\node (inc_2) [phase, below of = inc_1] {Included articles \\ \textbf{(n = 28)}};
   \draw [arrow] (id) -- (1st);
   \draw [arrow] (id) -- (screen);
   \draw [arrow] (screen) -- (2nd);
@@ -450,8 +450,8 @@ The diagram below shows each step of our article selection process. We followed 
   \node (elig) [phase, below of = screen] {Full-text articles assessed for Eligibility \\ \textbf{(n = 99)}};
   \node (3rd) [exc, right of = elig, xshift = 3cm] {Non-quantitative studies or records using unrelated variables excluded \\ \textbf{(n = 86)}};
   \node (inc_1) [phase, below of = elig] {Preliminary included articles \\ \textbf{(n = 13)}};
-  \node (4th) [exc, right of = inc_1, xshift = 3cm] {Articles excluded during analysis due to nonconforming variables \\ \textbf{(n = 10)}};
-\node (inc_2) [phase, below of = inc_1] {Included articles \\ \textbf{(n = 3)}};
+  \node (4th) [exc, right of = inc_1, xshift = 3cm] {Articles excluded during analysis due to nonconforming variables \\ \textbf{(n = 11)}};
+\node (inc_2) [phase, below of = inc_1] {Included articles \\ \textbf{(n = 2)}};
   \draw [arrow] (id) -- (1st);
   \draw [arrow] (id) -- (screen);
   \draw [arrow] (screen) -- (2nd);
