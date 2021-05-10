@@ -5641,4 +5641,4 @@ dat <- dat %>%
   filter(usemeta == 1)
 
 ## Saving
-save.image('./dataset/dataCoefs.RData')
+save.image('../dataset/dataCoefs.RData')
