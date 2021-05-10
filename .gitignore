@@ -364,4 +364,4 @@ tags
 # End of https://www.gitignore.io/api/r,vim,latex,macos
 
 # Folders
-/appendix/appendix_*/
+appendix/appendix_*/

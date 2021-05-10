@@ -361,7 +361,7 @@ phase, we also collected information on whether the paper had been published,
 and if it explicitly discussed the _law of 1/n_. Upon choosing the variables,
 we excluded two studies from the first sample, as they did not have the
 dependent/independent variables we collected for our meta-analysis. We then
-included the 3 papers we found in the second search, as both conformed to our
+included the 2 papers we found in the second search, as both conformed to our
 criteria, and compiled our final sample of `r length(unique(dat$authoryear))`
 articles.
 
@@ -1283,7 +1283,7 @@ The forest plot is shown below:
 build_forest(mod, NULL)
 ```
 
-```{r, fig.width=4, fig.height=4, fig.cap="Funnel Plot -- Effect of lower houses size (N) on log of Per Capita Expenditure (logExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
+```{r, fig.width=4, fig.height=3, fig.cap="Funnel Plot -- Effect of lower houses size (N) on log of Per Capita Expenditure (logExpPC)", warning=FALSE, cache=TRUE, echo = FALSE}
 funnel(mod)
 ```
 
@@ -1397,7 +1397,7 @@ mod
 
 The forest plot:
 
-```{r, fig.width=8, fig.height=5, fig.cap="Effect of log lower houses size (logN) on the GDP share of public expenditure (PCTGDP)",warning=FALSE, cache=TRUE, echo = FALSE}
+```{r, fig.width=8, fig.height=3, fig.cap="Effect of log lower houses size (logN) on the GDP share of public expenditure (PCTGDP)",warning=FALSE, cache=TRUE, echo = FALSE}
 build_forest(mod, NULL)
 ```
 
