@@ -666,7 +666,7 @@ average, weighted by standard errors. The length of the lines represent the
 precision of the estimates. The red line at the bottom of the figures displays
 the aggregate coefficients plus their respective confidence intervals.
 
-The first column of the graph reports the results for lower chamber size.
+The first line of graphs reports the results for lower chamber size.
 In the first model, which correlates lower chamber size and expenditure per capita, we find a
 standardised mean difference (SMD) of `r round(mod[[1]]$TE.random,3)` and a standard error of `r round(mod[[1]]$seTE.random,3)`
 (studies = `r mod[[1]]$k`, 95\% CI = [`r round(mod[[1]]$lower.random,3)`; `r round(mod[[1]]$upper.random,3)`], $p$-value = `r round(mod[[1]]$pval.random,3)` , prediction interval
@@ -684,21 +684,23 @@ statistically indistinguishable from zero.
 In our restricted sample, larger lower house size also does not increase
 government spending as a percentage of GDP (studies = `r mod[[5]]$k`, SMD = `r round(mod[[5]]$TE.random,3)`, SE =
 `r round(mod[[5]]$seTE.random,3)`, 95\% CI = [`r round(mod[[5]]$lower.random,3)`; `r round(mod[[5]]$upper.random,3)`], $p$-value = `r round(mod[[5]]$pval.random,3)`, prediction interval =
-[`r round(mod[[5]]$lower.predict,3)`; `r round(mod[[5]]$upper.predict,3)`], $I^2$ = `r round(mod[[5]]$I2*100, 2)`\%). We find a positive effect in our extended
-sample and the coefficient is statistically significant at the 10\% level
-(coefficients = `r mod[[8]]$k`, SMD = `r round(mod[[8]]$TE.random,3)`, SE = `r round(mod[[8]]$seTE.random,3)`, 95\% CI = [`r round(mod[[8]]$lower.random,3)`; `r round(mod[[8]]$upper.random,3)`], $p$-value =
-`r round(mod[[8]]$pval.random,3)`, prediction interval = [`r round(mod[[8]]$lower.predict,3)`; `r round(mod[[8]]$upper.predict,3)`], $I^2$ = `r round(mod[[8]]$I2*100, 2)`\%). The 
-result supports the "law of 1/$n$", but the evidence is moderate
-as the prediction interval include zero.
+[`r round(mod[[5]]$lower.predict,3)`; `r round(mod[[5]]$upper.predict,3)`], $I^2$ = `r round(mod[[5]]$I2*100, 2)`\%). In the extended sample the effect is negative, but it is also statistically insignificant.
+
+
+```{r}
+#We find a positive effect in our extended
+#sample and the coefficient is statistically significant at the 10\% level
+#(coefficients = `r mod[[8]]$k`, SMD = `r round(mod[[8]]$TE.random,3)`, SE = `r round(mod[[8]]$seTE.random,3)`, 95\% CI = [`r round(mod[[8]]$lower.random,3)`; `r round(mod[[8]]$upper.random,3)`], $p$-value =
+#`r round(mod[[8]]$pval.random,3)`, prediction interval = [`r round(mod[[8]]$lower.predict,3)`; #`r round(mod[[8]]$upper.predict,3)`], $I^2$ = `r round(mod[[8]]$I2*100, 2)`\%). The 
+#result supports the "law of 1/$n$", but the evidence is moderate
+#as the prediction interval include zero.
+```
 
 Next, we present the meta-analyses using the logarithm of lower house
-size, as the main explanatory variable. We start with the relationship between
-this variable and the logarithm of expenditure per capita. The result is positive and
-statistically significant at 10\%, but the prediction interval encompasses zero
+size. We start with the relationship between
+this variable and the logarithm of expenditure per capita. The result is positive, but the coefficient is not significant, and the prediction interval encompasses zero
 (studies = `r mod[[4]]$k`, SMD = `r round(mod[[4]]$TE.random,3)`, SE = `r round(mod[[4]]$seTE.random,3)`, 95\% CI = [`r round(mod[[4]]$lower.random,3)`; `r round(mod[[4]]$upper.random,3)`], $p$-value =
-`r round(mod[[4]]$pval.random,3)`, prediction interval = [`r round(mod[[4]]$lower.predict,3)`; `r round(mod[[4]]$upper.predict,3)`], $I^2$ = `r round(mod[[4]]$I2*100, 2)`\%). Although the
-coefficient has the predicted sign, we should interpret the finding with caution
-as it does not replicate in our sample of `r dim(fulldat)[1]` effect sizes.
+`r round(mod[[4]]$pval.random,3)`, prediction interval = [`r round(mod[[4]]$lower.predict,3)`; `r round(mod[[4]]$upper.predict,3)`], $I^2$ = `r round(mod[[4]]$I2*100, 2)`\%). Results in the full sample are also null.
 
 Our model that correlates log lower chamber size with public expenditures as a percentage of
 GDP fails to reach conventional levels of statistical significance (studies =
@@ -706,7 +708,7 @@ GDP fails to reach conventional levels of statistical significance (studies =
 prediction interval = [`r round(mod[[6]]$lower.predict,3)`; `r round(mod[[6]]$upper.predict,3)`], $I^2$ = `r round(mod[[6]]$I2*100, 2)`\%). The extended sample
 also gives us a null result.
 
-The third set of models uses upper house size, as the main independent
+The third set of models uses upper house size as the main independent
 variable. We find a positive correlation between this variable and expenditure per capita
 but the coefficient is not significant (studies = `r mod[[2]]$k`, SMD = `r round(mod[[2]]$TE.random,3)`, SE
 = `r round(mod[[2]]$seTE.random,3)`, 95\% CI = [`r round(mod[[2]]$lower.random,3)`; `r round(mod[[2]]$upper.random,3)`], $p$-value = `r round(mod[[2]]$pval.random,3)`, prediction interval =
@@ -774,10 +776,9 @@ capture temporal variation in the study coefficients. We also add a dummy
 variable to assess whether published articles report effect sizes that are
 higher or lower than those from working papers. The fourth variable measures
 whether studies focusing on non-majoritarian electoral systems report
-coefficients that are smaller or larger than those from majoritarian countries.
-Our last covariate is a categorical variable indicating the statistical
+coefficients that are smaller or larger than those from majoritarian countries. The fifth covariate is a categorical variable indicating the statistical
 procedure used in the original models (panel data, instrumental variables,
-OLS, or regression discontinuity design). 
+OLS, or regression discontinuity design). In our last variable, we separate coefficients that use samples from unicameral or bicameral systems, and code papers using polities with different institutional designs as "mixed".
 
 ```{r, echo = FALSE, warning = FALSE, message = FALSE, results = 'hide', cache = TRUE}
 res <- list()
@@ -994,7 +995,7 @@ Intercept & `r round(res[[3]][1,2],3)` & `r round(res[[4]][1,2],3)` & `r round(r
 \end{tabular}
 \begin{minipage}{\textwidth}
 \renewcommand{\footnoterule}{}
-\footnotetext{\textbf{Note:} {The restricted and extended samples include `r length(dat$id)` and `r length(fulldat$id)` study coefficients, respectively. We report the results from the permutation tests. Reference categories: Independent Variable $= k$; Published $= Yes$; Non-Majoritarian (PR \& Mixed) $= Majoritarian$; Method $= OLS$. Significance codes: *** $p < 0.01$; ** $p < 0.05$; * $p < 0.10$.}}
+\footnotetext{\textbf{Note:} {The restricted and extended samples include `r length(dat$id)` and `r length(fulldat$id)` study coefficients, respectively. We report the results from the permutation tests. Reference categories: Independent Variable $= k$; Published $= Yes$; Non-Majoritarian (PR \& Mixed) $= Majoritarian$; Method $= OLS$; Institutional Design $= Bicameralism$. Significance codes: *** $p < 0.01$; ** $p < 0.05$; * $p < 0.10$.}}
 \end{minipage}
 \end{table}
 ```
@@ -1003,8 +1004,7 @@ Intercept & `r round(res[[3]][1,2],3)` & `r round(res[[4]][1,2],3)` & `r round(r
 
 Table \ref{tabregressions} presents the meta-regression results for our
 restricted and extended samples. Each column represents one of the three
-measures of public spending we discuss in this paper. Each subgroup uses a chosen category as reference. When it comes to the independent variable, the reference category is upper chamber size; for 
-publication bias, the reference is published articles; for electoral system, the reference is majoritarian systems; and for methodology, the reference is ordinary least squares linear regression. To reduce the risk of
+measures of public spending we discuss in this paper. To reduce the risk of
 false positives in our analyses, we use permutation tests to calculate
 significance levels for the meta-regressions \citep{higgins2004controlling}.
 
@@ -1041,6 +1041,7 @@ find evidence that results vary considerably if the study employs different
 measures of legislature size or use causal research methods. The impact of
 factors such as the electoral system or year of publication also appear to be
 conditional on the selected model.
+
 
 # Discussion
 \label{sec:discussion}
