@@ -222,11 +222,11 @@ build_forest_het <- function(mod, capt, lsize = 22, ttl = NULL, hetvar = NULL) {
 
 [^huzeyfe]: Research Associate, Contemporary Brazilian History Research and Documentation Center, School of Social Sciences, Fundação Getulio Vargas, <huzeyfealptekin@gmail.com>.
 
-[^danilo]: Independent Researcher, <danilofreire@gmail.com>, <https://danilofreire.github.io>. Corresponding author.
+[^danilo]: Senior Lecturer, School of Social and Political Sciences, University of Lincoln <danilofreire@gmail.com>, <https://danilofreire.github.io>. Corresponding author.
 
 [^umberto]: Visiting Assistant Professor, Quantitative Theory and Methods Department, Emory University, <umberto.mignozzetti@emory.edu>, <http://umbertomig.com>.
 
-[^catarina]: PhD Student, University of California San Diego, <catarinamroman@gmail.com>, <http://catarinaroman.github.io>.
+[^catarina]: PhD Student, Department of Political Science, University of California San Diego, <catarinamroman@gmail.com>, <http://catarinaroman.github.io>.
 
 \newpage
 
