@@ -32,7 +32,7 @@ output:
 
 [^mignozzetti]: Visiting Assistant Professor, Quantitative Theory and Methods Department, Emory University, <umberto.mignozzetti@emory.edu>, <http://umbertomig.com>.
 
-[^roman]: Research Associate, School of International Relations, Fundação Getulio Vargas, <catarinamroman@gmail.com>, <http://catarinaroman.github.io>.
+[^roman]: PhD Student, University of California San Diego, <catarinamroman@gmail.com>, <http://catarinaroman.github.io>.
 
 \appendix
 
@@ -1640,12 +1640,12 @@ mod <- rma.mv(yi = coef,
 summary(mod)
 ```
 
-With all coefficients, the results of the effect sizes on the Log of Expenditure Per Capita Regressions are the following:
-
-1. In regard to the estimation method, papers that use `PANEL` data or `RDD`
+With all coefficients, among the results of the effect sizes on the Log of Expenditure Per Capita Regressions, we find that in regard to the estimation method, papers that use `PANEL` data or `RDD`
    designs have smaller effects than articles that employ `OLS` estimations.
 
-2. Having the log of lower house seats (`logN`) as the main independent variable increases the detected effect.
+```{r}
+# 2. Having the log of lower house seats (`logN`) as the main independent variable increases the detected effect.
+```
 
 All other results are insignificant.
 
@@ -1667,7 +1667,11 @@ mod <- rma.mv(yi = coef,
 summary(mod)
 ```
 
-All moderators are insignificant in the meta-regressions of Expenditure as a Percentage of GDP.
+In the meta-regressions of Expenditure as a Percentage of GDP, we found that:
+
+1. More recent papers find smaller effect sizes than older studies.
+
+2. Papers whose samples included both unicameral and bicameral legislatures report significantly lower coefficients.
 
 Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
 
@@ -1686,7 +1690,14 @@ mod <- rma.mv(yi = coef,
 summary(mod)
 ```
 
-Even for all the coefficients, all moderators remain insignificant.
+With all coefficients, the results of the effect sizes on the Expenditure as a Percentage of GDP regressions are the following:
+
+1. Recent papers find even smaller effect sizes than older studies.
+
+2. Studies using non-majoritarian systems find more positive effects between variables.
+
+3. Papers whose samples included both unicameral and bicameral legislatures report significantly lower coefficients. 
+
 
 # Robustness: Meta-Regressions (All Coefficients)
 
@@ -1722,7 +1733,7 @@ mod <- rma.mv(yi = coef,
 
 summary(mod)
 ```
-In the restricted model, with only the main coefficients in the selected papers, no moderator has a significant effect. We also run the meta-regressions adding all coefficients in the papers. The results follow below:
+In the restricted model, with only the main coefficients in the selected papers, only Unicameralism has a positive, significant effect. We also run the meta-regressions adding all coefficients in the papers. The results follow below:
 
 ```{r, size="footnotesize", warning=F, cache=T, echo = FALSE}
 mod <- rma.mv(yi = coef,
@@ -1739,13 +1750,22 @@ summary(mod)
 ```
 In the full model, we can see that:
 
-1. For the dependent variable, models with Log of Per Capita Expenditure tend to report significantly smaller effects than models with Per Capita Expenditure.
+1. Coefficients from non-majoritarian systems are significantly smaller than those found in purely majoritarian systems.
 
-2. For the independent variable, models with Log of Lower House Size tend to report significantly larger effects than models with Upper House Size.
+2. Compared with `OLS`, `PANEL`, `IV` and `RDD` report significantly smaller coefficients.
 
-3. Over time, the reported coefficients have been increasing in size.
+3. Evidence from purely unicameral systems produces significantly larger effect sizes.
 
-4. Compared with `OLS`, `PANEL` and `RDD` report significantly smaller coefficients.
+4. All other moderators are insignificant.
 
-5. All other moderators are insignificant.
+```{r}
+#1. For the dependent variable, models with Log of Per Capita Expenditure tend to report significantly smaller effects than models with Per Capita Expenditure.
 
+#2. For the independent variable, models with Log of Lower House Size tend to report significantly larger effects than models with Upper House Size.
+
+#3. Over time, the reported coefficients have been increasing in size.
+
+#4. Compared with `OLS`, `PANEL` and `RDD` report significantly smaller coefficients.
+
+#5. All other moderators are insignificant.
+```
