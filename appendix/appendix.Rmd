@@ -710,7 +710,7 @@ We combine the three independent variables ($n$, $\log(n)$, and $k$) with our de
 
 ## Lower House Size and Expenditure per Capita
 
-The results for the meta-analysis that compares lower house size (_n_) and expenditure per capita is available below.
+The results for the meta-analysis that compares lower house size (_n_) and expenditure per capita are available below.
 
 ```{r, cache=TRUE, echo = FALSE, size="footnotesize"}
 # Pooling effects analysis -- ExpPC x N
@@ -755,7 +755,7 @@ Highlights:
 
 The *law of 1/n* was introduced to describe majoritarian systems, but the theory has also been applied to non-majoritarian electoral systems. We estimated a subgroup analysis using a binary indicator for electoral system. The results may be seen below.
 
-We find little evidence that either majoritarian or non-majoritarian systems produce systematically positive effects on expenditure per capita. Both coefficients are not statistically significant, and they reassure us that the absense of effect is not caused by pooling multiple types of electoral systems.
+We find little evidence that either majoritarian or non-majoritarian systems produce systematically positive effects on expenditure per capita. Both coefficients are not statistically significant, and they reassure us that the absence of effect is not caused by pooling multiple types of electoral systems.
 
 ```{r, fig.width=8, fig.height=6, fig.cap="Subgroup Analysis of Lower House Size x Expenditure Per Capita, controlling by Electoral System", warning=FALSE, cache=TRUE, echo = FALSE}
 build_forest_het(aux, aux$coef, aux$VAR, slab = aux$authoryear,
@@ -1084,7 +1084,7 @@ Highlights:
 
 ### Regression Method Subgroup Analysis
 
-Over time, the literature evolved to use causally identified techniques for determine the effect of legislature size on the expenduture per capita. To study whether the method had an effect on the estimated coefficients, we fit a subgroup analysis using the method employed in each paper.
+Over time, the literature evolved to use causally identified techniques to determine the effect of legislature size on the expenduture per capita. To study whether the method had an effect on the estimated coefficients, we fit a subgroup analysis using the method employed in each paper.
 
 ```{r, fig.width=8, fig.height=6, fig.cap="Subgroup Analysis of (N) x (ExpPC), controlling by regression methods", warning=FALSE, cache=TRUE, echo = FALSE}
 aux <- dat %>%
@@ -1102,7 +1102,7 @@ build_forest_het(aux, aux$coef, aux$VAR, slab = aux$authoryear,
                  capt = NULL, hetvar = aux$method)
 ```
 
-Although all methods generate a null effect, the IV method seems to be well distributed, with two papers with positive effects and two papers negative displaying negative effects. The random effects model for the subgroup is 0.22, which is negative but non-significant. Improve the estimation technique, for the case of IVs, render still a null effect of legislature size on per capita government expenditure.
+Although all methods generate a null effect, the IV method seems to be well distributed, with two papers with positive effects and two papers displaying negative effects. The random effects model for the subgroup is 0.22, which is negative but non-significant. Improving the estimation technique, for the case of IVs, still renders a null effect of legislature size on per capita government expenditure.
 
 ## Lower House Size and Log of Expenditure per Capita (RDD)
 
@@ -1207,7 +1207,7 @@ Highlights:
 
 ### Electoral System Subgroup Analysis
 
-The *law of 1/n* was formulated to analyse the budgetary allocation in majoritarian systems. In the theoretical section below, we explain why the argument have potential issues when applied to non-majoritarian electoral systems. We estimated a subgroup analysis using a dummy variable indicating the electoral system included in each model.
+The *law of 1/n* was formulated to analyse the budgetary allocation in majoritarian systems. In the theoretical section below, we explain why the argument has potential issues when applied to non-majoritarian electoral systems. We estimated a subgroup analysis using a dummy variable indicating the electoral system included in each model.
 
 We see that majoritarian systems do not have a clear positive effect on budgetary spending. The majoritarian systems in the sample had a random effects model estimate of -0.25, while the random effects model in the non-majoritarian subgroup fitted a value of 0.08. Both are not statistically significant, but they reassure us that the absence of effect is not caused by pooling multiple types of electoral systems.
 
