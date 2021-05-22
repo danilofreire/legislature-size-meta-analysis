@@ -1600,7 +1600,7 @@ With all coefficients, the results of the effect sizes on the Expenditure Per Ca
 
 2.  Year has now a positive effect on coefficient sizes.
 
-3.  All other coeffients were not significant.
+3.  All other moderators were not significant.
 
 ## Meta-Regressions for Log of Expenditure Per Capita
 
@@ -1640,14 +1640,7 @@ mod <- rma.mv(yi = coef,
 summary(mod)
 ```
 
-With all coefficients, among the results of the effect sizes on the Log of Expenditure Per Capita Regressions, we find that in regard to the estimation method, papers that use `PANEL` data or `RDD`
-   designs have smaller effects than articles that employ `OLS` estimations.
-
-```{r}
-# 2. Having the log of lower house seats (`logN`) as the main independent variable increases the detected effect.
-```
-
-All other results are insignificant.
+With all coefficients, results of the effect sizes on the Log of Expenditure Per Capita Regressions indicate that in regard to the estimation method, papers that use `PANEL` data or `RDD` designs have smaller effects than articles that employ `OLS` estimations. All other results are insignificant.
 
 ## Meta-Regressions for Expenditure as a Percentage of the GDP
 
@@ -1669,7 +1662,7 @@ summary(mod)
 
 In the meta-regressions of Expenditure as a Percentage of GDP, we found that:
 
-1. More recent papers find smaller effect sizes than older studies.
+1. Recent papers find smaller effect sizes than older studies.
 
 2. Papers whose samples included both unicameral and bicameral legislatures report significantly lower coefficients.
 
@@ -1692,7 +1685,7 @@ summary(mod)
 
 With all coefficients, the results of the effect sizes on the Expenditure as a Percentage of GDP regressions are the following:
 
-1. Recent papers find even smaller effect sizes than older studies.
+1. Papers from more recent years find smaller effect sizes than older studies.
 
 2. Studies using non-majoritarian systems find more positive effects between variables.
 
@@ -1713,11 +1706,11 @@ In this section, we aggregate all the coefficients and run a multivariate meta-r
 
 5. Whether the study is a working paper or published work.
 
-6. The institution design: whether the legislature in the analysis is unicameral, bicameral, or mixed.
+6. The institutional design: whether the legislature in the analysis is unicameral, bicameral, or mixed.
 
 7. The estimation method used in the paper (OLS, PANEL, IV, or RDD).
 
-The results follow below, and show null effects for all variables, including the intercept.
+The results follow below, and show null effects for all variables except for Unicameral institutional designs.
 
 ```{r, size="footnotesize", warning=F, cache=T, echo = FALSE}
 mod <- rma.mv(yi = coef,
@@ -1750,22 +1743,10 @@ summary(mod)
 ```
 In the full model, we can see that:
 
-1. Coefficients from non-majoritarian systems are significantly smaller than those found in purely majoritarian systems.
+1. Coefficients from non-majoritarian systems are significantly lower than those found in purely majoritarian systems.
 
-2. Compared with `OLS`, `PANEL`, `IV` and `RDD` report significantly smaller coefficients.
+2. Compared with papers that employ `OLS`, those that use `PANEL`, `IV` and `RDD` report significantly smaller coefficients.
 
-3. Evidence from purely unicameral systems produces significantly larger effect sizes.
+3. Evidence from unicameral systems presents significantly larger effect sizes.
 
 4. All other moderators are insignificant.
-
-```{r}
-#1. For the dependent variable, models with Log of Per Capita Expenditure tend to report significantly smaller effects than models with Per Capita Expenditure.
-
-#2. For the independent variable, models with Log of Lower House Size tend to report significantly larger effects than models with Upper House Size.
-
-#3. Over time, the reported coefficients have been increasing in size.
-
-#4. Compared with `OLS`, `PANEL` and `RDD` report significantly smaller coefficients.
-
-#5. All other moderators are insignificant.
-```
