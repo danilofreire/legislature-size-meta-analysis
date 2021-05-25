@@ -1,6 +1,6 @@
 ---
 title:  |
-        | The Effect of Legislature Size on Public Spending
+        | The Effect of Legislature Size on Public Spending:
         | A Meta-Analysis
 author: 
   - Huzeyfe Alptekin[^huzeyfe]
@@ -222,11 +222,11 @@ build_forest_het <- function(mod, capt, lsize = 22, ttl = NULL, hetvar = NULL) {
 
 [^huzeyfe]: Research Associate, Contemporary Brazilian History Research and Documentation Center, School of Social Sciences, Fundação Getulio Vargas, <huzeyfealptekin@gmail.com>.
 
-[^danilo]: Independent Researcher, <danilofreire@gmail.com>, <https://danilofreire.github.io>. Corresponding author.
+[^danilo]: Senior Lecturer, School of Social and Political Sciences, University of Lincoln, <danilofreire@gmail.com>, <https://danilofreire.github.io>. Corresponding author.
 
 [^umberto]: Visiting Assistant Professor, Quantitative Theory and Methods Department, Emory University, <umberto.mignozzetti@emory.edu>, <http://umbertomig.com>.
 
-[^catarina]: Research Associate, School of International Relations, Fundação Getulio Vargas, <catarinamroman@gmail.com>, <http://catarinaroman.github.io>.
+[^catarina]: PhD Student, Department of Political Science, University of California San Diego, <catarinamroman@gmail.com>, <http://catarinaroman.github.io>.
 
 \newpage
 
@@ -309,38 +309,60 @@ provide robust support for the theory as originally conceived, and causal
 inference models suggest that larger legislatures are associated with lower
 public spending.
 
-# Methods
 
-We collected the study sample using three criteria. First, the study should
-cite \citet{weingast1981political} as their work is foundational to the
-distributive politics literature. Second, the study had to use quantitative
-methods to estimate the relationship between our variables of
-interest.\footnote{As meta-analysis requires a single estimate per observation,
-we excluded articles that use interaction terms or quadratic specifications of
-our independent variables.} Third, the study should be written in the English
-language. We conducted a primary search using Scopus, Microsoft Academic, and
-Google Scholar, three large academic databases.\footnote{See the Supplementary
-Material for code.}
+# Data and Methods
 
-After applying our exclusion criteria, the search produced a dataset of 
-`r length(unique(dat$id))` studies as of the 21\textsuperscript{st} of November,
-2019. Table \ref{tab:papers} contains the full list of articles from which we
-drew data. A PRISMA\footnote{The Preferred Reporting Items for Systematic
-Reviews and Meta-Analyses (PRISMA) statement provides a checklist designed
-to improve the quality and transparency of study selection processes in
-meta-analyses. For more information on the PRISMA framework, see
-\citet{liberati2009prisma}.} flow diagram showing the number of resulting
-papers after each review step is available in the Supplementary Material.
+We compiled our study sample in three rounds. In the first search round, we
+gathered data from three large academic databases (Scopus, Microsoft Academic,
+and Google Scholar) and looked for studies that cited
+\citet{weingast1981political}, as it is the foundational work in the literature
+on the "law of $1/n$". We then restricted our query to articles written in
+English and, to ensure that studies were comparable, we only included papers
+that used quantitative methods to investigate the relationship between
+legislature size and public spending\footnote{Please refer to Section C in the
+Supplementary Material for a detailed description of the selection procedure.
+We include two PRISMA (Preferred Reporting Items for Systematic Reviews and
+Meta-Analyses) flow diagrammes \citep{liberati2009prisma} showing the number of
+resulting papers after each review step.}. After this stage, we identified the
+variables authors most commonly employ to measure government expenditure and
+legislature size, our dependent and independent variables, respectively. For
+government expenditure, our study sample uses (i) public expenditure as a share
+of GDP; (ii) public expenditure per capita; and (iii) the natural logarithm of
+public expenditure per capita as its main variables of interest\footnote{Since
+meta-analysis requires a single estimate per observation, we excluded articles
+that use interaction terms or quadratic specifications of our selected
+variables.}. In regards to legislature size, the variables are (i) lower
+chamber size; (ii) natural logarithm of lower chamber size; and (iii) upper
+house size\footnote{There are a few important nuances concerning coding of
+these variables. For instance, unicameralism is captured both by lower chamber
+size ($n = 7$) and by log lower chamber size ($n = 5$). Since much of the
+literature estimates how institutional designs affect this relationship, ours
+and many other articles use both lower and upper chamber sizes as main
+explanatory variables. We did not find any articles that used the natural
+logarithm of upper chamber size.}.
+
+In the second round, we did not require articles to cite @weingast1981political
+and used a keyword-based query on Google Scholar to broaden the scope of the
+first search. We again restricted the search to articles written in English
+which employed quantitative methods. In the third search round, we looked into
+the personal webpages of every author we had already included in our previous
+sample. The purpose of this manual search was to assess whether there was any
+working paper or unpublished manuscript which we might had missed in the
+previous queries. All papers we found in that last search had already been
+included in our sample. Combined, the three searches produced a dataset of 
+`r length(unique(dat$id))` studies as of the 10\textsuperscript{th} of March,
+2021. Table \ref{tab:papers} contains the full list of articles we analyse in
+this paper.
 
 \footnotesize
-\begin{longtable}{>{\raggedright\arraybackslash}p{2.9cm}>{\raggedright\arraybackslash}p{4.5cm}>{\centering\arraybackslash}p{1.3cm}>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{1.4cm}>{\centering\arraybackslash}p{2.4cm}}
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.9cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{2.3cm}>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{1cm}}
 \caption{Papers included in the meta-analysis, ordered by year of appearance}\\
 \toprule
-\raggedright Author(s) & \centering Title & \centering Journal & \centering Year & \centering Country & \centering Method & \raggedleft Electoral System
+\raggedright Author(s) & \centering Journal & \centering Country & \centering Dependent Variable & \centering Method & \centering Institutional Design & \centering Electoral System
 \tabularnewline
 \midrule
-\endhead
-```{r, echo = FALSE, results = 'asis', cache = T}
+\endhead 
+```{r papers, echo = FALSE, results = 'asis', cache = T}
 build_nams <- function(x) {
   x_ <- unlist(strsplit(as.character(x), ' & ', fixed = T, useBytes = T))
   if(length(x_) == 1) return(x_)
@@ -357,13 +379,13 @@ build_nams <- function(x) {
                    sep = ''))
 }
 aux <- dat %>%
-  select(authorCite, title, journalCode, year, locationISO, method, elecsys3) %>%
+  select(authoryear, journalCode, locationISO, depvar2, method, instdesign, elecsys3, year) %>%
   unique() %>%
   arrange(year)
 for (i in 1:dim(aux)[1]) {
-  cat(paste(build_nams(aux$authorCite[i]), ' & ', aux$title[i], ' & ',
-      aux$journalCode[i], ' & ', aux$year[i], ' & ', 
-      aux$locationISO[i], ' & ', aux$method[i], ' & ', 
+  cat(paste(build_nams(aux$authoryear[i]), ' & ', aux$journalCode[i], ' & ',
+      aux$locationISO[i], ' & ', aux$depvar2[i], ' & ', 
+      aux$method[i], ' & ', aux$instdesign[i], ' & ', 
       aux$elecsys3[i], ' \\\\ [0.5ex]', sep = ''), '\n')
 }
 ```
@@ -372,18 +394,22 @@ for (i in 1:dim(aux)[1]) {
 \begin{minipage}{\textwidth}
 \renewcommand{\footnoterule}{}
 \vspace{-0.5cm}
-\footnotetext{\textbf{Note:} Unpub$=$Unpublished, JPE$=$Journal of Political
-Economy, EJPE$=$European Journal of Political Economy, PC$=$Public Choice,
-JPubE$=$Journal of Public Economics, JPriE$=$Journal of Private Enterprise,
-APSR$=$American Political Science Review, SEJ$=$Southern Economic Journal,
-UAR$=$Urban Affairs Review, SCID$=$Studies in Comparative International
-Development, SSQ$=$Social Science Quarterly, SPPQ$=$State Politics and Policy
-Quarterly, CPS$=$Comparative Political Studies, RivPE$=$Rivista di Politica
-Economica, E\&P$=$Economics and Politics, NTJ$=$National Tax Journal,
-OLS$=$Ordinary least squares, IV$=$Instrumental variables, Panel$=$Panel
-data/fixed effects, RDD$=$Regression discontinuity design, M$=$Majoritarian,
-NM$=$Non-majoritarian (mixed or proportional representation). Country codes
-follow the ISO 3166-1 alpha-3 international standard.} \end{minipage}
+\footnotetext{\textbf{Note:} Journals: Unpub$=$Unpublished, JPE$=$Journal of
+Political Economy, EJPE$=$European Journal of Political Economy, PC$=$Public
+Choice, JPubE$=$Journal of Public Economics, JPriE$=$Journal of Private
+Enterprise, APSR$=$American Political Science Review, SEJ$=$Southern Economic
+Journal, UAR$=$Urban Affairs Review, SCID$=$Studies in Comparative
+International Development, SSQ$=$Social Science Quarterly, SPPQ$=$State
+Politics and Policy Quarterly, CPS$=$Comparative Political Studies,
+RivPE$=$Rivista di Politica Economica, E\&P$=$Economics and Politics,
+NTJ$=$National Tax Journal. Country codes follow the ISO 3166-1 alpha-3
+international standard. Dependent variable: ExpPC$=$Per capita expenditure,
+logExpPC$=$Natural logarithm of per capita expenditure, PCTGDP$=$Expenditure as
+a percentage of GDP. Method: OLS$=$Ordinary least squares, IV$=$Instrumental
+variables, Panel$=$Panel data/fixed effects, RDD$=$Regression discontinuity
+design. Electoral system: M$=$Majoritarian, NM$=$Non-majoritarian (mixed or
+proportional representation).} 
+\end{minipage} 
 \end{longtable}
 
 \normalsize
@@ -393,706 +419,93 @@ of $1/n$" was first formulated in 1981, the empirical assessment of the theory
 only started a few years later, as dates of publishing range from `r min(dat$year)`
 to `r max(dat$year)`. Most studies focus on the United States (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='USA')])`), but our sample also contains
 papers on Australia (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='AUS')])`), Brazil (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='BRA')])`), Germany (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='DEU')])`), Indonesia (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='IDN')])`), Italy (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='ITA')])`), and
-Switzerland (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='CHE')])`). Five articles use cross-national data and analyse from 2 to 110
+Switzerland (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='CHE')])`). Eight articles use cross-national data and analyse from 2 to 110
 countries. Early studies used OLS and panel data methods to estimate the
-results, whereas the use of regression discontinuity designs is a recent
-addition to the literature, as the first paper to apply it was published in 2012.
+results, while studies from 2012 onward have also applied causal inference designs,
+such as instrumental variables and regression discontinuity models.
 
 Regarding the dependent variables included in the sample, `r as.numeric(table(unique(dat[,c('id','depvar2')])$depvar2)[which(names(table(unique(dat[,c('id','depvar2')])$depvar2))=='ExpPC')])` studies employ
 public expenditure per capita, `r as.numeric(table(unique(dat[,c('id','depvar2')])$depvar2)[which(names(table(unique(dat[,c('id','depvar2')])$depvar2))=='logExpPC')])` papers use its natural logarithm, and `r as.numeric(table(unique(dat[,c('id','depvar2')])$depvar2)[which(names(table(unique(dat[,c('id','depvar2')])$depvar2))=='PCTGDP')])` of them
 analyse the impact of legislature size on public expenditures as a percentage of
 GDP. This indicates that the area has refined the original formulation of $1/n$
-suggested by \citet{weingast1981political} and tested the impact of larger
-legislatures on different measures of government spending. Our independent
-variables of interest are $n$, lower chamber size (`r as.numeric(table(dat$indepvar2)[which(names(table(dat$indepvar2))=='N')])`), ($\log(n)$), the natural
-logarithm of lower chamber size (`r as.numeric(table(dat$indepvar2)[which(names(table(dat$indepvar2))=='logN')])`), and $k$, which represents upper chamber
-size (`r as.numeric(table(dat$indepvar2)[which(names(table(dat$indepvar2))=='K')])`).
+and tested the impact of larger legislatures on different measures of government
+spending. Our independent variables of interest are lower chamber size 
+(`r as.numeric(table(dat$indepvar2)[which(names(table(dat$indepvar2))=='N')])`), the natural
+logarithm of lower chamber size (`r as.numeric(table(dat$indepvar2)[which(names(table(dat$indepvar2))=='logN')])`), and upper chamber size (`r as.numeric(table(dat$indepvar2)[which(names(table(dat$indepvar2))=='K')])`).
 
-We also coded four moderators that may help us understand the heterogeneity in
+We also coded five moderators that may help us understand the heterogeneity in
 the reported results. We included them in our meta-regressions alongside an
-indicator for the type of independent variable used in the original study ($n$,
-log($n$), or $k$). The additional moderators are: 1) publication year; 2) paper
-publication in an academic journal; 3) electoral system; 4) estimation method.
-Since the literature on the "law of $1/n$" is notably diverse, we were
-restricted to include only the moderators that either refer to important
-theoretical questions, such as the effect of the electoral system on public
-spending, or to essential characteristics of the publications themselves.
-Although more moderators exist in the literature (ie., data aggregation level),
-they do not appear as often as required for the meta-regressions. Table
+indicator for the type of independent variable used in the original study. The
+additional moderators are: 1) publication year; 2) paper publication in an
+academic journal; 3) estimation method; 4) institutional design; 5) electoral
+system. Since the literature on the "law of $1/n$" is notably diverse, we
+included only moderators that either refer to important theoretical questions,
+such as the effect of the electoral system on public spending, or to essential
+characteristics of the publications themselves. Although more moderators exist
+in the literature (e.g., data aggregation level), they do not appear as often
+as necessary for their inclusion in the meta-regressions. Table
 \ref{tab:descriptive} shows the descriptive statistics of the moderator
 variables. 
 
 \vspace{.5cm}
 
-```{r, echo = FALSE, results='hide', warning=FALSE, message=FALSE}
-fulldat$usemeta2 <- factor(fulldat$usemeta)
-levels(fulldat$usemeta2) <- c("Other Coefficients", "Main Coefficients")
-fulldat$usemeta2 <- as.character(fulldat$usemeta2)
-fulldat$usemeta2 <- factor(fulldat$usemeta2)
-aux <- select(fulldat, usemeta2, indepvar2, year, published,
-              elecsys2, method) %>%
-  rename(`Independent Variables` = indepvar2,
-         `Year` = year,
-         `Published work` = published,
-         `Electoral system` = elecsys2,
-         `Estimation method` = method)
-
-res <- export2latex(
-  descrTable(~.-usemeta2, aux, y = aux$usemeta2,
-             show.p.overall = F, show.all = T, all.last = T), 
-  caption = 'Descriptive statistics of moderators\\label{tab:descriptive}'
-)
-res <- gsub(pattern = '\\[ALL\\]', 'All Coefficients', res$desc, useBytes = T)
-cat(res)
-```
-
 \footnotesize
-\begin{longtable}{lccc}\caption{Descriptive Statistics of Moderators\label{tab:descriptive}}\\
-\hline  
-& Main Coefficients & Other Coefficients &    All Coefficients   \\ 
-&       N=42        &       N=100        &    N=142    \\
-\hline
-\hline     
-\endfirsthead 
-\multicolumn{4}{l}{\tablename\ \thetable{} \textit{-- continued from previous page}}\\ 
-\hline
-& Main Coefficients & Other Coefficients &    All Coefficients   \\ 
-&       N=42        &       N=100        &    N=142    \\ 
-\hline
-\hline  
-\endhead   
-\hline
-\multicolumn{4}{l}{\textit{continued on next page}} \\ 
-\endfoot   
-\multicolumn{4}{l}{}  \\ 
-\endlastfoot 
-Independent Variables: &                   &                    &            \\ 
-$\qquad$K &    12 (28.6\%)     &     33 (33.0\%)     & 45 (31.7\%) \\ 
-$\qquad$N &    24 (57.1\%)     &     55 (55.0\%)     & 79 (55.6\%) \\ 
-$\qquad$logN &     6 (14.3\%)     &     12 (12.0\%)     & 18 (12.7\%) \\ 
-Year &    2009 (6.56)    &    2008 (5.82)     & 2008 (6.04)\\ 
-Published work: &                   &                    &            \\ 
-$\qquad$Yes &    36 (85.7\%)     &     93 (93.0\%)     & 129 (90.8\%)\\ 
-$\qquad$No &     6 (14.3\%)     &     7 (7.00\%)      & 13 (9.15\%) \\ 
-Electoral system: &                   &                    &            \\ 
-$\qquad$Majoritarian &    22 (52.4\%)     &     46 (46.0\%)     & 68 (47.9\%) \\ 
-$\qquad$Non-Majoritarian &    20 (47.6\%)     &     54 (54.0\%)     & 74 (52.1\%) \\ 
-Estimation method: &                   &                    &            \\ 
-$\qquad$OLS &    11 (26.2\%)     &     36 (36.0\%)     & 47 (33.1\%) \\ 
-$\qquad$PANEL &    23 (54.8\%)     &     51 (51.0\%)     & 74 (52.1\%) \\ 
-$\qquad$IV &     5 (11.9\%)     &     7 (7.00\%)      & 12 (8.45\%) \\ 
-$\qquad$RDD &     3 (7.14\%)     &     6 (6.00\%)      &  9 (6.34\%)  \\ 
- 
-\hline
-\end{longtable}
+```{r descriptive, warning=F, message=F, echo = FALSE, cache=TRUE, results='asis'}
+fulldat$usemeta2 <- factor(fulldat$usemeta)
+levels(fulldat$usemeta2) <- c("Other Coefficients", "Main Sample")
+aux <- select(fulldat, usemeta2, indepvar2, elecsys2, method,
+              year, published, instdesign) %>%
+  rename(`Independent Variables` = indepvar2,
+         `Year`                  = year,
+         `Published work`        = published,
+         `Estimation method`     = method,
+         `Institutional Design`  = instdesign,
+         `Electoral system`      = elecsys2)
 
+export2md(descrTable(~.-usemeta2, aux, y = aux$usemeta2,
+                        show.p.overall = F, show.all = T),
+          caption = "Descriptive Statistics of Moderators",
+          format  = "latex")
+```
 \normalsize
 
-Since most selected articles have more than one effect size, the observations
-in our dataset are not independent. To reduce the impact of multicollinearity,
-we estimate the models using two sets of study coefficients. The first group
-includes only the most rigorous model from each paper, that is, those estimated
-with the largest $n$, most control variables, and fixed effects if the authors
-added them. If the article employed a regression discontinuity design, we chose
-the coefficient from the optimal bandwidth or from the intermediate one. This
-sample encompasses `r dim(dat)[1]` estimates, as `r as.numeric(sum(table(table(dat$id))[-1]))` articles analysed two dependent or
-independent variables of interest \citep{baqir1999districts, bjedov2014impact,
-bradbury2001legislative, chen_malhotra_2007, crowley2019law,
+A key methodological issue we had to address concerns the potential violation
+of an important assumption in a meta-analysis, that of effect size independence
+[@cheung2014modeling; @cheung2019guide; @veroniki2016methods]. In our study
+sample, authors frequently use similar datasets, and almost all papers fit more
+than one model with similar variables, what suggests that the assumption does
+not hold. We use two procedures to tackle this problem. First, we created two
+sets of study coefficients to reduce the impact of multicollinearity in our
+estimations. The first group includes only the most rigorous models from each
+paper, that is, those estimated with the largest $n$, most control variables,
+and fixed effects if the authors added them. If the article employed a
+regression discontinuity design, we chose the coefficient from the optimal
+bandwidth or from the intermediate one. This sample encompasses `r dim(dat)[1]`
+estimates, as `r as.numeric(sum(table(table(dat$id))[-1]))` articles analysed
+two dependent or independent variables of interest\footnote{The papers that
+used more than one dependent or independent variable of interest are
+\citet{baqir1999districts, bjedov2014impact, bradbury2001legislative,
+chen2007law, crowley2019law, erler2007termlimits, gilligan2001fiscal,
 lee2016supermajority, lee2018court, maldonado2013legislatures, primo2006stop,
-ricciuti2003trading}. Our second sample, in contrast, contains all the `r dim(fulldat)[1]` effect
-sizes reported in the `r length(unique(dat$id))` papers. Here we focus on the results for our restricted
+ricciuti2003trading, ricciuti2004legislatures}.}. Our second sample, in
+contrast, contains all the `r dim(fulldat)[1]` effect sizes reported in the 
+`r length(unique(dat$id))` papers. Here we focus on the results for our restricted
 sample as we consider them more robust, but the findings are very similar when
-we use the extended set. We discuss eventual differences in the next section.
-Please refer to the Supplementary Material for further information about our
-sampling process and for the complete results.
+we use the extended set.
 
-# Results
-
-## Binomial Z-Tests
-\label{sub:binomial}
-
-The "law of $1/n$" states that more legislators increase government expenditure.
-Here we employ three methods to assess the empirical validity of that
-relationship. First, we run a binomial one-proportion z-test to determine
-whether the study coefficients have a positive or negative sign. Then, we fit 9
-random-effect models using the \texttt{meta} \citep{balduzzi2019perform} and the
-\texttt{dmetar} \citep{dmetar2019} packages for the \texttt{R} statistical
-language \citep{rstats2019}. We estimate the true effect size variance
-($\tau^2$) with a Restricted Maximum Likelihood Estimator, which the literature
-considers the most precise for continuous dependent variables
-\citep{veroniki2016methods}. Lastly, we run a series of meta-regressions to test
-possible sources of result heterogeneity. To recapitulate, our independent
-variables of interest are lower chamber size ($n$), the natural logarithm of
-lower chamber size (log($n$)), and upper chamber size ($k$). The dependent
-variables are public expenditure per capita, the natural logarithm of public
-expenditure per capita, and government expenditure as a percentage of GDP. Since
-the outcomes have different scales, we treat them separately in our models.
-
-```{r, cache=TRUE, echo = FALSE}
-aux <- filter(dat, indepvar2 == "N")
-binN <- binom.test(table(aux$scoef)[2], sum(table(aux$scoef)), p = 0.5)
-aux <- filter(dat, indepvar2=='K')
-binK <- binom.test(table(aux$scoef)[2], sum(table(aux$scoef)), p=0.5)
-aux <- filter(dat, indepvar2 == "logN")
-binlogN <- binom.test(table(aux$scoef)[2], sum(table(aux$scoef)), p = 0.5)
-```
-
-The binomial z-test evaluates whether the coefficient of our independent
-variables are positive or negative. The null hypothesis here states that the
-sign of the coefficient is equally likely to be positive or negative. We start
-with $n$, lower house size. Our results indicate that there is no correlation
-between the number of legislators in the lower house and public expenditure 
-(successes = `r as.numeric(binN$statistic)`, trials = `r as.numeric(binN$parameter)`, p~success~ = `r round(as.numeric(binN$estimate), 3)`, 95\% CI = [`r round(as.numeric(binN$conf.int[1]), 3)`; `r round(as.numeric(binN$conf.int[2]), 3)`],
-$p$-value = `r round(as.numeric(binN$p.value), 3)`). Note that the "law of $1/n$" suggests that there is a positive
-association between both. The binomial test for log($n$) also shows a
-non-statistically significant result (successes = `r as.numeric(binlogN$statistic)`, trials = `r as.numeric(binlogN$parameter)`, p~success~ = `r round(as.numeric(binlogN$estimate), 3)`, 95\% CI = [`r round(as.numeric(binlogN$conf.int[1]), 3)`; `r round(as.numeric(binlogN$conf.int[2]), 3)`],
-$p$-value = `r round(as.numeric(binlogN$p.value), 3)`). In contrast, we find a
-positive result for the number of legislators in the upper house ($k$), which is
-in line with the mainstream literature (successes = `r as.numeric(binK$statistic)`, trials = `r as.numeric(binK$parameter)`, p~success~ = `r round(as.numeric(binK$estimate), 3)`, 95\% CI = [`r round(as.numeric(binK$conf.int[1]), 3)`; `r round(as.numeric(binK$conf.int[2]), 3)`],
-$p$-value = `r round(as.numeric(binK$p.value), 3)`). 
-
-## Meta-Analysis
-\label{sub:Meta-Analysis}
-
-We then proceed to the meta-analysis. We matched the house size variables with
-our measures of government spending and created a theoretical $3 \times 3$
-matrix. Out of the 9 possible variable combinations, we found only 7 in
-the article pool. Our sample includes no papers that analyse the relationships
-between log($n$) and public expenditure per capita or between $k$ and the
-logarithm of public expenditure per capita.
-
-```{r, echo = FALSE, message = FALSE, warning = FALSE, cache=TRUE}
-mod <- list()
-# Pooling effects analysis -- ExpPC x N
-aux <- dat %>%
-  filter(indepvar2 == 'N',
-         depvar2 == 'ExpPC')
-
-mod[[1]] <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
-
-# Pooling effects analysis -- ExpPC x K
-aux <- dat %>%
-  filter(indepvar2 == 'K',
-         depvar2 == 'ExpPC')
-
-mod[[2]] <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
-# Pooling effects analysis -- logExpPC x N
-aux <- dat %>%
-  filter(indepvar2 == 'N',
-         depvar2 == 'logExpPC')
-
-mod[[3]] <- metagen(
-  coef, SE, data=aux,
-  studlab=paste(authoryear),
-  comb.fixed = FALSE,
-  comb.random = TRUE,
-  method.tau = "REML",
-  hakn = TRUE,
-  prediction = TRUE,
-  sm="SMD"
-  )
-
-# Pooling effects analysis -- logExpPC x logN
-aux <- dat %>%
-  filter(indepvar2 == 'logN',
-         depvar2 == 'logExpPC')
-
-mod[[4]] <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
-
-# Pooling effects analysis -- PCTGDP x N
-aux <- dat %>%
-  filter(indepvar2 == 'N',
-         depvar2 == 'PCTGDP')
-
-mod[[5]] <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
-
-# Pooling effects analysis -- PCTGDP x logN
-aux <- dat %>%
-  filter(indepvar2 == 'logN',
-         depvar2 == 'PCTGDP')
-
-mod[[6]] <- metagen(
-  coef, SE, data=aux,
-  studlab=paste(authoryear),
-  comb.fixed = FALSE,
-  comb.random = TRUE,
-  method.tau = "REML",
-  hakn = TRUE,
-  prediction=TRUE,
-  sm="SMD"
-  )
-
-# Pooling effects analysis -- PCTGDP x K
-aux <- dat %>%
-  filter(indepvar2 == 'K',
-         depvar2 == 'PCTGDP')
-
-mod[[7]] <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
-
-# Full model - Pooling effects analysis -- PCTGDP x N
-aux <- fulldat %>%
-  filter(indepvar2 == 'N',
-         depvar2 == 'PCTGDP')
-
-mod[[8]] <- metagen(coef, SE, data = aux,
-          studlab = paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm = "SMD")
-
-# Full data - Pooling effects analysis -- ExpPC x K
-aux <- fulldat %>%
-  filter(indepvar2 == 'K',
-         depvar2 == 'ExpPC')
-
-mod[[9]] <- metagen(coef, SE, data=aux,
-          studlab=paste(authoryear),
-          comb.fixed = FALSE,
-          comb.random = TRUE,
-          method.tau = "REML",
-          hakn = TRUE,
-          prediction=TRUE,
-          sm="SMD")
-```
-
-\begin{landscape}
-\begin{figure}[htb]
-\begin{center}
-\caption{Forest plots of the relationship between legislature size and government spending (reduced sample)}
-\vspace{.3cm}
-\includegraphics[width=25cm,height=17cm]{../graphs/graph1.pdf}
-\label{fig:plots}
-\end{center}
-\end{figure}
-\end{landscape}
-
-Figure \ref{fig:plots} shows the forest plots for our restricted sample,
-which includes only the `r dim(dat)[1]` main coefficients of the 
-`r length(unique(dat$id))` selected papers. On the left side of the plots are 
-the name of the study authors and the paper publication year. For unpublished
-studies, we included the first year the paper was available online. The bars in
-the middle show the reported effect sizes and the vertical lines indicate their
-average, weighted by standard errors. The length of the lines represent the
-precision of the estimates. The red line at the bottom of the figures displays
-the aggregate coefficients plus their respective confidence intervals.
-
-The first column of the graph reports the results for $n$, lower chamber size.
-In the first model, which correlates $n$ and expenditure per capita, we find a
-standardised mean difference (SMD) of `r round(mod[[1]]$TE.random,3)` and a standard error of `r round(mod[[1]]$seTE.random,3)`
-(studies = `r mod[[1]]$k`, 95\% CI = [`r round(mod[[1]]$lower.random,3)`; `r round(mod[[1]]$upper.random,3)`], $p$-value = `r round(mod[[1]]$pval.random,3)` , prediction interval
-= [`r round(mod[[1]]$lower.predict,3)`; `r round(mod[[1]]$upper.predict,3)`]). Therefore, we cannot reject the null hypothesis that the
-effect size is zero. The $I^2$ statistic, which quantifies the degree of
-heterogeneity among studies, is equal to `r round(mod[[1]]$I2*100, 2)`\%. $I^2$ values above 75\%
-indicate very high study heterogeneity [@higgins2019cochrane].
-
-We see similar results when we compare $n$ with log expenditure per capita. In
-this model, the average effect size is `r round(mod[[3]]$TE.random,3)` and the standard error is
-`r round(mod[[3]]$seTE.random,3)` (studies = `r mod[[3]]$k`, 95\% CI = [`r round(mod[[3]]$lower.random,3)`; `r round(mod[[3]]$upper.random,3)`], $p$-value = `r round(mod[[3]]$pval.random,3)`, prediction
-interval = [`r round(mod[[3]]$lower.predict,3)`; `r round(mod[[3]]$upper.predict,3)`]; $I^2$ = `r round(mod[[3]]$I2*100, 2)`\%). The coefficient is 
-statistically indistinguishable from zero.
-
-In our restricted sample, larger lower house size also does not increase
-government spending as a percentage of GDP (studies = `r mod[[5]]$k`, SMD = `r round(mod[[5]]$TE.random,3)`, SE =
-`r round(mod[[5]]$seTE.random,3)`, 95\% CI = [`r round(mod[[5]]$lower.random,3)`; `r round(mod[[5]]$upper.random,3)`], $p$-value = `r round(mod[[5]]$pval.random,3)`, prediction interval =
-[`r round(mod[[5]]$lower.predict,3)`; `r round(mod[[5]]$upper.predict,3)`], $I^2$ = `r round(mod[[5]]$I2*100, 2)`\%). We find a positive effect in our extended
-sample and the coefficient is statistically significant at the 10\% level
-(coefficients = `r mod[[8]]$k`, SMD = `r round(mod[[8]]$TE.random,3)`, SE = `r round(mod[[8]]$seTE.random,3)`, 95\% CI = [`r round(mod[[8]]$lower.random,3)`; `r round(mod[[8]]$upper.random,3)`], $p$-value =
-`r round(mod[[8]]$pval.random,3)`, prediction interval = [`r round(mod[[8]]$lower.predict,3)`; `r round(mod[[8]]$upper.predict,3)`], $I^2$ = `r round(mod[[8]]$I2*100, 2)`\%). The 
-result supports the "law of 1/$n$", but the evidence is moderate
-as the prediction interval include zero.
-
-Next, we present the meta-analyses using log($n$), the logarithm of lower house
-size, as the main explanatory variable. We start with the relationship between
-log($n$) and the logarithm of expenditure per capita. The result is positive and
-statistically significant at 10\%, but the prediction interval encompasses zero
-(studies = `r mod[[4]]$k`, SMD = `r round(mod[[4]]$TE.random,3)`, SE = `r round(mod[[4]]$seTE.random,3)`, 95\% CI = [`r round(mod[[4]]$lower.random,3)`; `r round(mod[[4]]$upper.random,3)`], $p$-value =
-`r round(mod[[4]]$pval.random,3)`, prediction interval = [`r round(mod[[4]]$lower.predict,3)`; `r round(mod[[4]]$upper.predict,3)`], $I^2$ = `r round(mod[[4]]$I2*100, 2)`\%). Although the
-coefficient has the predicted sign, we should interpret the finding with caution
-as it does not replicate in our sample of `r dim(fulldat)[1]` effect sizes.
-
-Our model that correlates log($n$) with public expenditures as a percentage of
-GDP fails to reach conventional levels of statistical significance (studies =
-`r mod[[6]]$k`, SMD = `r round(mod[[6]]$TE.random,3)`, SE = `r round(mod[[6]]$seTE.random,3)`, 95\% CI = [`r round(mod[[6]]$lower.random,3)`; `r round(mod[[6]]$upper.random,3)`], $p$-value = `r round(mod[[6]]$pval.random,3)`,
-prediction interval = [`r round(mod[[6]]$lower.predict,3)`; `r round(mod[[6]]$upper.predict,3)`], $I^2$ = `r round(mod[[6]]$I2*100, 2)`\%). The extended sample
-also gives us a null result.
-
-The third set of models uses $k$, upper house size, as the main independent
-variable. We find a positive correlation between $k$ and expenditure per capita
-but the coefficient is not significant (studies = `r mod[[2]]$k`, SMD = `r round(mod[[2]]$TE.random,3)`, SE
-= `r round(mod[[2]]$seTE.random,3)`, 95\% CI = [`r round(mod[[2]]$lower.random,3)`; `r round(mod[[2]]$upper.random,3)`], $p$-value = `r round(mod[[2]]$pval.random,3)`, prediction interval =
-[`r round(mod[[2]]$lower.predict,3)`; `r round(mod[[2]]$upper.predict,3)`], $I^2$ = `r round(mod[[2]]$I2*100, 2)`\%). But as with the other models, the prediction
-interval again includes zero. When we run the same analysis in the extended
-sample, we see a significant coefficient for the estimate, yet the prediction interval also
-contains zero (coefficients = `r mod[[9]]$k`, SMD = `r round(mod[[9]]$TE.random,3)`, SE = `r round(mod[[9]]$seTE.random,3)`, 95\% CI = [`r round(mod[[9]]$lower.random,3)`; `r round(mod[[9]]$upper.random,3)`],
-$p$-value $<$ 0.001, prediction interval = [`r round(mod[[9]]$lower.predict,3)`; `r round(mod[[9]]$upper.predict,3)`], $I^2$ = `r round(mod[[9]]$I2*100, 2)`\%).
-
-Our last estimation analyses the relationship between $k$ and government
-spending as a percentage of GDP. The coefficient is not statistically
-significant, indicating a null effect (studies = `r mod[[7]]$k`, SMD = `r round(mod[[7]]$TE.random,3)`, SE = `r round(mod[[7]]$seTE.random,3)`, 95\% CI
-= [`r round(mod[[7]]$lower.random,3)`; `r round(mod[[7]]$upper.random,3)`], $p$-value = `r round(mod[[7]]$pval.random,3)`, prediction interval = [`r round(mod[[7]]$lower.predict,3)`; `r round(mod[[7]]$upper.predict,3)`],
-$I^2$ = `r round(mod[[7]]$I2*100, 2)`\%). The result is very similar in the extended sample.
-
-In a nutshell, we do not find strong evidence in favour of the "law of $1/n$".
-While some models do show a positive and statistically significant result, none
-of the prediction intervals are totally positive or negative. The studies also
-have considerable heterogeneity, what indicates that the original coefficients
-do not point consistently towards the same direction.
-
-One reason why we have not detected any strong effects may be due to the
-identification strategy authors use in their models. On the one hand, OLS and
-panel data models require too many controls to make units comparable, and they
-are vulnerable to omitted variable bias or post-treatment bias
-[@cinelli2020making; @pearl2015conditioning]. On the other hand, estimation
-methods such as instrumental variables and regression discontinuity designs
-have become popular because of their high internal validity
-[@angrist2008mostly]. Figure \ref{fig:plots2} shows the disaggregated effects
-for two sets of models that employ causal estimation techniques. They measure
-the impact of lower house size on expenditure per capita (left) and on the
-natural logarithm of expenditure per capita (right).
-
-\vspace{.06cm}
-
-\begin{figure}[htb]
-\begin{center}
-\caption{Forest plots of the relationship between legislature size and government spending with regression method heterogeneity (restricted sample)}
-\vspace{.3cm}
-\includegraphics[width=1\linewidth, height=7.5cm]{../graphs/graph2.pdf}
-\label{fig:plots2}
-\end{center}
-\end{figure}
-
-\newpage 
-
-Papers that employed instrumental variables show some interesting variation: out
-of the four coefficients listed, two are positive and two are negative. Two of
-these four coefficients are significant, again one positive and one negative.
-The subgroup analysis presents a SMD which is negative but insignificant. In
-contrast, all papers that use regression discontinuity designs show negative and
-statistically significant results. Since only three papers in our sample use
-RDDs, we are cautious about predicting an overall negative relation, but they do
-indicate that better identification strategies yield a zero-to-negative impact
-of legislature size on expenditure, in support of the reverse "law of $1/n$".
-
-## Meta-Regressions
-\label{sub:regressions}
-
-In this section, we run a series of meta-regressions with covariates that may
-account for differences across the selected papers. The first variable indicates
-whether the study uses $n$, log($n$) or $k$ as its main explanatory variable.
-The second variable shows the study publication year, which we included to
-capture temporal variation in the study coefficients. We also add a dummy
-variable to assess whether published articles report effect sizes that are
-higher or lower than those from working papers. The fourth variable measures
-whether studies focusing on non-majoritarian electoral systems report
-coefficients that are smaller or larger than those from majoritarian countries.
-Our last covariate is a categorical variable indicating the statistical
-procedure used in the original models (panel data, instrumental variables,
-OLS, or regression discontinuity design).
-
-```{r, echo = FALSE, warning = FALSE, message = FALSE, results = 'hide', cache = TRUE}
-res <- list()
-
-## Expenditure as percentage GDP -- Restricted
-mod <-  rma(yi = coef,
-              sei = SE,
-              data = dat,
-              method = "REML",
-              mods = ~indepvar2+year+published+elecsys2+method,
-              test = "knha",
-            subset = dat$depvar2=='PCTGDP',
-            slab = dat$authoryear)
-
-res[[1]] <- tibble(
-     ` ` = c("Intercept",
-             "Indepvar: N",
-             "Indepvar: logN",
-             "Year",
-             "Elecsys: Non-Majoritarian",
-             "Method: Panel"),
-  Estimate = mod[["beta"]],
-  SE = mod[["se"]],
-  `T` = mod[["zval"]],
-  `P-Value` = mod[["pval"]],
-  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
-              round(mod[["ci.ub"]], digits = 4), ")"),
-  model = "PCTGDP"
-) %>%
-  mutate_if(is.numeric, list(~round(., digits = 4)))
-
-## Expenditure as percentage GDP -- Extended
-mod <- rma(yi = coef,
-              sei = SE,
-              data = fulldat,
-              method = "REML",
-              mods = ~ indepvar2+year+published+elecsys2+method,
-              test = "knha",
-            subset = fulldat$depvar2=='PCTGDP',
-            slab = fulldat$authoryear)
-
-res[[2]] <- tibble(
-  ` ` = c("Intercept",
-          "Indepvar: N",
-          "Indepvar: logN",
-          "Year",
-          "Elecsys: Non-Majoritarian",
-          "Method: Panel"),
-  Estimate = mod[["beta"]],
-  SE = mod[["se"]],
-  `T` = mod[["zval"]],
-  `P-Value` = mod[["pval"]],
-  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
-              round(mod[["ci.ub"]], digits = 4 ), ")"),
-  model = "PCTGDP - All coefs"
-) %>%
-  mutate_if(is.numeric, list(~round(., digits = 3)))
-
-# Expenditure per capita - Restricted
-mod <-  rma(yi = coef,
-              sei = SE,
-              data = dat,
-              method = "REML",
-              mods = ~indepvar2+year+published+elecsys2+method,
-              test = "knha",
-            subset = dat$depvar2=='ExpPC',
-            slab = dat$authoryear,
-            control=list(maxiter=1000))
-
-res[[3]] <- tibble(
-  ` ` = c("Intercept",
-          "Indepvar: N",
-          "Year",
-          "Published: No",
-          "Elecsys: Non-Majoritarian",
-          "Method: Panel",
-          "Method: IV"),
-  Estimate = mod[["beta"]],
-  SE = mod[["se"]],
-  `T` = mod[["zval"]],
-  `P-Value` = mod[["pval"]],
-  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
-              round(mod[["ci.ub"]], digits = 4 ), ")"),
-  model = "ExpPC"
-) %>%
-  mutate_if(is.numeric, list(~round(., digits = 3)))
-
-# Expenditure per capita - Extended
-mod <- rma(yi = coef,
-              sei = SE,
-              data = fulldat,
-              method = "REML",
-              mods = ~ indepvar2+year+published+elecsys2+method,
-              test = "knha",
-            subset = fulldat$depvar2=='ExpPC',
-            slab = fulldat$authoryear)
-
-res[[4]] <- tibble(
-  ` ` = c("Intercept",
-          "Indepvar: N",
-          "Year",
-          "Published: No",
-          "Elecsys: Non-Majoritarian",
-          "Method: Panel",
-          "Method: IV"),
-  Estimate = mod[["beta"]],
-  SE = mod[["se"]],
-  `T` = mod[["zval"]],
-  `P-Value` = mod[["pval"]],
-  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
-              round(mod[["ci.ub"]], digits = 4 ), ")"),
-  model = "ExpPC - All coefs"
-) %>%
-  mutate_if(is.numeric, list(~round(., digits = 3)))
-
-# Log of Expenditure per capita - Restricted
-mod <- rma(yi = coef,
-              sei = SE,
-              data = dat,
-              method = "REML",
-              mods = ~indepvar2+year+published+elecsys2+method,
-              test = "knha",
-            subset = dat$depvar2=='logExpPC',
-            slab = dat$authoryear)
-
-res[[5]] <- tibble(
-   ` ` = c("Intercept",
-           "Indepvar: N",
-           "Year",
-           "Published: No",
-           "Method: Panel"),
-  Estimate = mod[["beta"]],
-  SE = mod[["se"]],
-  `T` = mod[["zval"]],
-  `P-Value` = mod[["pval"]],
-  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
-              round(mod[["ci.ub"]], digits = 4 ), ")"),
-  model = "logExpPC"
-) %>%
-  mutate_if(is.numeric, list(~round(., digits = 3)))
-
-# Log of Expenditure per capita - Extended
-mod <- rma(yi = coef,
-              sei = SE,
-              data = fulldat,
-              method = "REML",
-              mods = ~ indepvar2+year+published+elecsys2+method,
-              test = "knha",
-            subset = fulldat$depvar2=='logExpPC',
-            slab = fulldat$authoryear)
-
-res[[6]] <- tibble(
-  ` ` = c("Intercept",
-          "Indepvar: N",
-          "Year",
-          "Published: No",
-          "Method: Panel",
-          "Method: RDD"),
-  Estimate = mod[["beta"]],
-  SE = mod[["se"]],
-  `T` = mod[["zval"]],
-  `P-Value` = mod[["pval"]],
-  CI = paste0("(", round(mod[["ci.lb"]], digits = 4), " ; ",
-              round(mod[["ci.ub"]], digits = 4), ")"),
-  model = "logExpPC - All coefs"
-) %>%
-  mutate_if(is.numeric, list(~round(., digits = 3)))
-strep <- function (x) {
-  ifelse(x<0.01, '***',ifelse(x<0.05,'**', ifelse(x<0.1,'*','')))
-}
-```
-
-```{=latex}
-\vspace{0.5cm}
-
-\begin{table}[htpb]
-\caption{Meta Regression Results\label{tabregressions}}
-\footnotesize
-\centering
-\begin{tabular}{lcccccc}
-\toprule
-\midrule
-\multicolumn{1}{c}{ } & \multicolumn{2}{c}{Expenditure Per Capita} & \multicolumn{2}{c}{Log Expenditure Per Capita} & \multicolumn{2}{c}{Gov. Spending \% GDP} \\
-\cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5} \cmidrule(l{3pt}r{3pt}){6-7}
-& Restricted & Extended & Restricted & Extended & Restricted & Extended \\
-\midrule
-Independent Variable: $N$ & `r round(res[[3]][2,2],3)` & `r round(res[[4]][2,2],3)` & `r round(res[[5]][2,2],3)` & `r round(res[[6]][2,2],3)` & `r round(res[[1]][2,2],3)` & `r round(res[[2]][2,2],3)`\\
-                          & (`r round(res[[3]][2,3],3)`)`r strep(res[[3]][2,5])` & (`r round(res[[4]][2,3],3)`)`r strep(res[[4]][2,5])` & (`r round(res[[5]][2,3],3)`)`r strep(res[[5]][2,5])` & (`r round(res[[6]][2,3],3)`)`r strep(res[[6]][2,5])` & (`r round(res[[1]][2,3],3)`)`r strep(res[[1]][2,5])` & (`r round(res[[2]][2,3],3)`)`r strep(res[[2]][2,5])`\\
-%
-Independent Variable: log($N$) &  &  &  &  & `r round(res[[1]][3,2],3)` & `r round(res[[2]][3,2],3)`\\
-                               &  &  &  &  & (`r round(res[[1]][3,3],3)`)`r strep(res[[1]][3,5])` & (`r round(res[[2]][3,3],3)`)`r strep(res[[2]][3,5])`\\
-%
-Year & `r round(res[[3]][3,2],3)` & `r round(res[[4]][3,2],3)` & `r round(res[[5]][3,2],3)` & `r round(res[[6]][3,2],3)` & `r round(res[[1]][4,2],3)` & `r round(res[[2]][4,2],3)`\\
-     & (`r round(res[[3]][3,3],3)`)`r strep(res[[3]][3,5])` & (`r round(res[[4]][3,3],3)`)`r strep(res[[4]][3,5])` & (`r round(res[[5]][3,3],3)`)`r strep(res[[5]][3,5])` & (`r round(res[[6]][3,3],3)`)`r strep(res[[6]][3,5])` & (`r round(res[[1]][4,3],3)`)`r strep(res[[1]][4,5])` & (`r round(res[[2]][4,3],3)`)`r strep(res[[2]][4,5])`\\
-%
-Published: No & `r round(res[[3]][4,2],3)` & `r round(res[[4]][4,2],3)` & `r round(res[[5]][4,2],3)` &  `r round(res[[6]][4,2],3)` &  & \\
-              & (`r round(res[[3]][4,3],3)`)`r strep(res[[3]][4,5])` & (`r round(res[[4]][4,3],3)`)`r strep(res[[4]][4,5])` & (`r round(res[[5]][4,3],3)`)`r strep(res[[5]][4,5])` & (`r round(res[[6]][4,3],3)`)`r strep(res[[6]][4,5])` &  & \\
-%
-Non-Majoritarian (PR \& Mixed) & `r round(res[[3]][5,2],3)` & `r round(res[[4]][5,2],3)` & &  & `r round(res[[1]][5,2],3)` & `r round(res[[2]][5,2],3)` \\
-                               & (`r round(res[[3]][5,3],3)`)`r strep(res[[3]][5,5])` & (`r round(res[[4]][5,3],3)`)`r strep(res[[4]][5,5])` & &  & (`r round(res[[1]][5,3],3)`)`r strep(res[[1]][5,5])` & (`r round(res[[2]][5,3],3)`)`r strep(res[[2]][5,5])`\\
-%
-Method: Panel & `r round(res[[3]][6,2],3)` & `r round(res[[4]][6,2],3)` & `r round(res[[5]][5,2],3)` & `r round(res[[6]][5,2],3)` & `r round(res[[1]][6,2],3)` & `r round(res[[2]][6,2],3)`\\
-              & (`r round(res[[3]][6,3],3)`)`r strep(res[[3]][6,5])` & (`r round(res[[4]][6,3],3)`)`r strep(res[[4]][6,5])` & (`r round(res[[5]][5,3],3)`)`r strep(res[[5]][5,5])` & (`r round(res[[6]][5,3],3)`)`r strep(res[[6]][5,5])` & (`r round(res[[1]][6,3],3)`)`r strep(res[[1]][6,5])` & (`r round(res[[2]][6,3],3)`)`r strep(res[[2]][6,5])`\\
-%
-Method: IV & `r round(res[[3]][7,2],3)` & `r round(res[[4]][7,2],3)` &  &  &  & \\
-           & (`r round(res[[3]][7,3],3)`)`r strep(res[[3]][7,5])` & (`r round(res[[4]][7,3],3)`)`r strep(res[[4]][7,5])` &  &  &  & \\
-%
-Method: RDD &  &  &  & `r round(res[[6]][6,2],3)` &  & \\
-            &  &  &  & (`r round(res[[6]][6,3],3)`)`r strep(res[[6]][6,5])` &  & \\
-% 
-Intercept & `r round(res[[3]][1,2],3)` & `r round(res[[4]][1,2],3)` & `r round(res[[5]][1,2], 3)` & `r round(res[[6]][1,2], 3)` & `r round(res[[1]][1,2], 3)` & `r round(res[[2]][1,2], 3)`\\
-          & (`r round(res[[3]][1,3],3)`)`r strep(res[[3]][1,5])` & (`r res[[4]][1,3]`)`r strep(res[[4]][1,5])` & (`r round(res[[5]][1,3],3)`)`r strep(res[[5]][1,5])` & (`r round(res[[6]][1,3],3)`)`r strep(res[[6]][1,5])` & (`r round(res[[1]][1,3],3)`)`r strep(res[[1]][1,5])` & (`r round(res[[2]][1,3],3)`)`r strep(res[[2]][1,5])`\\
-\bottomrule
-\end{tabular}
-\begin{minipage}{\textwidth}
-\renewcommand{\footnoterule}{}
-\footnotetext{\textbf{Note:} {The restricted and extended samples include `r length(dat$id)` and `r length(fulldat$id)` study coefficients, respectively. We report the results from the permutation tests. Reference categories: Independent Variable $= k$; Published $= Yes$; Non-Majoritarian (PR \& Mixed) $= Majoritarian$; Method $= OLS$. Significance codes: *** $p < 0.01$; ** $p < 0.05$; * $p < 0.10$.}}
-\end{minipage}
-\end{table}
-```
-
-\newpage 
-
-Table \ref{tabregressions} presents the meta-regression results for our
-restricted and extended samples. Each column represents one of the three
-measures of public spending we discuss in this paper. To reduce the risk of
-false positives in our analyses, we use permutation tests to calculate
-significance levels for the meta-regressions \citep{higgins2004controlling}.
-
-The first two models show the results for public expenditure per capita. No
-variable reaches conventional levels of statistical significance in the
-restricted sample. In the extended sample, we find that models that use $n$ as
-an independent variable have lower effects when
-compared to $k$. This suggests that an additional member in the lower house has
-a smaller impact on public spending than a member in the upper house. Moreover,
-the results for the extended sample point out that recent studies find larger
-effects than older ones.
-
-The third and fourth columns use the natural logarithm of expenditure per capita
-as the dependent variable. None of the covariates are statistically significant in our
-smaller sample, but two moderators are negatively associated with the outcome in
-our larger study pool. They both refer to estimation methods. Studies that
-employ panel/fixed effects or regression discontinuity designs (RDDs) have lower
-coefficients for log expenditure per capita if we take OLS as the reference
-category. 
-
-Two variables are statistically significant in the last set of meta-regressions,
-which include public expenditures as a percentage of GDP as the dependent
-variable. Both in our restricted and in our extended samples, recent studies
-have smaller coefficients than early papers, which stands in contrast with
-our previous models. Non-majoritarian voting systems are also
-associated with lower levels of public spending, what is against the theoretical
-expectations of the "law of $1/n$". The results, however, do not replicate in
-the first set of estimations.
-
-Overall, our results suggest that study coefficients are highly sensitive to
-research design choices. The same study samples may produce different outcomes
-depending on the response variables scholars decide to analyse. Moreover, we
-find evidence that results vary considerably if the study employs different
-measures of legislature size or use causal research methods. The impact of
-factors such as the electoral system or year of publication also appear to be
-conditional on the selected model.
+Our second procedure consists of employing multilevel random effect models
+[@cheung2014modeling; @matthes2019meta] in all of our estimations. We add two
+extra levels to the regular meta-analysis, one including a unique publication
+ID for each paper, and another indicating the data source used in the original
+study. By adding these two levels, we account for within- and between-study
+variation, thus removing these sources of effect size dependency. More
+information about the multilevel models can be found in Section H of the
+Supplementary Material. 
 
 # Discussion
 \label{sec:discussion}
 
-In this article, we assess the empirical validity of the "law of $1/n$". Based
+In this letter, we assess the empirical validity of the "law of $1/n$". Based
 on a sample of `r length(unique(dat$id))` publications on the topic, our
 meta-analyses show that there is no strong evidence that an increase in the
 number of legislators has a significant effect on public expenditures. If such
@@ -1158,4 +571,5 @@ kessler2014communication, lewis2019legislature, lledo2003electoral,
 mukherjee2003politicalparties, petterssonlidbom2012size, schaltegger2009large,
 stein1998institutional, mukherjee2003politicalparties, macdonald2008impact,
 matsusaka2005endogeneity, ricciuti2004legislatures}
+
 
