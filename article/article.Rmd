@@ -312,47 +312,50 @@ public spending.
 
 # Data and Methods
 
-We compiled our study sample in three rounds. In the first search round, we
+We compiled our study sample in three search rounds. In the first round, we
 gathered data from three large academic databases (Scopus, Microsoft Academic,
 and Google Scholar) and looked for studies that cited
 \citet{weingast1981political}, as it is the foundational work in the literature
-on the "law of $1/n$". We then restricted our query to articles written in
-English and, to ensure that studies were comparable, we only included papers
-that used quantitative methods to investigate the relationship between
-legislature size and public spending\footnote{Please refer to Section C in the
-Supplementary Material for a detailed description of the selection procedure.
-We include two PRISMA (Preferred Reporting Items for Systematic Reviews and
-Meta-Analyses) flow diagrammes \citep{liberati2009prisma} showing the number of
-resulting papers after each review step.}. After this stage, we identified the
-variables authors most commonly employ to measure government expenditure and
-legislature size, our dependent and independent variables, respectively. For
-government expenditure, our study sample uses (i) public expenditure as a share
-of GDP; (ii) public expenditure per capita; and (iii) the natural logarithm of
-public expenditure per capita as its main variables of interest\footnote{Since
+on the "law of $1/n$". We then restricted our query to articles written in the
+English language, and to make our study sample comparable, we only selected
+papers that use quantitative methods to analyse data\footnote{Since
 meta-analysis requires a single estimate per observation, we excluded articles
 that use interaction terms or quadratic specifications of our selected
-variables.}. In regards to legislature size, the variables are (i) lower
-chamber size; (ii) natural logarithm of lower chamber size; and (iii) upper
-house size\footnote{There are a few important nuances concerning coding of
-these variables. For instance, unicameralism is captured both by lower chamber
-size ($n = 7$) and by log lower chamber size ($n = 5$). Since much of the
-literature estimates how institutional designs affect this relationship, ours
-and many other articles use both lower and upper chamber sizes as main
-explanatory variables. We did not find any articles that used the natural
-logarithm of upper chamber size.}.
+variables. Please refer to Section C in the Supplementary Material for a
+detailed description of the selection procedure. We also included two PRISMA
+(Preferred Reporting Items for Systematic Reviews and Meta-Analyses) flow
+diagrammes \citep{liberati2009prisma} showing the number of resulting papers
+after each review step.}. After this stage, we identified the variables that
+authors employ more often to measure government expenditure and legislature
+size, our dependent and independent variables, respectively. For government
+expenditure, our study sample uses (i) public expenditure as a share of GDP;
+(ii) public expenditure per capita; and (iii) the natural logarithm of public
+expenditure per capita as its main variables of interest. In regards to
+legislature size, the variables are (i) lower chamber size; (ii) natural
+logarithm of lower chamber size; and (iii) upper house size\footnote{There are
+a few important nuances concerning coding of these variables. For instance,
+unicameralism is captured both by lower chamber size ($n = 7$) and by log lower
+chamber size ($n = 5$). Since much of the literature estimates how
+institutional designs affect this relationship, ours and many other articles
+use both lower and upper chamber sizes as main explanatory variables. We did
+not find any articles that used the natural logarithm of upper chamber size.}.
 
 In the second round, we did not require articles to cite @weingast1981political
 and used a keyword-based query on Google Scholar to broaden the scope of the
-first search. We again restricted the search to articles written in English
-which employed quantitative methods. In the third search round, we looked into
-the personal webpages of every author we had already included in our previous
-sample. The purpose of this manual search was to assess whether there was any
-working paper or unpublished manuscript which we might had missed in the
-previous queries. All papers we found in that last search had already been
-included in our sample. Combined, the three searches produced a dataset of 
-`r length(unique(dat$id))` studies as of the 10\textsuperscript{th} of March,
-2021. Table \ref{tab:papers} contains the full list of articles we analyse in
-this paper.
+first search. The search string contained terms strongly associated with the
+literature on the "law of $1/n$" and was as follows: `("upper chamber size" OR
+"lower chamber size" OR "council size" OR "parliament size" OR "legislature
+size" OR "number of legislators" OR "legislative size") AND ("spending" OR
+"expenditure" OR "government size")`. We again restricted the search to
+articles written in English which employed quantitative methods. In the third
+search round, we looked into the personal webpages of every author we had
+already included in our previous sample. The purpose of this manual search was
+to assess whether there was any working paper or unpublished manuscript which
+we might had missed in the previous queries. All papers we found in the last
+search had already been included in our sample. Combined, the three searches
+produced a dataset of `r length(unique(dat$id))` studies as of the
+10\textsuperscript{th} of March 2021. Table \ref{tab:papers} contains the full
+list of articles we analyse in this paper.
 
 \footnotesize
 \begin{longtable}{>{\raggedright\arraybackslash}p{3.9cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{2.3cm}>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{1cm}}
@@ -472,35 +475,36 @@ export2md(descrTable(~.-usemeta2, aux, y = aux$usemeta2,
 A key methodological issue we had to address concerns the potential violation
 of an important assumption in a meta-analysis, that of effect size independence
 [@cheung2014modeling; @cheung2019guide; @veroniki2016methods]. In our study
-sample, authors frequently use similar datasets, and almost all papers fit more
-than one model with similar variables, what suggests that the assumption does
-not hold. We use two procedures to tackle this problem. First, we created two
-sets of study coefficients to reduce the impact of multicollinearity in our
-estimations. The first group includes only the most rigorous models from each
-paper, that is, those estimated with the largest $n$, most control variables,
-and fixed effects if the authors added them. If the article employed a
-regression discontinuity design, we chose the coefficient from the optimal
-bandwidth or from the intermediate one. This sample encompasses `r dim(dat)[1]`
-estimates, as `r as.numeric(sum(table(table(dat$id))[-1]))` articles analysed
-two dependent or independent variables of interest\footnote{The papers that
-used more than one dependent or independent variable of interest are
-\citet{baqir1999districts, bjedov2014impact, bradbury2001legislative,
-chen2007law, crowley2019law, erler2007termlimits, gilligan2001fiscal,
-lee2016supermajority, lee2018court, maldonado2013legislatures, primo2006stop,
-ricciuti2003trading, ricciuti2004legislatures}.}. Our second sample, in
-contrast, contains all the `r dim(fulldat)[1]` effect sizes reported in the 
-`r length(unique(dat$id))` papers. Here we focus on the results for our restricted
-sample as we consider them more robust, but the findings are very similar when
-we use the extended set.
+sample, authors frequently use similar datasets in their analyses,
+and almost all papers fit more than one model with similar variables, what
+suggests that the assumption does not hold. We use two procedures to tackle this
+problem. First, we created two sets of study coefficients to reduce the impact
+of multicollinearity in our estimations. The first group includes only the most
+rigorous models from each paper, that is, those estimated with the largest $n$,
+most control variables, and fixed effects if the authors added them. If the
+article employed a regression discontinuity design, we chose the coefficient
+from the optimal bandwidth or from the intermediate one. This sample
+encompasses `r dim(dat)[1]` estimates, as `r as.numeric(sum(table(table(dat$id))[-1]))`
+articles analysed two dependent or independent variables of
+interest\footnote{The papers that used more than one dependent or independent
+variable of interest are \citet{baqir1999districts, bjedov2014impact,
+bradbury2001legislative, chen2007law, crowley2019law, erler2007termlimits,
+gilligan2001fiscal, lee2016supermajority, lee2018court,
+maldonado2013legislatures, primo2006stop, ricciuti2003trading,
+ricciuti2004legislatures}.}. Our second sample, in contrast, contains all the
+`r dim(fulldat)[1]` effect sizes reported in the `r length(unique(dat$id))`
+papers. Here we focus on the results for our restricted sample as we consider
+them more robust, but the findings are very similar when we use the extended
+set.
 
 Our second procedure consists of employing multilevel random effect models
 [@cheung2014modeling; @matthes2019meta] in all of our estimations. We add two
 extra levels to the regular meta-analysis, one including a unique publication
 ID for each paper, and another indicating the data source used in the original
 study. By adding these two levels, we account for within- and between-study
-variation, thus removing these sources of effect size dependency. More
-information about the multilevel models can be found in Section H of the
-Supplementary Material. 
+variation, thus removing these sources of effect size dependency and improving
+the accuracy of the results. More information about the multilevel models can
+be found in Section H of the Supplementary Material. 
 
 # Discussion
 \label{sec:discussion}
