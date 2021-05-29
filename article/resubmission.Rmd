@@ -546,9 +546,6 @@ be found in Section H of the Supplementary Material.
 
 # Results
 
-## Binomial Z-Tests
-\label{sub:binomial}
-
 The "law of $1/n$" states that more legislators increase government expenditure.
 Here we employ three methods to assess the empirical validity of that
 relationship. First, we run a binomial one-proportion z-test to determine
@@ -565,6 +562,9 @@ lower chamber size, and upper chamber size. The dependent
 variables are public expenditure per capita, the natural logarithm of public
 expenditure per capita, and government expenditure as a percentage of GDP. Since
 the outcomes have different scales, we treat them separately in our models.
+
+## Binomial Z-Tests
+\label{sub:binomial}
 
 ```{r, cache=TRUE, echo = FALSE}
 aux <- filter(dat, indepvar2 == "N")
@@ -860,128 +860,40 @@ depending on the response variables scholars decide to analyse. The broadest agg
 # Discussion
 \label{sec:discussion}
 
-1 paragrafo para collective action problems -- raciocionio no "industrial something of legislatures", que é um paper do weingast
-1 para cada problema que o umberto falou
-pargrafo final eh o de acumulo de conhecimento
-
-Temos de manter esse mdoelo porque tem muita variancia nos modelos.
-É inteligível nao ter nenhum resultado, justamente pq tem *muita* variância.
-Quando tinha mais graus de liberdade, dava mais resultado. À medida que fomos colocando mais, diminuiu efeito.
-
-Justificando os null results: 
-Erro do weingast: você acha que cria um novo distrito e que o numero de pessoas se mantem fixo. só que diminui a população!!
-o modelo do weingast funciona numa situação muito especifica, e mudando ela um tiquinho ja nao funciona mais.
-
-jeitos de avançar a literatura:
-ter uma ideia melhor de quais as assumptions você precisa pra funcionar o negocio.
-tem mil assumptions entre os 3 custos/beneficios
-os 3 componentes podem variar da forma que for. um deles é externalidade (no mercado das firmas que estão no outro lugar e que vão contratar).
-e ninguem que fala da lei discute as assumptions!!!
-As assumptions são dificeis de mensurar.
-
-Problemas de identificação (desenho). RDs funcionam melhor.
-Moreover replicação/acumulo na disciplina basicamente nao existe.
-Seria muito surpreendente encontrar resultados dado esse quadro geral, na verdade.
-
-existe um desconforto geral com a teoria mas ninguém toca nos mecanismos.
-
-outro veio teórico:
-os papers de RDD sao todos pra PR, mas o paper do weingast nao eh pra PR.
-Pra PR, eh preciso relaxar a hipotese do weingast: existem sustemas PR mas que a votação dos caras eh concentrada num territorio. é uma hipotese fraca do weingast para que ela funcione. mas a teoria nao foi feita pra isso.
-por ex. 70% dos vereadores em sp têm votacao concentrada por territorio.
-mas existe uma big assumption da qual ninguém fala.
-se a votacao eh dispersa (geograficamente), a lei do 1/n faz zero sentido.
-PR reforça esse mecanismo, que pode estar correlacionado de formas que a teoria nao prevê.
-
-os padroes desse tipo de paper nao eh o mesmo dos papers de experimento.
-o nosso paper eh uma meta analise muito mais dificil de fazer do que a da mia costa, em que tem todas as stats e todos os coeficientes reportados bonitinhos.
-
-tem uma seleção de qual modelo vai entrar: modelo mais completo. (maior n, efeito fixo - max possivel, maximo de controle, optimal/intermediate bandwidth do RD, etc).
-se tem mais de um modelo que comply com a regra, é o n maior.
-para ser comparavel: soh comparar modelos com as mesmas DV e indvar.
-na meta-regression, a gente coloca todas as indvars, e nao as depvars. porque soh nos interessa que direção o efeito vai, e nao o tamanho do efeito.
-
-a gente nao tem controle sobre o tamanho/scale da variação. a meta regression eh o melhor que a gente pdoe fazer pra limpar essa variação doida.
-forest plots: o que fazemos bem para tornar todas em comparaveis eh ter o good coefficient do modelo, e ter o desvio padrão.
-toda vez que fazemos esse tipo de meta analise, o pacote transforma o coeficiente em seu Hedges’ \(g\).
-
-pergunta pode ser: (A) como fazemos para botar no mesmo saco um RD e um panel? resp: isso eh um problea mesmo nas meta analises, mas na meta regressao isso limpa.
-(B) coeficientes sao all over the place. como vocês conseguiram comparar cada um?
-Daí explicar o procedimento. Na restricted sample, we cherry picked, mas no appendix rodamos a analise com tudo junto pra vc, revisor, ver. 
-
-Discussion:
-1 - ok
-2 - ok, só corrigir
-3 - como nossos resultados "resolvem" as questões da teoria
-a linha que avalia o desenho institucional está certa dessa forma.
-sobre a galera que escreve sobre as dinâmicas internas de competição e coalisão, podemos inferir que essas dinâmicas influenciam muito mais do que legislature size.
-Juntar a lit review com nosso ultimo paragrafo falando sobre as recomendações de para onde deve avançar a literatura. "Apesar de ela ser extensa, vemos que ainda poderiam ser explorados A B C".
-4 - ultimo paragrafo vira o que é o terceiro. uma das sugestões é aumentar o numero de replicações, etc, de como a disciplina como um todo deve avançar, sobre como construimos conhecimento na disciplina.
-
-In this article, we assess the empirical validity of the "law of $1/n$". Based
+In this letter, we assess the empirical validity of the "law of $1/n$". Based
 on a sample of `r length(unique(dat$id))` publications on the topic, our
 meta-analyses show that there is no strong evidence that an increase in the
-number of legislators has a significant effect on public expenditures. If such
-effect exists, it is likely driven by an increase in the size of the upper
-legislature, as suggested by several studies in the literature
-[@baqir2002districting; @bradbury2001legislative; @bradbury2003local;
-@chen2007law; @gilligan2001fiscal; @primo2006stop]. Instead, we find
-better evidence for the "reverse law of $1/n$", which posits that larger
-legislatures lead to lower government spending. This is mainly because studies
-using regression discontinuity designs, a method that has robust internal
-validity, consistently indicate a negative relationship between lower house size
-and the logarithm of expenditure per capita [@hohmann2017effect;
-@lewis2019legislature; @petterssonlidbom2012size].
-
-The meta-regressions show that study characteristics have a considerable
+number of legislators has a significant effect on public expenditures. The meta-regressions show that study characteristics have a considerable
 influence on reported results. Electoral system affects the relationship
 between legislature size and public expenditure, but the results are not
-replicable in all estimations. Publication year generates conflicting findings
-in our models. Nevertheless, the meta-regressions confirm that RDDs produce
-negative effects more frequently than OLS regressions.
+replicable in all estimations. In the broadest aggregation models, unicameralism favours the $1/n$ effect. Publication year generates conflicting findings
+in our models, but recent papers tend to present smaller coefficients than older ones. The meta-regressions confirm that more modern estimation methods such as RDDs and panel/fixed-effects models decrease effects more frequently than OLS regressions.
 
-The literature explores many mediating and alternative explanations for how or why the number of legislators in a chamber relates to their choice of commmon pool resource use. @crowley2019law argues that a variable that better translates how large legislatures decrease the efficiency of public spending is fragmentation, which also expresses the and that its effect is actually non-linear. Other studies echo this argument and develop other frgamentation mechanisms that explain relationships that are linear and non-linear. For instance, when it comes to district fragmentation, @baqir1999districts and @drew2017price support the "law of $1/n$"'s positive effect on public spending when one considers the amount of districts that share a common pool of resources. Many studies demonstrate how partisan fragmentation is a bigger predictor of increased spending, and analyze how majorities and veto powers respectively boost and curtail these effects [@baqir2002districting, cite all the papers]. These findings dialogue directly with @weingast1981political's *norm of universalism* within US legislatures, which is the assumption that, when drawing from common pool resources, chambers will always approve of any singular legislators' projects. 
+While the vast literature covering the law of $1/n$ builds important empirical knowledge, few studies dedicate enough to the theory itself. Naturally, there are exceptions [@primo2008distributive]. Among others, @crowley2019law and @pecorino2018supermajority expand the original model targeting the absence of transaction costs in the firm-like behaviour of legislatures [@weingast1988industrial]. Yet, a few issues remain unadressed. Namely, the model assumes three types of costs for legislative public good provision: expenses for the constituency, expenses outside the constituency, and externalities. The main issue in testing this empirically is that externalities such as shifts in prices of local firms, for example, are extremely hard to measure. Thus, it is very difficult to properly translate the mechanism using empirical data, making it is easy to accidentally distort results. Therefore, it should not come as a surprise that slight differences in political features generate highly heterogeneous results.
 
-Applying the "law of $1/n$" in contexts too far removed from the US attests against it, as, for instance, public spending more strongly correlates to cabinet than legislature size in Swiss cantons and Malaysian (states or municipalities?), where decision-making power is concentrated in the executive.
+In this sense, the empirical cases in the literature are not always the most fortunate testing ground for the law of $1/n$. While we believe that moving beyond the majoritarian districts framework could produce valuable insight, institutional features that are central to the theory cannot be overrun. For instance, proportional representation (PR) electoral systems allow candidates whose constituents are spread across large territories to provide diffused public goods and win elections. However, geographically-targeted service provision is at the very core of the legislative behaviour that produces the law of $1/n$. Thus, testing this theory in PR systems may be ineffective and misleading. It is important to note that all of our studies employing RDDs analyse PR systems. This forces us to hypothesise the negative effects in RDDs may not be caused by the estimation method, but because we coincidentally gather a subsample where PR systems specially weaken the $1/n$ effect.\footnote{Given that the other more sophisticated causal inference methods point in the same direction as the RDDs, we do believe RDDs decrease effect sizes. However, the method's effect becomes hard to disentangle from that of proportional representation since the latter entirely encompasses the prior.}
 
-
-Why is there no clear-cut evidence in favour or against the "law of $1/n$"? A
-plausible reason may be that there are few incentives for the pure accumulation
+Another plausible reason why there is no clear-cut evidence in favour or against the "law of $1/n$" may be that there are few incentives for the pure accumulation
 of knowledge in the social sciences, at least when compared to the benefits
 scholars may accrue when they challenge or add features to existing theories
 [@geddes2003paradigms]. This leads to a reduced number of replication studies in
 the field, although we have seen some positive changes in this respect, such as
 EGAP's _Metaketa Initiative_.\footnote{See
 \url{https://egap.org/our-work/the-metaketa-initiative} for further
-information.} 
-
-For instance, in our sample, papers added supermajority rules
-[@lee2015supermajority; @lee2016supermajority], redistricting
-[@baqir2002districting; @lee2018court], party ideology [@bjedov2014impact],
-coalition sizes [@baskaran2013coalition], term limits [@erler2007termlimits],
-bicameralism [@ricciuti2004legislature], and the interplay between upper and
-lower houses [@chen2007law] to the main theory, but a comprehensive
-procedural replication of the findings using different samples is yet to be
-written. 
-
-The addition of new features has the benefit of enriching the original
-theory with useful details, although it has the disadvantage of not providing a
-conclusive test to the "law of $1/n$".
+information.} We advocate that continuously producing and consuming meta-analyses is a covetable path towards knowledge-building for the social sciences. Although aggregating observational -- instead of experimental -- data can be especially challenging mathematically, we have shown it to be possible and effective.
 
 Our analyses suggest three areas for further research. First, our study
 sample did not include articles that evaluate the association between the
-log lower chamber size and public expenditure per capita or between upper chamber size and log expenditure
+natural logarithm of lower chamber size and public expenditure per capita, or between upper house size and log expenditure
 per capita. New work on that area might clarify some of the inconsistencies we
 find here. Second, despite the inclusion of several moderators in our models,
 aggregate results still show considerable heterogeneity. Domestic factors such
 as party dynamics or gerrymandering [@lee2015supermajority;
-@mukherjee2003politicalparties; @gilligan2006public] may prove useful in this
-regard. Finally, we highlight the need for more causal inference studies in the
-literature. Whenever possible, authors should leverage natural and
-quasi-experiments to assess whether the current results hold when tested with
-such research designs. These suggestions may help scholars and policy-makers to
+@mukherjee2003politicalparties; @gilligan2006public] may prove useful in explaining particular dynamics. Third, authors should leverage natural and quasi-experiments to assess whether the current results hold when systematically tested. Fortunately, we acknowledge this may also be a trend under way, as all four studies using regression discontinuity designs in our sample were published within less than 10 years prior to this meta-analysis.
+These suggestions may help scholars and policy-makers to
 reach an optimal balance between sound fiscal policy and the demands for
 increased political representation.
+
 
 \newpage
 \setlength{\parindent}{0cm}
