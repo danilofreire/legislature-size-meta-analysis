@@ -27,6 +27,9 @@ $endif$
 \usepackage[normalem]{ulem}
 \usepackage{etoolbox}
 \usepackage{tocloft}
+\usepackage{rotating}
+\usepackage{afterpage}
+\usepackage{adjustbox}
 
 % Dots in toc
 \renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
