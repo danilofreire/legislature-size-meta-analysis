@@ -220,7 +220,7 @@ build_forest_het <- function(mod, capt, lsize = 22, ttl = NULL, hetvar = NULL) {
 }
 ```
 
-[^huzeyfe]: Research Associate, Contemporary Brazilian History Research and Documentation Center, School of Social Sciences, Fundação Getulio Vargas, <huzeyfealptekin@gmail.com>.
+[^huzeyfe]: Independent Researcher, <huzeyfealptekin@gmail.com>.
 
 [^danilo]: Senior Lecturer, School of Social and Political Sciences, University of Lincoln, <danilofreire@gmail.com>, <https://danilofreire.github.io>. 
 
@@ -419,7 +419,7 @@ build_nams <- function(x) {
                    sep = ''))
 }
 aux <- dat %>%
-  select(authoryear, journalCode, locationISO, depvar2, method, instdesign, elecsys3, year) %>%
+  select(authoryear, journalCode, locationISO, depvar2, method, instdesign2, elecsys3, year) %>%
   unique() %>%
   arrange(year, depvar2)
 aux2 <- aux %>%
@@ -438,7 +438,7 @@ aux <- aux2
 for (i in 1:dim(aux)[1]) {
   cat(paste(build_nams(aux$authoryear[i]), ' & ', aux$journalCode[i], ' & ',
       aux$locationISO[i], ' & ', aux$depvar2[i], ' & ', 
-      aux$method[i], ' & ', aux$instdesign[i], ' & ', 
+      aux$method[i], ' & ', aux$instdesign2[i], ' & ', 
       aux$elecsys3[i], ' \\\\ [0.5ex]', sep = ''), '\n')
 }
 ```
@@ -447,23 +447,23 @@ for (i in 1:dim(aux)[1]) {
 \begin{minipage}{\textwidth}
 \renewcommand{\footnoterule}{}
 \vspace{-0.5cm}
-\footnotetext{\textbf{Journal:} Unpub$=$Unpublished, JPE$=$Journal of Political
-Economy, EJPE$=$European Journal of Political Economy, PC$=$Public Choice,
-JPubE$=$Journal of Public Economics, JPriE$=$Journal of Private Enterprise,
-APSR$=$American Political Science Review, SEJ$=$Southern Economic Journal,
-UAR$=$Urban Affairs Review, SCID$=$Studies in Comparative International
-Development, SSQ$=$Social Science Quarterly, SPPQ$=$State Politics and Policy
-Quarterly, CPS$=$Comparative Political Studies, RivPE$=$Rivista di Politica
-Economica, E\&P$=$Economics and Politics, NTJ$=$National Tax Journal.}
+\footnotetext{\textbf{Journal:} Unpub $=$ Unpublished, JPE $=$ Journal of Political
+Economy, EJPE $=$ European Journal of Political Economy, PC $=$ Public Choice,
+JPubE $=$ Journal of Public Economics, JPriE $=$ Journal of Private Enterprise,
+APSR $=$ American Political Science Review, SEJ $=$ Southern Economic Journal,
+UAR $=$ Urban Affairs Review, SCID $=$ Studies in Comparative International
+Development, SSQ $=$ Social Science Quarterly, SPPQ $=$ State Politics and Policy
+Quarterly, CPS $=$ Comparative Political Studies, RivPE $=$ Rivista di Politica
+Economica, E\&P $=$ Economics and Politics, NTJ$=$National Tax Journal.}
 \footnotetext{\textbf{Country:} Country codes follow the ISO 3166-1 alpha-3
 international standard.} 
-\footnotetext{\textbf{Dependent Variable:} ExpPC$=$Per capita expenditure,
-logExpPC$=$Natural logarithm of per capita expenditure, PCTGDP$=$Expenditure as
+\footnotetext{\textbf{Dependent Variable:} ExpPC $=$ Per capita expenditure,
+logExpPC $=$ Natural logarithm of per capita expenditure, PCTGDP $=$ Expenditure as
 a percentage of GDP.}
-\footnotetext{\textbf{Method:} OLS$=$Ordinary least squares, IV$=$Instrumental
-variables, Panel$=$Panel data/fixed effects, RDD$=$Regression discontinuity
+\footnotetext{\textbf{Method:} OLS $=$ Ordinary least squares, IV $=$ Instrumental
+variables, Panel $=$ Panel data/fixed effects, RDD $=$ Regression discontinuity
 design.}
-\footnotetext{\textbf{Electoral System:} M$=$Majoritarian, NM$=$Non-majoritarian (mixed or proportional
+\footnotetext{\textbf{Electoral System:} M $=$ Majoritarian, NM $=$ Non-majoritarian (mixed or proportional
 representation).} 
 \end{minipage} 
 \end{longtable}
@@ -515,12 +515,12 @@ variables.
 fulldat$usemeta2 <- factor(fulldat$usemeta)
 levels(fulldat$usemeta2) <- c("Other coefficients", "Main sample")
 aux <- select(fulldat, usemeta2, indepvar2, elecsys2, method,
-              year, published, instdesign) %>%
+              year, published, instdesign2) %>%
   rename(`Independent Variables` = indepvar2,
          `Year`                  = year,
          `Published work`        = published,
          `Estimation method`     = method,
-         `Institutional Design`  = instdesign,
+         `Institutional Design`  = instdesign2,
          `Electoral system`      = elecsys2)
 
 export2md(descrTable(~.-usemeta2, aux, y = aux$usemeta2,
@@ -919,8 +919,295 @@ its reference category. Since we aggregate different types of independent
 variables under the same models, the size of the effects does not accurately
 translate the scale of variations.
 
+```{r, echo = FALSE, warning = FALSE, message = FALSE, results = 'hide', cache = TRUE}
+res <- list()
+
+# Aux fctns
+strep <- function (x) {
+  if(!is.na(x)) {
+    return(ifelse(x<0.01, '***',ifelse(x<0.05,'**', ifelse(x<0.1,'*',''))))
+  } else {
+    return('')
+  }
+}
+
+extract_coefs <- function(mod, modnam) {
+  dfr <- data.frame(
+     nams2 = row.names(mod[["beta"]]),
+     est = mod[["beta"]],
+     se = mod[["se"]],
+     pval = mod[["pval"]],
+     model = modnam
+  )
+  aux <- data.frame(nams = c("Intercept",
+             "Indepvar: logN",
+             "Indepvar: N",
+             "Year",
+             "Elecsys: Non-Majoritarian",
+             "Published",
+             "Method: Panel",
+             "Method: IV",
+             "Method: RDD",
+             "Legislature: Unicameral"), 
+             nams2 = c("intrcpt", 
+                       "indepvar2logN", 
+                       "indepvar2N", 
+                       "year", 
+                       "publishedYes", 
+                       "elecsys2Non-Maj", 
+                       "methodPANEL", 
+                       "methodIV", 
+                       "methodRDD",
+                       "instdesign2Unicameral"))
+  dfr <- left_join(aux, dfr) %>%
+    mutate_if(is.numeric, list(~round(., digits = 4)))
+  dfr$nams2 <- NULL
+  return(dfr)
+}
+
+# Expenditure per capita - Restricted
+mod <-  rma(yi = coef,
+              sei = SE,
+              data = dat,
+              method = "REML",
+              mods = ~indepvar2+year+published+elecsys2+method+instdesign2,
+              test = "knha",
+            subset = dat$depvar2=='ExpPC',
+            slab = dat$authoryear,
+            control=list(maxiter=1000))
+
+res[[1]] <- extract_coefs(mod, "ExpPC")
+
+# Expenditure per capita - Extended
+mod <- rma(yi = coef,
+              sei = SE,
+              data = fulldat,
+              method = "REML",
+              mods = ~ ~indepvar2+year+published+elecsys2+method+instdesign2,
+              test = "knha",
+            subset = fulldat$depvar2=='ExpPC',
+            slab = fulldat$authoryear)
+
+res[[2]] <- extract_coefs(mod, "ExpPC - All coefs")
+
+# Log of Expenditure per capita - Restricted
+mod <- rma(yi = coef,
+              sei = SE,
+              data = dat,
+              method = "REML",
+              mods = ~indepvar2+year+published+elecsys2+method+instdesign2,
+              test = "knha",
+            subset = dat$depvar2=='logExpPC',
+            slab = dat$authoryear)
+
+res[[3]] <- extract_coefs(mod, "logExpPC")
+
+# Log of Expenditure per capita - Extended
+mod <- rma(yi = coef,
+              sei = SE,
+              data = fulldat,
+              method = "REML",
+              mods = ~ ~indepvar2+year+published+elecsys2+method+instdesign2,
+              test = "knha",
+            subset = fulldat$depvar2=='logExpPC',
+            slab = fulldat$authoryear)
+
+res[[4]] <- extract_coefs(mod, "logExpPC - All coefs")
+
+## Expenditure as percentage GDP -- Restricted
+mod <-  rma.mv(yi = coef,
+              V = VAR,
+              data = dat,
+              method = "REML",
+              random = ~ 1 | id_level1/id_level2, 
+              mods = ~indepvar2+year+published+elecsys2+method+instdesign2,
+              test = "knha",
+              sparse = TRUE,
+              tdist = TRUE,
+              subset = dat$depvar2=='PCTGDP',
+              slab = dat$authoryear)
+
+res[[5]] <- extract_coefs(mod, "PCTGDP")
+
+## Expenditure as percentage GDP -- Extended
+mod <- rma(yi = coef,
+              sei = SE,
+              data = fulldat,
+              method = "REML",
+              mods = ~indepvar2+year+published+elecsys2+method+instdesign2,
+              test = "knha",
+            subset = fulldat$depvar2=='PCTGDP',
+            slab = fulldat$authoryear)
+
+res[[6]] <- extract_coefs(mod, "PCTGDP - All coefs")
+
+mod <- rma.mv(yi = coef,
+              V = VAR,
+              data = dat,
+              method = "REML",
+              random = ~ 1 | id_level1/id_level2, 
+              mods = ~depvar2+indepvar2+year+published+elecsys2+method+instdesign2,
+              test = "knha",
+              tdist = TRUE,
+              sparse = TRUE,
+              slab = dat$authoryear)
+
+res[[7]] <- extract_coefs(mod, "Full Model")
+
+mod <- rma.mv(yi = coef,
+              V = VAR,
+              data = fulldat,
+              method = "REML",
+              random = ~ 1 | id_level1/id_level2, 
+              mods = ~depvar2+indepvar2+year+published+elecsys2+method+instdesign2,
+              test = "knha",
+              tdist = TRUE,
+              sparse = TRUE,
+              slab = fulldat$authoryear)
+
+res[[8]] <- extract_coefs(mod, "Full Model - All coefs")
+gcf <- function(mod, pos) {
+  x <- mod$est[pos]
+  y <- mod$pval[pos]
+  if(!is.na(x)) {
+    return(paste0(round(x, digits = 3), strep(y)))
+  } else {
+    return('')
+  }
+}
+gcf2 <- function(mod, pos) {
+  # round(res[[3]][2,3],3)`)`r strep(res[[3]][2,5])`
+  x <- mod$se[pos]
+  if(!is.na(x)) {
+    return(paste0('(', round(x, digits = 3), ')'))
+  } else {
+    return('')
+  }
+}
+```
+
 \vspace{0.5cm}
-[TABLE GOES HERE]
+
+```{=latex}
+\begin{table}[htpb]
+\caption{Meta Regression Results\label{tabregressions}}
+\footnotesize
+\centering
+\begin{tabular}{lcccccccc}
+\toprule
+\midrule
+\multicolumn{1}{c}{ } & \multicolumn{2}{c}{Expenditure Per Capita} & \multicolumn{2}{c}{Log Expenditure Per Capita} & \multicolumn{2}{c}{Gov. Spending \% GDP} & \multicolumn{2}{c}{Full Model} \\
+\cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5} \cmidrule(l{3pt}r{3pt}){6-7} \cmidrule(l{3pt}r{3pt}){8-9}
+& Restricted & Extended & Restricted & Extended & Restricted & Extended & Restricted & Extended \\
+\midrule
+Independent Variable: log($N$) & 
+`r gcf(res[[1]], 2)` & `r gcf(res[[2]], 2)` & 
+`r gcf(res[[3]], 2)` & `r gcf(res[[4]], 2)` & 
+`r gcf(res[[5]], 2)` & `r gcf(res[[6]], 2)` &
+`r gcf(res[[7]], 2)` & `r gcf(res[[8]], 2)` \\
+& `r gcf2(res[[1]], 2)` & `r gcf2(res[[2]], 2)` & 
+`r gcf2(res[[3]], 2)` & `r gcf2(res[[4]], 2)` & 
+`r gcf2(res[[5]], 2)` & `r gcf2(res[[6]], 2)` & 
+`r gcf2(res[[7]], 2)` & `r gcf2(res[[8]], 2)` \\
+%
+Independent Variable: $N$ &
+`r gcf(res[[1]], 3)` & `r gcf(res[[2]], 3)` & 
+`r gcf(res[[3]], 3)` & `r gcf(res[[4]], 3)` & 
+`r gcf(res[[5]], 3)` & `r gcf(res[[6]], 3)` &
+`r gcf(res[[7]], 3)` & `r gcf(res[[8]], 3)` \\
+& `r gcf2(res[[1]], 3)` & `r gcf2(res[[2]], 3)` & 
+`r gcf2(res[[3]], 3)` & `r gcf2(res[[4]], 3)` & 
+`r gcf2(res[[5]], 3)` & `r gcf2(res[[6]], 3)` & 
+`r gcf2(res[[7]], 3)` & `r gcf2(res[[8]], 3)` \\
+%
+Year & 
+`r gcf(res[[1]], 4)` & `r gcf(res[[2]], 4)` & 
+`r gcf(res[[3]], 4)` & `r gcf(res[[4]], 4)` & 
+`r gcf(res[[5]], 4)` & `r gcf(res[[6]], 4)` &
+`r gcf(res[[7]], 4)` & `r gcf(res[[8]], 4)` \\
+& `r gcf2(res[[1]], 4)` & `r gcf2(res[[2]], 4)` & 
+`r gcf2(res[[3]], 4)` & `r gcf2(res[[4]], 4)` & 
+`r gcf2(res[[5]], 4)` & `r gcf2(res[[6]], 4)` & 
+`r gcf2(res[[7]], 4)` & `r gcf2(res[[8]], 4)` \\
+%
+Non-Majoritarian (PR \& Mixed) & 
+`r gcf(res[[1]], 5)` & `r gcf(res[[2]], 5)` & 
+`r gcf(res[[3]], 5)` & `r gcf(res[[4]], 5)` & 
+`r gcf(res[[5]], 5)` & `r gcf(res[[6]], 5)` &
+`r gcf(res[[7]], 5)` & `r gcf(res[[8]], 5)` \\
+& `r gcf2(res[[1]], 5)` & `r gcf2(res[[2]], 5)` & 
+`r gcf2(res[[3]], 5)` & `r gcf2(res[[4]], 5)` & 
+`r gcf2(res[[5]], 5)` & `r gcf2(res[[6]], 5)` & 
+`r gcf2(res[[7]], 5)` & `r gcf2(res[[8]], 5)` \\
+%
+Published: Yes & 
+`r gcf(res[[1]], 6)` & `r gcf(res[[2]], 6)` & 
+`r gcf(res[[3]], 6)` & `r gcf(res[[4]], 6)` & 
+`r gcf(res[[5]], 6)` & `r gcf(res[[6]], 6)` &
+`r gcf(res[[7]], 6)` & `r gcf(res[[8]], 6)` \\
+& `r gcf2(res[[1]], 6)` & `r gcf2(res[[2]], 6)` & 
+`r gcf2(res[[3]], 6)` & `r gcf2(res[[4]], 6)` & 
+`r gcf2(res[[5]], 6)` & `r gcf2(res[[6]], 6)` & 
+`r gcf2(res[[7]], 6)` & `r gcf2(res[[8]], 6)` \\
+%
+Method: Panel & 
+`r gcf(res[[1]], 7)` & `r gcf(res[[2]], 7)` & 
+`r gcf(res[[3]], 7)` & `r gcf(res[[4]], 7)` & 
+`r gcf(res[[5]], 7)` & `r gcf(res[[6]], 7)` &
+`r gcf(res[[7]], 7)` & `r gcf(res[[8]], 7)` \\
+& `r gcf2(res[[1]], 7)` & `r gcf2(res[[2]], 7)` & 
+`r gcf2(res[[3]], 7)` & `r gcf2(res[[4]], 7)` & 
+`r gcf2(res[[5]], 7)` & `r gcf2(res[[6]], 7)` & 
+`r gcf2(res[[7]], 7)` & `r gcf2(res[[8]], 7)` \\
+%
+Method: IV & 
+`r gcf(res[[1]], 8)` & `r gcf(res[[2]], 8)` & 
+`r gcf(res[[3]], 8)` & `r gcf(res[[4]], 8)` & 
+`r gcf(res[[5]], 8)` & `r gcf(res[[6]], 8)` &
+`r gcf(res[[7]], 8)` & `r gcf(res[[8]], 8)` \\
+& `r gcf2(res[[1]], 8)` & `r gcf2(res[[2]], 8)` & 
+`r gcf2(res[[3]], 8)` & `r gcf2(res[[4]], 8)` & 
+`r gcf2(res[[5]], 8)` & `r gcf2(res[[6]], 8)` & 
+`r gcf2(res[[7]], 8)` & `r gcf2(res[[8]], 8)` \\
+%
+Method: RDD &
+`r gcf(res[[1]], 9)` & `r gcf(res[[2]], 9)` & 
+`r gcf(res[[3]], 9)` & `r gcf(res[[4]], 9)` & 
+`r gcf(res[[5]], 9)` & `r gcf(res[[6]], 9)` &
+`r gcf(res[[7]], 9)` & `r gcf(res[[8]], 9)` \\
+& `r gcf2(res[[1]], 9)` & `r gcf2(res[[2]], 9)` & 
+`r gcf2(res[[3]], 9)` & `r gcf2(res[[4]], 9)` & 
+`r gcf2(res[[5]], 9)` & `r gcf2(res[[6]], 9)` & 
+`r gcf2(res[[7]], 9)` & `r gcf2(res[[8]], 9)` \\
+% 
+Inst.: Unicameral & 
+`r gcf(res[[1]], 10)` & `r gcf(res[[2]], 10)` & 
+`r gcf(res[[3]], 10)` & `r gcf(res[[4]], 10)` & 
+`r gcf(res[[5]], 10)` & `r gcf(res[[6]], 10)` &
+`r gcf(res[[7]], 10)` & `r gcf(res[[8]], 10)` \\
+& `r gcf2(res[[1]], 10)` & `r gcf2(res[[2]], 10)` & 
+`r gcf2(res[[3]], 10)` & `r gcf2(res[[4]], 10)` & 
+`r gcf2(res[[5]], 10)` & `r gcf2(res[[6]], 10)` & 
+`r gcf2(res[[7]], 10)` & `r gcf2(res[[8]], 10)` \\
+% 
+Intercept & 
+`r gcf(res[[1]], 1)` & `r gcf(res[[2]], 1)` & 
+`r gcf(res[[3]], 1)` & `r gcf(res[[4]], 1)` & 
+`r gcf(res[[5]], 1)` & `r gcf(res[[6]], 1)` &
+`r gcf(res[[7]], 1)` & `r gcf(res[[8]], 1)` \\
+& `r gcf2(res[[1]], 1)` & `r gcf2(res[[2]], 1)` & 
+`r gcf2(res[[3]], 1)` & `r gcf2(res[[4]], 1)` & 
+`r gcf2(res[[5]], 1)` & `r gcf2(res[[6]], 1)` & 
+`r gcf2(res[[7]], 1)` & `r gcf2(res[[8]], 1)` \\
+\bottomrule
+\end{tabular}
+\begin{minipage}{\textwidth}
+\renewcommand{\footnoterule}{}
+\footnotetext{\textbf{Note:} {The restricted and extended samples include `r length(dat$id)` and `r length(fulldat$id)` study coefficients, respectively. We report the results from the permutation tests. Reference categories: Independent Variable: Upper House Size; Published $= No$; Non-Majoritarian; Method $= OLS$, Legislative: $= Non-Unicameral$. Significance codes: *** $p < 0.01$; ** $p < 0.05$; * $p < 0.10$.}}
+\end{minipage}
+\end{table}
+```
+
 \vspace{0.5cm}
 
 The first two models show the results for public expenditure per capita. No
