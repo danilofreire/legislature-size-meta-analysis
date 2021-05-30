@@ -421,7 +421,20 @@ build_nams <- function(x) {
 aux <- dat %>%
   select(authoryear, journalCode, locationISO, depvar2, method, instdesign, elecsys3, year) %>%
   unique() %>%
-  arrange(year)
+  arrange(year, depvar2)
+aux2 <- aux %>%
+  mutate(depvar2 = 'aux') %>%
+  unique()
+for(i in 1:dim(aux)[1]) {
+  if(aux2$depvar2[aux2$authoryear == aux$authoryear[i]] == 'aux') {
+    aux2$depvar2[aux2$authoryear == aux$authoryear[i]] = aux$depvar2[i]
+  } else {
+    aux2$depvar2[aux2$authoryear == aux$authoryear[i]] = paste(
+      aux2$depvar2[aux2$authoryear == aux$authoryear[i]],
+      aux$depvar2[i], sep = ', ')
+  }
+}
+aux <- aux2
 for (i in 1:dim(aux)[1]) {
   cat(paste(build_nams(aux$authoryear[i]), ' & ', aux$journalCode[i], ' & ',
       aux$locationISO[i], ' & ', aux$depvar2[i], ' & ', 
