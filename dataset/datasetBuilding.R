@@ -5635,6 +5635,12 @@ dat <- arrange(dat, id) %>%
   relocate(id_level2, .after = id_level1) %>%
   mutate(VAR = SE^2)
 
+# Inst Design 2
+dat <- dat %>%
+  mutate(instdesign2 = ifelse(instdesign == 'Unicameral',
+                              'Unicameral', 'Non-Unicameral')) %>%
+  relocate(instdesign2, .after = instdesign)
+
 # Full data and partial data
 fulldat <- dat
 dat <- dat %>%
