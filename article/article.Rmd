@@ -9,7 +9,7 @@ author:
   - Catarina Roman[^catarina]
 date: \today
 thanks: "The authors thank Guilherme Duarte, Robert Myles McDonnell, and David Skarbek for their constructive feedback. We also thank Cedric Antunes, Luis Castro, Giovanna França, Julia Oriente, and Lucas Mingardi for their excellent research assistance. Replication materials are available at <https://github.com/danilofreire/legislature-size-meta-analysis>. We kindly acknowledge funding from the São Paulo State Science Foundation (FAPESP grant number 2018/00646-1)."
-abstract: "In a seminal article, @weingast1981political argue that there is a positive relationship between legislature size and inefficiency in public expenditures. Their proposition is currently known as the \"law of $1/n$\" and has been widely debated in political science and public administration. However, recent studies have questioned the validity of the theory. In this letter, we estimate the first meta-analysis of the relationship between the number of legislators and public spending. Based on a sample of 29 articles, we find no robust evidence for the effect of legislature size on government budgets. Yet the aggregate results show significant heterogeneity. While earlier studies provide moderate support for the \"law of $1/n$\", papers using causal inference methods consistently find a negative relationship between seats and spending. The available evidence also indicates that proportional representation and mixed voting systems are no more likely to overspend than majoritarian ones."
+abstract: "In a seminal article, @weingast1981political argue that there is a positive relationship between legislature size and inefficiency in public expenditures. Their proposition is currently known as the \"law of $1/n$\" and has been widely debated in political science and public administration. However, recent studies have questioned the validity of the theory. In this letter, we estimate the first meta-analysis of the relationship between the number of legislators and public spending. Based on a sample of 30 articles, we find no robust evidence for the effect of legislature size on government budgets. Yet the aggregate results show significant heterogeneity. While earlier studies provide moderate support for the \"law of $1/n$\", papers using causal inference methods consistently find a negative relationship between seats and spending. The available evidence also indicates that proportional representation and mixed voting systems are no more likely to overspend than majoritarian ones."
 abstractspacing: double
 keywords: distributive politics; law of $1/n$; legislature size; meta-analysis; public spending
 jelcodes: H21; H23; H50; H61
@@ -388,10 +388,11 @@ into the personal webpages of every author whom we had already included in our
 sample. The purpose of this manual search was to assess whether there was any
 working paper or unpublished manuscript that we had missed in the two former
 queries. All papers we found in the last search had already been included in
-our sample. Combined, the three searches produced a dataset of 
-`r length(unique(dat$id))` studies as of the 10\textsuperscript{th} of March 2021.
-Table \ref{tab:papers} contains the full list of articles we analyse in this
-paper.
+our sample. The full list of excluded records is available for online
+consultation in the replication materials. Combined, the three searches
+produced a dataset of `r length(unique(dat$id))` studies as of the
+10\textsuperscript{th} of March 2021. Table \ref{tab:papers} contains the full
+list of articles we analyse in this paper.
 
 \footnotesize
 \begin{longtable}{>{\raggedright\arraybackslash}p{3.9cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{2.3cm}>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{1.1cm}}
@@ -789,40 +790,42 @@ intervals.
 The uppermost row shows the results for lower chamber size in our restricted
 sample. In the first model, which correlates lower house and expenditure per
 capita, we find a standardised mean difference (SMD) of 0.022 and a standard
-error of 0.131 (studies = `r mod[[1]]$k`, 95\% CI = [-0.256; 0.299], $p$-value
-= 0.87), so we cannot rule that the effect is different from zero. Indeed, the
-effect of lower chamber size on the other two dependent variables is also null
-in statistical terms. When we compare lower chamber size with log expenditure
-per capita, the overall effect size is -0.031 and the standard error is 0.049
-(studies = `r mod[[3]]$k`, 95\% CI = [-0.188; 0.127], $p$-value = 0.58), and
-the impact of larger lower houses on government spending as a percentage of GDP
-is also negligible (studies = `r mod[[5]]$k`, SMD = - 0.006, 95\% CI =
-[-0.0334; 0.021], $p$-value = 0.563). The results are virtually identical when
-we estimate the meta-analyses using our extended sample, and the all three
-coefficients are again statistically indistinguishable from zero. 
+error of 0.131 (figure 1.1, studies = `r mod[[1]]$k`, 95\% CI = [-0.256;
+0.299], $p$-value = 0.87), so we cannot rule that the effect is different from
+zero. Indeed, the effect of lower chamber size on the other two dependent
+variables is also null in statistical terms. When we compare lower chamber size
+with log expenditure per capita, the overall effect size is -0.031 and the
+standard error is 0.049 (figure 1.2, studies = `r mod[[3]]$k`, 95\% CI =
+[-0.188; 0.127], $p$-value = 0.58), and the impact of larger lower houses on
+government spending as a percentage of GDP  is also negligible (figure 1.3,
+studies = `r mod[[5]]$k`, SMD = - 0.006, 95\% CI = [-0.0334; 0.021], $p$-value
+= 0.563). The results are virtually identical when we estimate the
+meta-analyses using our extended sample, and the all three coefficients are
+again statistically indistinguishable from zero. 
 
 Next, we present the meta-analyses using the logarithm of lower house size as
 an independent variable. The relationship between this variable and the log of
 per capita expenditure is positive, but the coefficient is not significant
-(studies = `r mod[[4]]$k`, SMD = 0.078, SE = 0.109, 95\% CI = [-0.225; 0.381],
-$p$-value = 0.515. The effect of log lower house size on expenditure as a
-percentage of the GDP is very similar, although the SMD is negative (studies =
-`r mod[[6]]$k`, SMD = `r round(mod[[6]]$TE.random,3)`, SE = 
-`r round(mod[[6]]$seTE.random,3)`, 95\% CI = [`r round(mod[[6]]$lower.random,3)`;
-`r round(mod[[6]]$upper.random,3)`], $p$-value = 
-`r round(mod[[6]]$pval.random,3)`). Results in the full sample are also null, and
-the coefficients for each dependent variable have the same sign as the
-restricted sample -- positive and negative, respectively.
+(figure 1.4, studies = `r mod[[4]]$k`, SMD = 0.078, SE = 0.109, 95\% CI =
+[-0.225; 0.381], $p$-value = 0.515). The effect of log lower house size on
+expenditure as a percentage of the GDP is negative, but it is again
+non-statistically significant (figure 1.5, studies = `r mod[[6]]$k`, SMD = 
+`r round(mod[[6]]$TE.random,3)`, SE = `r round(mod[[6]]$seTE.random,3)`, 95\% CI =
+[`r round(mod[[6]]$lower.random,3)`; `r round(mod[[6]]$upper.random,3)`],
+$p$-value = `r round(mod[[6]]$pval.random,3)`). Results in the full sample are
+also null, and the coefficients for each dependent variable have the same sign
+as the restricted sample -- positive and negative, respectively.
 
 The third set of models uses upper house size as the main independent variable.
 We find a positive correlation between this variable and expenditure per capita
-(studies = `r mod[[2]]$k`, SMD = 3.658, SE = 4.299, 95\% CI = [-6.255; 13.572],
-$p$-value = 0.419), and a negative relationship with government spending as a
-percentage of GDP (studies = `r mod[[7]]$k`, SMD = 
-`r round(mod[[7]]$TE.random,3)`, SE = `r round(mod[[7]]$seTE.random,3)`, 95\% CI =
-[`r round(mod[[7]]$lower.random,3)`; `r round(mod[[7]]$upper.random,3)`],
-$p$-value = `r round(mod[[7]]$pval.random,3)`), yet neither coefficient is
-statistically significant. Results are the same in our extended sample.
+(figure 1.6, studies = `r mod[[2]]$k`, SMD = 3.658, SE = 4.299, 95\% CI =
+[-6.255; 13.572], $p$-value = 0.419), and a negative relationship with
+government spending as a percentage of GDP (figure 1.7, studies = 
+`r mod[[7]]$k`, SMD = `r round(mod[[7]]$TE.random,3)`, SE = 
+`r round(mod[[7]]$seTE.random,3)`, 95\% CI = [`r round(mod[[7]]$lower.random,3)`;
+`r round(mod[[7]]$upper.random,3)`], $p$-value = 
+`r round(mod[[7]]$pval.random,3)`), yet neither coefficient is statistically
+significant. Results are the same in our extended sample.
 
 Taken together, these results yield conservative interpretations. Besides all
 average effect sizes not reaching conventional levels of statistical
@@ -964,63 +967,79 @@ its original theoretical framework.
 # Discussion
 \label{sec:discussion}
 
-In this letter, we assess the empirical validity of the "law of $1/n$". Based
-on a sample of `r length(unique(dat$id))` publications on the topic, our
-meta-analyses show that there is no strong evidence that an increase in the
-number of legislators has a significant effect on public expenditures. If such
-effect exists, it is likely driven by an increase in $k$, the size of the upper
-legislature, as suggested by several studies in the literature
-[@baqir2002districting; @bradbury2001legislative; @bradbury2003local;
-@chen2007law; @gilligan2001fiscal; @primo2006stop]. Instead, we find
-better evidence for the "reverse law of $1/n$", which posits that larger
-legislatures lead to lower government spending. This is mainly because studies
-using regression discontinuity designs, a method that has robust internal
-validity, consistently indicate a negative relationship between lower house size
-and the logarithm of expenditure per capita [@hohmann2017effect;
-@lewis2019legislature; @petterssonlidbom2012size].
-
-The meta-regressions show that study characteristics have a considerable
+In this letter, we use meta-analytic methods to assess the generality of the
+"law of $1/n$". Based on a sample of `r length(unique(dat$id))` publications,
+our meta-analyses show that there is no strong evidence that an increase in the
+number of legislators has a significant effect on public expenditures. The
+meta-regressions indicate that study characteristics have a considerable
 influence on reported results. Electoral system affects the relationship
 between legislature size and public expenditure, but the results are not
-replicable in all estimations. Publication year generates conflicting findings
-in our models. Nevertheless, the meta-regressions confirm that RDDs produce
-negative effects more frequently than OLS regressions.
+replicable in all estimations. In our extended sample, we find that
+unicameralism favours the $1/n$ effect. Publication year generates conflicting
+findings in our models, but recent papers tend to present smaller coefficients
+than older ones. The meta-regressions confirm that modern estimation methods
+such as RDDs and panel/fixed-effects models decrease effects more frequently
+than OLS regressions. In a nutshell, we only find moderate support for the "law
+of $1/n$" in unicameral governments and in the upper house, mostly when authors
+used OLS estimators.
 
-Why is there no clear-cut evidence in favour or against the "law of $1/n$"? A
-plausible reason may be that there are few incentives for the pure accumulation
-of knowledge in the social sciences, at least when compared to the benefits
-scholars may accrue when they challenge or add features to existing theories
-[@geddes2003paradigms]. This leads to a reduced number of replication studies in
-the field, although we have seen some positive changes in this respect, such as
-EGAP's _Metaketa Initiative_.\footnote{See
+While the vast literature covering the "law of $1/n$" builds important
+empirical knowledge, we hypothesise that some of the null findings that we
+present here are due to difficulties in testing important assumptions behind
+the theory itself. For instance, the theory assumes three types of costs for
+legislative public good provision, namely expenses for the constituency,
+expenses outside the constituency, and externalities. The main issue in
+assessing their actual impact is that externalities such as shifts in prices of
+local firms, for example, are extremely hard to measure. Thus, it is very
+difficult to properly translate the mechanism to empirical data, making it is
+easy to accidentally distort results. Therefore, it should not come as a
+surprise that slight differences in political features generate highly
+heterogeneous results.
+
+In this sense, the empirical cases in the literature may not always be the most
+fortunate testing ground for the "law of $1/n$". While we believe that moving
+beyond the majoritarian districts framework could produce valuable insights,
+institutional features that are central to the theory cannot be overrun. For
+example, proportional representation (PR) electoral systems allow candidates
+whose constituents are spread across large territories to provide diffused
+public goods and win elections. However, geographically-targeted service
+provision is at the very core of the legislative behaviour that produces the
+"law of $1/n$". Thus, scholars should consider the possible implications of
+these micro-level dynamics when applying the "law of $1/n$" logic to different
+settings. 
+
+Another plausible reason why there is no clear-cut evidence in favour or
+against the "law of $1/n$" may be that there are few incentives for the pure
+accumulation of knowledge in the social sciences, at least when compared to the
+benefits scholars may accrue when they challenge or add features to existing
+theories [@geddes2003paradigms]. This leads to a reduced number of replication
+studies and research syntheses in the field, although we have seen some
+positive changes in this respect, such as EGAP's _Metaketa
+Initiative_.\footnote{See
 \url{https://egap.org/our-work/the-metaketa-initiative} for further
-information.} For instance, in our sample, papers added supermajority rules
-[@lee2015supermajority; @lee2016supermajority], redistricting
-[@baqir2002districting; @lee2018court], party ideology [@bjedov2014impact],
-coalition sizes [@baskaran2013coalition], term limits [@erler2007termlimits],
-bicameralism [@ricciuti2004legislature], and the interplay between upper and
-lower houses [@chen2007law] to the main theory, but a comprehensive
-procedural replication of the findings using different samples is yet to be
-written. The addition of new features has the benefit of enriching the original
-theory with useful details, although it has the disadvantage of not providing a
-conclusive test to the "law of $1/n$".
+information.} Here we show that continuously producing and consuming
+meta-analyses is a viable path towards knowledge-building in our discipline.
+Although aggregating observational -- instead of experimental -- data can be
+especially challenging, we believe that research synthesis methods play an
+essential role in advancing our understanding of complex political phenomena.
 
-Our analyses suggest three areas for further research. First, our study
+Our analyses suggest other avenues for further research. First, our study
 sample did not include articles that evaluate the association between the
-log($n$) and public expenditure per capita or between $k$ and log expenditure
-per capita. New work on that area might clarify some of the inconsistencies we
-find here. Second, despite the inclusion of several moderators in our models,
-aggregate results still show considerable heterogeneity. Domestic factors such
-as party dynamics or gerrymandering [@lee2015supermajority;
-@mukherjee2003politicalparties; @gilligan2006public] may prove useful in this
-regard. Finally, we highlight the need for more causal inference studies in the
-literature. Whenever possible, authors should leverage natural and
-quasi-experiments to assess whether the current results hold when tested with
-such research designs. These suggestions may help scholars and policy-makers to
-reach an optimal balance between sound fiscal policy and the demands for
-increased political representation.
+natural logarithm of lower chamber size and public expenditure per capita, or
+between upper house size and log expenditure per capita. New work on that area
+might clarify some of the inconsistencies we find here. Second, despite the
+inclusion of several moderators in our models, aggregate results still show
+considerable heterogeneity. Domestic factors such as party dynamics or
+gerrymandering [@lee2015supermajority; @mukherjee2003politicalparties;
+@gilligan2006public] may prove useful in explaining those divergent results.
+Third, authors should leverage natural and quasi-experiments to assess whether
+the current results hold when systematically tested. Fortunately, this may also
+be a trend under way, as all four studies using regression discontinuity
+designs in our sample were published within less than 10 years prior to this
+meta-analysis. These suggestions may help scholars to validate the robustness
+of their findings and policy-makers to reach an optimal balance between sound
+fiscal policy and the demands for increased political representation.
 
-\newpage
 \setlength{\parindent}{0cm}
 \setlength{\parskip}{5pt}
 
@@ -1029,6 +1048,5 @@ erler2007termlimits, fiorino2007legislature, hohmann2017effect,
 kessler2014communication, lewis2019legislature, lledo2003electoral,
 mukherjee2003politicalparties, petterssonlidbom2012size, schaltegger2009large,
 stein1998institutional, mukherjee2003politicalparties, macdonald2008impact,
-matsusaka2005endogeneity, ricciuti2004legislatures}
-
+matsusaka2005endogeneity, ricciuti2004legislatures, coate2011government}
 
