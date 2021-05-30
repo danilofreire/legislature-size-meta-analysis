@@ -1660,7 +1660,7 @@ mod <- rma.mv(yi = coef,
               data = fulldat,
               method = "REML",
               random = ~ 1 | id_level1/id_level2, 
-              mods = ~indepvar2+year+published+elecsys2+method+instdesign,
+              mods = ~indepvar2+year+published+elecsys2+method+instdesign2,
               test = "knha",
               tdist = TRUE,
               sparse = TRUE,
@@ -1680,7 +1680,7 @@ mod <- rma.mv(yi = coef,
               data = dat,
               method = "REML",
               random = ~ 1 | id_level1/id_level2, 
-              mods = ~indepvar2+year+published+elecsys2+method+instdesign,
+              mods = ~indepvar2+year+published+elecsys2+method+instdesign2,
               test = "knha",
               tdist = TRUE,
               sparse = TRUE,
@@ -1694,7 +1694,7 @@ In the meta-regressions of Expenditure as a Percentage of GDP, we found that:
 
 1. Recent papers find smaller effect sizes than older studies.
 
-2. Papers whose samples included both unicameral and bicameral legislatures report significantly lower coefficients.
+2. Papers whose samples included unicameral legislatures report slightly higher coefficients.
 
 Below we also run the meta-regressions adding all coefficients in the papers. The results follow below:
 
@@ -1704,7 +1704,7 @@ mod <- rma.mv(yi = coef,
               data = fulldat,
               method = "REML",
               random = ~ 1 | id_level1/id_level2, 
-              mods = ~indepvar2+year+published+elecsys2+method+instdesign,
+              mods = ~indepvar2+year+published+elecsys2+method+instdesign2,
               test = "knha",
               tdist = TRUE,
               sparse = TRUE,
@@ -1719,7 +1719,7 @@ With all coefficients, the results of the effect sizes on the Expenditure as a P
 
 2. Studies using non-majoritarian systems find more positive effects between variables.
 
-3. Papers whose samples included both unicameral and bicameral legislatures report significantly lower coefficients. 
+3. Papers whose samples included unicameral legislatures report significantly higher coefficients. 
 
 
 # Robustness: Meta-Regressions (All Coefficients)
@@ -1736,7 +1736,7 @@ In this section, we aggregate all the coefficients and run a multivariate meta-r
 
 5. Whether the study is a working paper or published work.
 
-6. The institutional design: whether the legislature in the analysis is unicameral, bicameral, or mixed.
+6. The institutional design: whether the legislature in the analysis is unicameral or non-unicameral (bicameral or mixed).
 
 7. The estimation method used in the paper (OLS, PANEL, IV, or RDD).
 
@@ -1748,7 +1748,7 @@ mod <- rma.mv(yi = coef,
               data = dat,
               method = "REML",
               random = ~ 1 | id_level1/id_level2, 
-              mods = ~depvar2+indepvar2+year+published+elecsys2+method+instdesign,
+              mods = ~depvar2+indepvar2+year+published+elecsys2+method+instdesign2,
               test = "knha",
               tdist = TRUE,
               sparse = TRUE,
@@ -1756,7 +1756,7 @@ mod <- rma.mv(yi = coef,
 
 summary(mod)
 ```
-In the restricted model, with only the main coefficients in the selected papers, only Unicameralism has a positive, significant effect. We also run the meta-regressions adding all coefficients in the papers. The results follow below:
+In the restricted model, with only the main coefficients in the selected papers, Unicameralism has a positive, significant effect. Also, papers using Regression Discontinuity Design tend to have a negative effect, significant at the 10% level. We also run the meta-regressions adding all coefficients in the papers. The results follow below:
 
 ```{r, size="footnotesize", warning=F, cache=T, echo = FALSE}
 mod <- rma.mv(yi = coef,
@@ -1764,7 +1764,7 @@ mod <- rma.mv(yi = coef,
               data = fulldat,
               method = "REML",
               random = ~ 1 | id_level1/id_level2, 
-              mods = ~depvar2+indepvar2+year+published+elecsys2+method+instdesign,
+              mods = ~depvar2+indepvar2+year+published+elecsys2+method+instdesign2,
               test = "knha",
               tdist = TRUE,
               sparse = TRUE,
@@ -1773,10 +1773,8 @@ summary(mod)
 ```
 In the full model, we can see that:
 
-1. Coefficients from non-majoritarian systems are significantly lower than those found in purely majoritarian systems.
+1. Compared with papers that employ `OLS`, those that use `PANEL`, `IV` and `RDD` report significantly smaller coefficients.
 
-2. Compared with papers that employ `OLS`, those that use `PANEL`, `IV` and `RDD` report significantly smaller coefficients.
+2. Evidence from unicameral systems presents significantly larger effect sizes.
 
-3. Evidence from unicameral systems presents significantly larger effect sizes.
-
-4. All other moderators are insignificant.
+3. All other moderators are insignificant.
