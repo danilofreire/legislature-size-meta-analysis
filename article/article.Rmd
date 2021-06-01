@@ -9,7 +9,7 @@ author:
   - Catarina Roman[^catarina]
 date: \today
 thanks: "The authors thank Guilherme Duarte, Robert Myles McDonnell, and David Skarbek for their constructive feedback. We also thank Cedric Antunes, Luis Castro, Giovanna França, Julia Oriente, and Lucas Mingardi for their excellent research assistance. Replication materials are available at <https://github.com/danilofreire/legislature-size-meta-analysis>. We kindly acknowledge funding from the São Paulo State Science Foundation (FAPESP grant number 2018/00646-1)."
-abstract: "In a seminal article, @weingast1981political argue that there is a positive relationship between legislature size and inefficiency in public expenditures. Their proposition is currently known as the \"law of $1/n$\" and has been widely debated in political science and public administration. However, recent studies have questioned the validity of the theory. In this letter, we estimate the first meta-analysis of the relationship between the number of legislators and public spending. Based on a sample of 30 articles, we find no robust evidence for the effect of legislature size on government budgets. Yet the aggregate results show significant heterogeneity. While earlier studies provide moderate support for the \"law of $1/n$\", papers using causal inference methods consistently find a negative relationship between seats and spending. The available evidence also indicates that proportional representation and mixed voting systems are no more likely to overspend than majoritarian ones."
+abstract: "In a seminal article, @weingast1981political argue that there is a positive relationship between legislature size and inefficiency in public expenditures. Their proposition is currently known as the \"law of $1/n$\" and has been widely debated in political science and public administration. However, recent studies have questioned the validity of the theory. In this letter, we conduct the first meta-analysis that assesses the generality of the \"law of $1/n$\". Based on a sample of 30 articles, we find no robust evidence for the effect of legislature size on government budgets. Yet the aggregate results show significant heterogeneity. We find moderate support for the \"law of $1/n$\" in unicameral legislatures and in the upper house, but panel/fixed-effects models and regression discontinuity designs reduce public spending estimates. Our results also indicate that proportional representation systems are no more likely to overspend than majoritarian ones."
 abstractspacing: double
 keywords: distributive politics; law of $1/n$; legislature size; meta-analysis; public spending
 jelcodes: H21; H23; H50; H61
@@ -868,7 +868,7 @@ the natural logarithm of expenditure per capita (right).
 \begin{center}
 \caption{Forest plots of the relationship between legislature size and government spending with regression method heterogeneity (restricted sample)}
 \vspace{.3cm}
-\includegraphics[width=1\linewidth, height=7.5cm]{../graphs/graph2.pdf}
+\includegraphics[width=1\linewidth, height=7.8cm]{../graphs/graph2.pdf}
 \label{fig:plots2}
 \end{center}
 \end{figure}
@@ -952,6 +952,7 @@ extract_coefs <- function(mod, modnam) {
              "Method: Panel",
              "Method: IV",
              "Method: RDD",
+             "Legislature: Mixed",
              "Legislature: Unicameral"), 
              nams2 = c("intrcpt", 
                        "indepvar2logN", 
@@ -962,11 +963,30 @@ extract_coefs <- function(mod, modnam) {
                        "methodPANEL", 
                        "methodIV", 
                        "methodRDD",
-                       "instdesign2Unicameral"))
+                       "instdesignMixed",
+                       "instdesignUnicameral"))
   dfr <- left_join(aux, dfr) %>%
     mutate_if(is.numeric, list(~round(., digits = 4)))
   dfr$nams2 <- NULL
   return(dfr)
+}
+
+gcf <- function(mod, pos) {
+  x <- mod$est[pos]
+  y <- mod$pval[pos]
+  if(!is.na(x)) {
+    return(paste0(round(x, digits = 3), strep(y)))
+  } else {
+    return('')
+  }
+}
+gcf2 <- function(mod, pos) {
+  x <- mod$se[pos]
+  if(!is.na(x)) {
+    return(paste0('(', round(x, digits = 3), ')'))
+  } else {
+    return('')
+  }
 }
 
 # Expenditure per capita - Restricted
@@ -974,7 +994,7 @@ mod <-  rma(yi = coef,
               sei = SE,
               data = dat,
               method = "REML",
-              mods = ~indepvar2+year+published+elecsys2+method+instdesign2,
+              mods = ~indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
             subset = dat$depvar2=='ExpPC',
             slab = dat$authoryear,
@@ -987,7 +1007,7 @@ mod <- rma(yi = coef,
               sei = SE,
               data = fulldat,
               method = "REML",
-              mods = ~ ~indepvar2+year+published+elecsys2+method+instdesign2,
+              mods = ~ ~indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
             subset = fulldat$depvar2=='ExpPC',
             slab = fulldat$authoryear)
@@ -999,7 +1019,7 @@ mod <- rma(yi = coef,
               sei = SE,
               data = dat,
               method = "REML",
-              mods = ~indepvar2+year+published+elecsys2+method+instdesign2,
+              mods = ~indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
             subset = dat$depvar2=='logExpPC',
             slab = dat$authoryear)
@@ -1011,7 +1031,7 @@ mod <- rma(yi = coef,
               sei = SE,
               data = fulldat,
               method = "REML",
-              mods = ~ ~indepvar2+year+published+elecsys2+method+instdesign2,
+              mods = ~ ~indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
             subset = fulldat$depvar2=='logExpPC',
             slab = fulldat$authoryear)
@@ -1024,7 +1044,7 @@ mod <-  rma.mv(yi = coef,
               data = dat,
               method = "REML",
               random = ~ 1 | id_level1/id_level2, 
-              mods = ~indepvar2+year+published+elecsys2+method+instdesign2,
+              mods = ~indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
               sparse = TRUE,
               tdist = TRUE,
@@ -1038,7 +1058,7 @@ mod <- rma(yi = coef,
               sei = SE,
               data = fulldat,
               method = "REML",
-              mods = ~indepvar2+year+published+elecsys2+method+instdesign2,
+              mods = ~indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
             subset = fulldat$depvar2=='PCTGDP',
             slab = fulldat$authoryear)
@@ -1050,7 +1070,7 @@ mod <- rma.mv(yi = coef,
               data = dat,
               method = "REML",
               random = ~ 1 | id_level1/id_level2, 
-              mods = ~depvar2+indepvar2+year+published+elecsys2+method+instdesign2,
+              mods = ~depvar2+indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
               tdist = TRUE,
               sparse = TRUE,
@@ -1063,31 +1083,13 @@ mod <- rma.mv(yi = coef,
               data = fulldat,
               method = "REML",
               random = ~ 1 | id_level1/id_level2, 
-              mods = ~depvar2+indepvar2+year+published+elecsys2+method+instdesign2,
+              mods = ~depvar2+indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
               tdist = TRUE,
               sparse = TRUE,
               slab = fulldat$authoryear)
 
 res[[8]] <- extract_coefs(mod, "Full Model - All coefs")
-gcf <- function(mod, pos) {
-  x <- mod$est[pos]
-  y <- mod$pval[pos]
-  if(!is.na(x)) {
-    return(paste0(round(x, digits = 3), strep(y)))
-  } else {
-    return('')
-  }
-}
-gcf2 <- function(mod, pos) {
-  # round(res[[3]][2,3],3)`)`r strep(res[[3]][2,5])`
-  x <- mod$se[pos]
-  if(!is.na(x)) {
-    return(paste0('(', round(x, digits = 3), ')'))
-  } else {
-    return('')
-  }
-}
 ```
 
 \vspace{0.5cm}

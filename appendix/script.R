@@ -1,7 +1,7 @@
 #####################################################################################
 ## R code for "The Effect of Legislature Size on Public Spending: A Meta-Analysis" ##
 ## Huzeyfe Alptekin, Danilo Freire, Umberto Mignozzetti, and Catarina Roman        ##
-## May 2021                                                                        ##
+## June 2021                                                                       ##
 #####################################################################################
 
 ## Install and load required packages
@@ -226,7 +226,6 @@ build_forest_het <- function(dat, coef, v, slab, capt, lsize = 22, ttl = NULL, h
   return(p)
 }
 
-
 ## Load datasets
 load("../dataset/dataCoefs.RData")
 
@@ -270,7 +269,7 @@ dat %>%
 dat %>%
   select(id, elecsys2) %>%
   unique() %>%
-  ggplot(aes(x=as.factor(elecsys2))) +
+  ggplot(aes(x = as.factor(elecsys2))) +
     geom_bar(color = "black") +
   labs(x = "Electoral Systems",
        y = "") +
@@ -281,13 +280,13 @@ dat %>%
   select(id, depvar2) %>%
   unique() %>%
   mutate(depvar2 = factor(depvar2,
-                          labels = c("Per Capita Expenditure",
-                                     "Percentage GDP Government Expenditure",
-                                     "Log Per Capita Expenditure"))) %>%
+                          labels = c("Expenditure Per Capita",
+                                     "Expenditure as Percentage GDP",
+                                     "Log Expenditure Per Capita"))) %>%
   ggplot(aes(x = depvar2)) +
     geom_bar(color = "black") +
   labs(x = "",
-       y = "Dependent Variables") +
+       y = "") +
   coord_flip() +
   theme_bw()
 
@@ -295,14 +294,15 @@ dat %>%
 dat %>%
   select(id, indepvar2) %>%
   unique() %>%
-  mutate(indepvar2 = factor(indepvar2, labels = c("K (upper house legislators)",
-                                                  "Log N",
-                                                  "N (lower house legislators)"
+  mutate(indepvar2 = factor(indepvar2, 
+                            labels = c("Upper Chamber Size",
+                                       "Log of Lower Chamber Size",
+                                       "Lower Chamber Size"
                                                   ))) %>%
   ggplot(aes(x = indepvar2)) +
     geom_bar(color = "black") +
   labs(x = "",
-       y = "Independent Variables") +
+       y = "") +
   coord_flip() +
   theme_bw()
 
@@ -332,14 +332,21 @@ dat %>%
 ## Descriptive Statistics of Moderators
 fulldat$usemeta2 <- factor(fulldat$usemeta)
 levels(fulldat$usemeta2) <- c("Extended Sample", "Main Sample")
-aux <- select(fulldat, usemeta2, indepvar2, elecsys2, method,
-              year, published) %>%
+aux <- select(fulldat, usemeta2, indepvar2, year, published, method,
+              instdesign, elecsys2) %>%
+  mutate(indepvar2 = recode(indepvar2,
+                            `N` = "Lower Chamber Size",
+                            `K` = "Upper Chamber Size",
+                            `logN` = "Log of Lower Chamber Size"),
+         elecsys2 = recode(elecsys2,
+                           `Non-Maj` = "Non-Majoritarian",
+                           `Maj` = "Majoritarian")) %>%
   rename(`Independent Variables` = indepvar2,
-         `Electoral system`      = elecsys2,
-         `Estimation method`     = method,
          `Year`                  = year,
-         `Published work`        = published)
-
+         `Published work`        = published,
+         `Estimation method`     = method,
+         `Institutional Design`  = instdesign,
+         `Electoral system`      = elecsys2)
 export2md(descrTable(~.-usemeta2, aux, y = aux$usemeta2,
                         show.p.overall = F, show.all = T),
           caption = "Descriptive Statistics of Moderators",
@@ -347,25 +354,52 @@ export2md(descrTable(~.-usemeta2, aux, y = aux$usemeta2,
 
 ## Binomial Tests for Coefficient Signs
 
-# For the number of legislators in the lower house ($N$), the results follow below.
+# For the number of legislators in the lower house, the results follow below.
 aux <- filter(dat, indepvar2 == "N")
 aux2 <- binom.test(table(aux$scoef)[2], sum(table(aux$scoef)), p = 0.5)
 pander(tidy(aux2)[,-c(2,4,5,6)][,c(3,4,1,2)])
 
-# For the log of the number of legislators in the lower house ($\log(N)$), the results are as follows:
+# For the log of the number of legislators in the lower house, the results are as follows:
 aux <- filter(dat, indepvar2 == "logN")
 aux2 <- binom.test(table(aux$scoef)[2], sum(table(aux$scoef)), p = 0.5)
 pander(tidy(aux2)[,-c(2,4,5,6)][,c(3,4,1,2)])
 
-# Finally, for the number of legislators in the upper house ($K$), the results are:
+# For the number of legislators in the upper house, the results are:
 aux <- filter(dat, indepvar2=='K')
 aux2 <- binom.test(table(aux$scoef)[2], sum(table(aux$scoef)), p=0.5)
 pander(tidy(aux2)[,-c(2,4,5,6)][,c(3,4,1,2)])
 
+# Unicameral vesus non-unicameral systems:
+aux <- list()
+aux[[1]] <- filter(dat, indepvar2 == "N", instdesign2 == 'Unicameral')
+aux[[2]] <- filter(dat, indepvar2 == "N", instdesign2 != 'Unicameral')
+aux[[3]] <- filter(dat, indepvar2 == "logN", instdesign2 == 'Unicameral')
+aux[[4]] <- filter(dat, indepvar2 == "logN", instdesign2 != 'Unicameral')
+aux[[1]] <- binom.test(table(aux[[1]]$scoef)[2],
+                       sum(table(aux[[1]]$scoef)), p = 0.5)
+aux[[2]] <- binom.test(table(aux[[2]]$scoef)[2],
+                       sum(table(aux[[2]]$scoef)), p = 0.5)
+aux[[3]] <- binom.test(table(aux[[3]]$scoef)[2],
+                       sum(table(aux[[3]]$scoef)), p = 0.5)
+aux[[4]] <- binom.test(table(aux[[4]]$scoef)[2],
+                       sum(table(aux[[4]]$scoef)), p = 0.5)
+aux2 <- tidy(aux[[1]])[,-c(2,4,5,6)][,c(3,4,1,2)]
+aux2 <- bind_rows(aux2, tidy(aux[[2]])[,-c(2,4,5,6)][,c(3,4,1,2)])
+aux2 <- bind_rows(aux2, tidy(aux[[3]])[,-c(2,4,5,6)][,c(3,4,1,2)])
+aux2 <- bind_rows(aux2, tidy(aux[[4]])[,-c(2,4,5,6)][,c(3,4,1,2)])
+aux2 <- aux2 %>%
+  mutate(`Indep. Variable` = c('Lower House Size', 'Lower House Size',
+                               'Log of Lower House Size', 'Log of Lower House Size'),
+         `Legislative Inst.` = c('Unicameral', 'Non-unicameral',
+                                 'Unicameral', 'Non-unicameral')) %>%
+  relocate(`Indep. Variable`, `Legislative Inst.`, .before = method)
+aux2$method <- NULL
+aux2$alternative <- NULL
+pander(aux2)
+
 ## Meta-Analysis
 
 # Lower House Size and Expenditure per Capita
-# Pooling effects analysis -- ExpPC x N
 aux <- dat %>%
   filter(indepvar2 == 'N',
          depvar2 == 'ExpPC')
@@ -378,15 +412,19 @@ mod <- rma.mv(coef, VAR, data=aux,
           method = "REML")
 mod
 build_forest(mod, NULL)
-f1 <- build_forest(mod, NULL, lsize = 15, ttl = 'Lower House Size\nand Expenditure per Capita')
+f1 <- build_forest(mod, NULL, lsize = 15, ttl = '1.1 - Lower Chamber Size\nand Expenditure Per Capita')
 funnel(mod)
 
 # Electoral System Subgroup Analysis
 build_forest_het(aux, aux$coef, aux$VAR, slab = aux$authoryear,
                  capt = NULL, hetvar = aux$elecsys2)
+                 capt = NULL, hetvar = aux$elecsys2)
+
+# Institutional Design Subgroup Analysis
+build_forest_het(aux, aux$coef, aux$VAR, slab = aux$authoryear,
+                 capt = NULL, hetvar = aux$instdesign2)
 
 # Upper House Size and Expenditure per Capita
-# Pooling effects analysis -- ExpPC x K
 aux <- dat %>%
   filter(indepvar2 == 'K',
          depvar2 == 'ExpPC')
@@ -400,10 +438,9 @@ mod <- rma.mv(coef, VAR, data=aux,
 mod
 build_forest(mod, NULL)
 funnel(mod)
-f2 <- build_forest(mod, NULL, 15, ttl = 'Upper House Size\nand Expenditure Per Capita')
+f2 <- build_forest(mod, NULL, 15, ttl = '1.6 - Upper Chamber Size\nand Expenditure Per Capita')
 
 # Lower House Size and Log Expenditure Per Capita
-# Pooling effects analysis -- logExpPC x N
 aux <- dat %>%
   filter(indepvar2 == 'N',
          depvar2 == 'logExpPC')
@@ -417,10 +454,9 @@ mod <- rma.mv(coef, VAR, data=aux,
 mod
 build_forest(mod, NULL)
 funnel(mod)
-f3 <- build_forest(mod, NULL, 15, ttl = 'Lower House Size\nand Log Expenditure Per Capita')
+f3 <- build_forest(mod, NULL, 15, ttl = '1.2 - Lower Chamber Size\nand Log Expenditure Per Capita')
 
 # Log of Lower House Size and Log of Expenditure Per Capita
-# Pooling effects analysis -- logExpPC x logN
 aux <- dat %>%
   filter(indepvar2 == 'logN',
          depvar2 == 'logExpPC')
@@ -434,10 +470,9 @@ mod <- rma.mv(coef, VAR, data=aux,
 mod
 build_forest(mod, NULL)
 funnel(mod)
-f4  <- build_forest(mod, NULL, 15, ttl = 'Log of Lower House Size\nand Log of Expenditure Per Capita')
+f4  <- build_forest(mod, NULL, 15, ttl = '1.4 - Log Lower Chamber Size\nand Log Expenditure Per Capita')
 
 # Lower House Size and Expenditure as Percentage of GDP
-# Pooling effects analysis -- PCTGDP x N
 aux <- dat %>%
   filter(indepvar2 == 'N',
          depvar2 == 'PCTGDP')
@@ -451,10 +486,9 @@ mod <- rma.mv(coef, VAR, data=aux,
 mod
 build_forest(mod, NULL)
 funnel(mod)
-f5 <- build_forest(mod, NULL, 15, ttl = 'Lower House Size\nand Expenditure as Percentage of GDP')
+f5 <- build_forest(mod, NULL, 15, ttl = '1.3 - Lower Chamber Size\nand Expenditure as Percentage of GDP')
 
 # Log Lower House Size and Expenditure as Percentage of GDP
-# Pooling effects analysis -- PCTGDP x logN
 aux <- dat %>%
   filter(indepvar2 == 'logN',
          depvar2 == 'PCTGDP')
@@ -469,10 +503,9 @@ mod <- rma.mv(coef, VAR, data=aux,
 mod
 build_forest(mod, NULL)
 funnel(mod)
-f6 <- build_forest(mod, NULL, 15, ttl = 'Log Lower House Size\nand Expenditure as Percentage of GDP')
+f6 <- build_forest(mod, NULL, 15, ttl = '1.5 - Log Lower Chamber Size\nand Expenditure as Percentage of GDP')
 
 # Upper House Size and Expenditure as Percentage of GDP
-# Pooling effects analysis -- PCTGDP x K
 aux <- dat %>%
   filter(indepvar2 == 'K',
          depvar2 == 'PCTGDP')
@@ -486,10 +519,9 @@ mod <- rma.mv(coef, VAR, data=aux,
 mod
 build_forest(mod, NULL)
 funnel(mod)
-f7 <- build_forest(mod, NULL, 15, ttl = 'Upper House Size\nand Expenditure as Percentage of GDP')
+f7 <- build_forest(mod, NULL, 15, ttl = '1.7 - Upper Chamber Size\nand Expenditure as Percentage of GDP')
 
 # Lower House Size and Expenditure per Capita (IV)
-# Pooling effects analysis -- ExpPC x N (IV only)
 aux <- dat %>%
   filter(indepvar2 == 'N',
          depvar2 == 'ExpPC',
@@ -538,7 +570,6 @@ build_forest_het(aux, aux$coef, aux$VAR, slab = aux$authoryear,
                  capt = NULL, hetvar = aux$method)
 
 # Lower House Size and Log of Expenditure per Capita (RDD)
-# Pooling effects analysis -- logExpPC x N (RDD only)
 aux <- dat %>%
   filter(indepvar2 == 'N',
          depvar2 == 'logExpPC',
@@ -580,7 +611,6 @@ dev.off()
 ## Meta-Analysis (All Coefficients)
 
 # Lower House Size and Expenditure Per Capita
-# Pooling effects analysis -- ExpPC x N
 aux <- fulldat %>%
   filter(indepvar2 == 'N',
          depvar2 == 'ExpPC')
@@ -600,7 +630,6 @@ build_forest_het(aux, aux$coef, aux$VAR, slab = aux$authoryear,
                  capt = NULL, hetvar = aux$elecsys2)
 
 # Upper House Size and Expenditure Per Capita
-# Pooling effects analysis -- ExpPC x K
 aux <- fulldat %>%
   filter(indepvar2 == 'K',
          depvar2 == 'ExpPC')
@@ -616,7 +645,6 @@ build_forest(mod, NULL)
 funnel(mod)
 
 # Lower House Size and Log of Expenditure Per Capita
-# Pooling effects analysis -- logExpPC x N
 aux <- fulldat %>%
   filter(indepvar2 == 'N',
          depvar2 == 'logExpPC')
@@ -632,7 +660,6 @@ build_forest(mod, NULL)
 funnel(mod)
 
 # Log of Lower House Size and Log of Expenditure Per Capita
-# Pooling effects analysis -- logExpPC x logN
 aux <- fulldat %>%
   filter(indepvar2 == 'logN',
          depvar2 == 'logExpPC')
@@ -648,7 +675,6 @@ build_forest(mod, NULL)
 funnel(mod)
 
 # Lower House Size and Expenditure as Percentage of GDP
-# Pooling effects analysis -- PCTGDP x N
 aux <- fulldat %>%
   filter(indepvar2 == 'N',
          depvar2 == 'PCTGDP')
@@ -664,7 +690,6 @@ build_forest(mod, NULL)
 funnel(mod)
 
 # Log of Lower House Size and Expenditure as Percentage of GDP
-# Pooling effects analysis -- PCTGDP x logN
 aux <- fulldat %>%
   filter(indepvar2 == 'logN',
          depvar2 == 'PCTGDP')
@@ -680,7 +705,6 @@ build_forest(mod, NULL)
 funnel(mod)
 
 # Upper House Size and Expenditure as Percentage of GDP
-# Pooling effects analysis -- PCTGDP x K
 aux <- fulldat %>%
   filter(indepvar2 == 'K',
          depvar2 == 'PCTGDP')
@@ -696,7 +720,6 @@ build_forest(mod, NULL)
 funnel(mod)
 
 # Lower House Size and Expenditure per Capita (IV)
-# Pooling effects analysis -- ExpPC x N (IV only)
 aux <- fulldat %>%
   filter(indepvar2 == 'N',
          depvar2 == 'ExpPC',
@@ -713,7 +736,6 @@ build_forest(mod, NULL)
 funnel(mod)
 
 # Lower House Size and Log of Expenditure per Capita (RDD)
-# Pooling effects analysis -- ExpPC x N
 aux <- fulldat %>%
   filter(indepvar2 == 'N',
          depvar2 == 'logExpPC',
@@ -823,7 +845,7 @@ mod <- rma.mv(yi = coef,
             slab = fulldat$authoryear)
 summary(mod)
 
-## Robustness: Meta-Regressions (All Coefficients)
+## Meta-Regressions (All Coefficients)
 # Restricted Sample
 mod <- rma.mv(yi = coef,
               V = VAR,
