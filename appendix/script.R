@@ -1,6 +1,5 @@
 #####################################################################################
 ## R code for "The Effect of Legislature Size on Public Spending: A Meta-Analysis" ##
-## Huzeyfe Alptekin, Danilo Freire, Umberto Mignozzetti, and Catarina Roman        ##
 ## June 2021                                                                       ##
 #####################################################################################
 

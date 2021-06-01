@@ -2,13 +2,7 @@
 title:  |
         | The Effect of Legislature Size on Public Spending:
         | A Meta-Analysis
-author: 
-  - Huzeyfe Alptekin[^huzeyfe]
-  - Danilo Freire[^danilo]
-  - Umberto Mignozzetti[^umberto]
-  - Catarina Roman[^catarina]
 date: \today
-thanks: "The authors thank Guilherme Duarte, Robert Myles McDonnell, and David Skarbek for their constructive feedback. We also thank Cedric Antunes, Luis Castro, Giovanna França, Julia Oriente, and Lucas Mingardi for their excellent research assistance. Replication materials are available at <https://github.com/danilofreire/legislature-size-meta-analysis>. We kindly acknowledge funding from the São Paulo State Science Foundation (FAPESP grant number 2018/00646-1)."
 abstract: "In a seminal article, @weingast1981political argue that there is a positive relationship between legislature size and inefficiency in public expenditures. Their proposition is currently known as the \"law of $1/n$\" and has been widely debated in political science and public administration. However, recent studies have questioned the validity of the theory. In this letter, we conduct the first meta-analysis that assesses the generality of the \"law of $1/n$\". Based on a sample of 30 articles, we find no robust evidence for the effect of legislature size on government budgets. Yet the aggregate results show significant heterogeneity. We find moderate support for the \"law of $1/n$\" in unicameral legislatures and in the upper house, but panel/fixed-effects models and regression discontinuity designs reduce public spending estimates. Our results also indicate that proportional representation systems are no more likely to overspend than majoritarian ones."
 abstractspacing: double
 keywords: distributive politics; law of $1/n$; legislature size; meta-analysis; public spending
@@ -219,14 +213,6 @@ build_forest_het <- function(mod, capt, lsize = 22, ttl = NULL, hetvar = NULL) {
   return(p)
 }
 ```
-
-[^huzeyfe]: Independent Researcher, <huzeyfealptekin@gmail.com>.
-
-[^danilo]: Senior Lecturer, School of Social and Political Sciences, University of Lincoln, <danilofreire@gmail.com>, <https://danilofreire.github.io>. 
-
-[^umberto]: Visiting Assistant Professor, Quantitative Theory and Methods Department, Emory University, <umberto.mignozzetti@emory.edu>, <http://umbertomig.com>. Corresponding author.
-
-[^catarina]: PhD Student, Department of Political Science, University of California San Diego, <catarinamroman@gmail.com>, <http://catarinaroman.github.io>.
 
 \newpage
 
