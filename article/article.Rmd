@@ -318,21 +318,17 @@ leads to lower public spending [@debenedetto2018effect; @hohmann2017effect;
 possible that methodological choices partially explain the divergent results
 observed in the literature, as articles that use RDDs consistently point to the
 same direction. One limitation of this finding is that these studies only test
-the impact of lower house size on the natural logarithm of expenditure per
+the impact of lower house size and its natural logarithm on the natural logarithm of expenditure per
 capita, thus it remains unclear whether the results hold with other variables.
 
 The meta-regressions provide additional evidence that our study sample is
 highly heterogeneous and that effect sizes differ substantially according to
 study specifications. When using an extended sample of `r dim(fulldat)[1]`
 coefficients, we find that unicameralism is associated with higher public
-spending, as predicted by the "law of $1/n$". Since most unicameral
-legislatures in our sample are local governments (municipalities or districts),
-this result supports the predictions of @weingast1981political. Moreover,
-our meta-regressions indicate that larger upper chambers spend more in terms of
+spending, as predicted by the "law of $1/n$". Moreover,
+one of our meta-regressions indicates that larger upper chambers spend more in terms of
 per capita expenditure than lower chambers, a result that also appears in the
-binomial tests. Non-majoritarian voting systems decrease government spending as
-a percentage of GDP, but they do not have a relevant impact on the other
-measures of public expenditure, following the idea that the $1/n$ effect grows
+binomial tests. Overall, non-majoritarian voting systems seem to decrease government spending, following the idea that the $1/n$ effect grows
 weaker as the empirical cases distance from the original definition of the law.
 Finally, meta-regression results confirm that regression discontinuity designs
 reduce public spending estimates.
@@ -369,7 +365,7 @@ logarithm of upper chamber size in their models.}.
 In the second round, we did not require articles to cite @weingast1981political
 and used a keyword-based query on Google Scholar to broaden the scope of the
 first search. The search string contained terms strongly associated with the
-literature on the "law of $1/n$" and was as follows: `("upper chamber size" OR
+literature on the "law of $1/n$" and it was as follows: `("upper chamber size" OR
 "lower chamber size" OR "council size" OR "parliament size" OR "legislature
 size" OR "number of legislators" OR "legislative size") AND ("spending" OR
 "expenditure" OR "government size")`. We again restricted the search to
@@ -470,9 +466,9 @@ of $1/n$" was first formulated in 1981, the empirical assessment of the theory
 only started a few years later, as dates of publishing range from `r min(dat$year)`
 to `r max(dat$year)`. Most studies focus on the United States (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='USA')])`), but our sample also contains
 papers on Australia (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='AUS')])`), Brazil (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='BRA')])`), Germany (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='DEU')])`), Indonesia (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='IDN')])`), Italy (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='ITA')])`), and
-Switzerland (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='CHE')])`). Eight articles use cross-national data and analyse from 2 to 110
+Switzerland (`r as.numeric(table(unique(dat[,c('id','locationISO')])$locationISO)[which(names(table(unique(dat[,c('id','locationISO')])$locationISO))=='CHE')])`). Seven articles use cross-national data and analyse from 2 to 110
 countries. Early studies used OLS and panel data methods to estimate the
-results, while studies from 2012 onward have also applied causal inference
+results, while studies from 2005 onward have also applied causal inference
 models such as instrumental variables and regression discontinuity designs to
 test the relationship between house size and public spending.
 
@@ -549,9 +545,8 @@ from the optimal bandwidth or from the intermediate one. This sample
 encompasses `r dim(dat)[1]` estimates, as 
 `r as.numeric(sum(table(table(dat$id))[-1]))` articles analysed two dependent or
 independent variables of interest\footnote{The papers that used more than one
-dependent or independent variable of interest are \citet{baqir1999districts,
-bjedov2014impact, bradbury2001legislative, chen2007law, crowley2019law,
-erler2007termlimits, gilligan2001fiscal, lee2016supermajority, lee2018court,
+dependent or independent variable of interest are \citet{bjedov2014impact, bradbury2001legislative, chen2007law, crowley2019law,
+erler2007termlimits, gilligan2001fiscal, lee2015supermajority, lee2016supermajority, lee2018court,
 maldonado2013legislatures, primo2006stop, ricciuti2003trading,
 ricciuti2004legislatures}.}. Our second sample, in contrast, contains all the
 `r dim(fulldat)[1]` effect sizes reported in the `r length(unique(dat$id))`
@@ -566,7 +561,7 @@ ID for each paper, and another indicating the data source used in the original
 study. By adding these two levels, we account for within- and between-study
 variation, thus removing these sources of effect size dependency and improving
 the accuracy of the results. More information about the multilevel models can
-be found in Section H of the Supplementary Material. 
+be found in Section H.1 of the Supplementary Material. 
 
 We use Hedges' $g$ to calculate effect sizes in our meta-analysis
 [@hedges1981distribution]. While there are other methods to standardise
@@ -947,8 +942,8 @@ extract_coefs <- function(mod, modnam) {
              "Indepvar: logN",
              "Indepvar: N",
              "Year",
-             "Elecsys: Non-Majoritarian",
              "Published",
+             "Elecsys: Non-Majoritarian",
              "Method: Panel",
              "Method: IV",
              "Method: RDD",
@@ -975,7 +970,7 @@ gcf <- function(mod, pos) {
   x <- mod$est[pos]
   y <- mod$pval[pos]
   if(!is.na(x)) {
-    return(paste0(round(x, digits = 3), strep(y)))
+    return(paste0(format(round(x, digits = 3), nsmall = 3), strep(y)))
   } else {
     return('')
   }
@@ -983,63 +978,14 @@ gcf <- function(mod, pos) {
 gcf2 <- function(mod, pos) {
   x <- mod$se[pos]
   if(!is.na(x)) {
-    return(paste0('(', round(x, digits = 3), ')'))
+    return(paste0('(', format(round(x, digits = 3), nsmall = 3), ')'))
   } else {
     return('')
   }
 }
 
 # Expenditure per capita - Restricted
-mod <-  rma(yi = coef,
-              sei = SE,
-              data = dat,
-              method = "REML",
-              mods = ~indepvar2+year+published+elecsys2+method+instdesign,
-              test = "knha",
-            subset = dat$depvar2=='ExpPC',
-            slab = dat$authoryear,
-            control=list(maxiter=1000))
-
-res[[1]] <- extract_coefs(mod, "ExpPC")
-
-# Expenditure per capita - Extended
-mod <- rma(yi = coef,
-              sei = SE,
-              data = fulldat,
-              method = "REML",
-              mods = ~ ~indepvar2+year+published+elecsys2+method+instdesign,
-              test = "knha",
-            subset = fulldat$depvar2=='ExpPC',
-            slab = fulldat$authoryear)
-
-res[[2]] <- extract_coefs(mod, "ExpPC - All coefs")
-
-# Log of Expenditure per capita - Restricted
-mod <- rma(yi = coef,
-              sei = SE,
-              data = dat,
-              method = "REML",
-              mods = ~indepvar2+year+published+elecsys2+method+instdesign,
-              test = "knha",
-            subset = dat$depvar2=='logExpPC',
-            slab = dat$authoryear)
-
-res[[3]] <- extract_coefs(mod, "logExpPC")
-
-# Log of Expenditure per capita - Extended
-mod <- rma(yi = coef,
-              sei = SE,
-              data = fulldat,
-              method = "REML",
-              mods = ~ ~indepvar2+year+published+elecsys2+method+instdesign,
-              test = "knha",
-            subset = fulldat$depvar2=='logExpPC',
-            slab = fulldat$authoryear)
-
-res[[4]] <- extract_coefs(mod, "logExpPC - All coefs")
-
-## Expenditure as percentage GDP -- Restricted
-mod <-  rma.mv(yi = coef,
+mod <- rma.mv(yi = coef,
               V = VAR,
               data = dat,
               method = "REML",
@@ -1048,18 +994,81 @@ mod <-  rma.mv(yi = coef,
               test = "knha",
               sparse = TRUE,
               tdist = TRUE,
+              subset = dat$depvar2=='ExpPC',
+              slab = dat$authoryear)
+
+res[[1]] <- extract_coefs(mod, "ExpPC")
+
+# Expenditure per capita - Extended
+mod <- rma.mv(yi = coef,
+              V = VAR,
+              data = fulldat,
+              method = "REML",
+              random = ~ 1 | id_level1/id_level2, 
+              mods = ~indepvar2+year+published+elecsys2+method+instdesign,
+              test = "knha",
+              tdist = TRUE,
+              sparse = TRUE,
+              subset = fulldat$depvar2=='ExpPC',
+              slab = fulldat$authoryear)
+
+res[[2]] <- extract_coefs(mod, "ExpPC - All coefs")
+
+# Log of Expenditure per capita - Restricted
+mod <- rma.mv(yi = coef,
+              V = VAR,
+              data = dat,
+              method = "REML",
+              random = ~ 1 | id_level1/id_level2, 
+              mods = ~indepvar2+year+published+elecsys2+method+instdesign,
+              test = "knha",
+              tdist = TRUE,
+              sparse = TRUE,
+              subset = dat$depvar2=='logExpPC',
+              slab = dat$authoryear)
+
+res[[3]] <- extract_coefs(mod, "logExpPC")
+
+# Log of Expenditure per capita - Extended
+mod <- rma.mv(yi = coef,
+              V = VAR,
+              data = fulldat,
+              method = "REML",
+              random = ~ 1 | id_level1/id_level2, 
+              mods = ~indepvar2+year+published+elecsys2+method+instdesign,
+              test = "knha",
+              tdist = TRUE,
+              sparse = TRUE,
+              subset = fulldat$depvar2=='logExpPC',
+              slab = fulldat$authoryear)
+
+res[[4]] <- extract_coefs(mod, "logExpPC - All coefs")
+
+## Expenditure as percentage GDP -- Restricted
+mod <- rma.mv(yi = coef,
+              V = VAR,
+              data = dat,
+              method = "REML",
+              random = ~ 1 | id_level1/id_level2, 
+              mods = ~indepvar2+year+published+elecsys2+method+instdesign,
+              test = "knha",
+              tdist = TRUE,
+              sparse = TRUE,
               subset = dat$depvar2=='PCTGDP',
               slab = dat$authoryear)
 
 res[[5]] <- extract_coefs(mod, "PCTGDP")
 
 ## Expenditure as percentage GDP -- Extended
-mod <- rma(yi = coef,
-              sei = SE,
+mod <- rma.mv(yi = coef,
+              V = VAR,
               data = fulldat,
               method = "REML",
+              random = ~ 1 | id_level1/id_level2, 
               mods = ~indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
+              tdist = TRUE,
+              sparse = TRUE,
             subset = fulldat$depvar2=='PCTGDP',
             slab = fulldat$authoryear)
 
@@ -1136,7 +1145,7 @@ Year &
 `r gcf2(res[[5]], 4)` & `r gcf2(res[[6]], 4)` & 
 `r gcf2(res[[7]], 4)` & `r gcf2(res[[8]], 4)` \\
 %
-Non-Majoritarian & 
+Published: Yes & 
 `r gcf(res[[1]], 5)` & `r gcf(res[[2]], 5)` & 
 `r gcf(res[[3]], 5)` & `r gcf(res[[4]], 5)` & 
 `r gcf(res[[5]], 5)` & `r gcf(res[[6]], 5)` &
@@ -1146,7 +1155,7 @@ Non-Majoritarian &
 `r gcf2(res[[5]], 5)` & `r gcf2(res[[6]], 5)` & 
 `r gcf2(res[[7]], 5)` & `r gcf2(res[[8]], 5)` \\
 %
-Published: Yes & 
+Non-Majoritarian & 
 `r gcf(res[[1]], 6)` & `r gcf(res[[2]], 6)` & 
 `r gcf(res[[3]], 6)` & `r gcf(res[[4]], 6)` & 
 `r gcf(res[[5]], 6)` & `r gcf(res[[6]], 6)` &
@@ -1219,7 +1228,7 @@ Intercept &
 \end{tabular}
 \begin{minipage}{\textwidth}
 \renewcommand{\footnoterule}{}
-\footnotetext{\textbf{Note:} {The restricted and extended samples include `r length(dat$id)` and `r length(fulldat$id)` study coefficients, respectively. We report the results from the permutation tests. Reference categories: Independent Variable $=$ Upper House Size; Published $=$ No; Method $=$ OLS, Inst. Design $=$ Bicameral. Significance codes: *** $p < 0.01$; ** $p < 0.05$; * $p < 0.10$. Blank cells mean that there is no sufficient data to estimate the paramater.}}
+\footnotetext{\textbf{Note:} {The restricted and extended samples include `r length(dat$id)` and `r length(fulldat$id)` study coefficients, respectively. We report the results from the permutation tests. Reference categories: Independent Variable $=$ Upper House Size; Published $=$ No; Method $=$ OLS, Inst. Design $=$ Bicameral. Significance codes: *** $p < 0.01$; ** $p < 0.05$; * $p < 0.10$. Blank cells mean that there is no sufficient data to estimate the parameter.}}
 \end{minipage}
 \end{table}
 ```
@@ -1236,26 +1245,23 @@ find larger effects than older ones.
 
 The third and fourth columns use the natural logarithm of expenditure per
 capita as the dependent variable. Among the coefficients in the restricted
-sample, those in published studies are significantly smaller than those in
+sample, those in published studies tend to be smaller than those in
 working papers\footnote{We find no evidence of publication bias in our models.
 The funnel plots for all estimations are available Sections H and I of the
 Supplementary Material.}. Another two moderators are negatively associated with
-the outcome in our larger study pool. They both refer to estimation methods.
+the outcome in our larger coefficient pool. They both refer to estimation methods.
 Studies that employ panel/fixed effects or regression discontinuity designs
 (RDDs) have lower coefficients for log expenditure per capita if we take OLS as
-the reference category. 
+the reference category.
 
-Three variables are statistically significant in the third set of
+Three estimates are statistically significant in the third set of
 meta-regressions, which include public expenditure as a percentage of GDP as
 the dependent variable. Both in our restricted and in our extended samples,
 recent studies have smaller coefficients than older papers, which stands in
 contrast with the first model. Moreover, institutional design also affects
 outcomes. Papers that use mixed samples of bicameral and unicameral systems
 report significantly lower coefficients than those that analyse bicameral
-legislatures exclusively. Non-majoritarian electoral systems are also
-associated with lower levels of public spending, which may be justified since
-the "law of $1/n$" was conceived for majoritarian voting. These latter results,
-however, do not replicate in the first set of estimations.
+legislatures exclusively. Non-majoritarian electoral systems, a category that encompasses proportional representation and mixed systems, may have a positive effect on the "law of $1/n$", but the estimate only borders on statistical significance.
 
 The last two columns report meta-regressions that aggregate all selected
 studies. In the restricted sample of coefficients, unicameralism has a positive
@@ -1263,9 +1269,10 @@ effect. This result holds for the extended sample as well. When we regress all
 `r dim(fulldat)[1]` coefficients, the effects of estimation methods become
 stronger once again. Panel/fixed-effects models and regression discontinuity
 designs both significantly decrease the $1/n$ effect. Instrumental variable
-models follow along these lines. Additionally, non-majoritarian voting
-constituencies appear once again as settings where the "law of $1/n$" becomes
-weaker.
+models follow along these lines. Non-majoritarian electoral systems are also
+significantly associated with lower levels of public spending, which may be justified since
+the "law of $1/n$" was conceived for majoritarian voting. These latter results,
+however, do not replicate in the other sets of estimations.
 
 The evidence seems to be sensitive to the methodological design. Our results
 suggest that the same study samples may produce different outcomes depending on
