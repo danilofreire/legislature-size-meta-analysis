@@ -445,6 +445,7 @@ export2md2<-function(x, which.table="descr", nmax=TRUE, header.labels=c(),
     # N in the second row
     table1 <- table1[,-3]
     colnames(table1)[2] <- 'Extended Sample'
+    table1 <- table1[,c(1,3,2)]
     n.exists <- nrow(table1) > 1 && length(grep("^N=", trim(table1[1, 2])))
     if (format=="latex" & strip)
       table1[((1+n.exists):nrow(table1)),ncol(table1)] <- ifelse(table1[((1+n.exists):nrow(table1)),ncol(table1)]=="", "\\vphantom{}", table1[((1+n.exists):nrow(table1)),ncol(table1)])
@@ -837,6 +838,7 @@ aux3 <- descrTable(~.-usemeta2,
 export2md2(aux3, 
            caption = "Descriptive Statistics of Moderators", 
            format  = "latex")
+
 ```
 \normalsize
 
