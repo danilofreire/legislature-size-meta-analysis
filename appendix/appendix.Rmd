@@ -97,7 +97,7 @@ broom_mod <- function(mod, subgroup = FALSE) {
   return(mod2)
 }
 
-# Estimation of the 
+# Estimation of the heterogeneous effects
 estim_het <- function(dat, yi, v, random, slab, hetvar = NULL) {
   if (is.null(hetvar)) {
     stop('Hetvar should be different than null.')
@@ -108,11 +108,11 @@ estim_het <- function(dat, yi, v, random, slab, hetvar = NULL) {
                     test = 't', tdist = T)
   res <- tibble()
   for (i in levshetvar) {
-    partmod <- rma.mv(yi = yi, V = v, 
+    partmod <- rma.mv(yi = yi, V = v,
                       random = random,
-                      data = dat, slab = slab, 
+                      data = dat, slab = slab,
                       method = 'REML',
-                      test = 't', tdist = T, 
+                      test = 't', tdist = T,
                       subset = hetvar == i)
     partmod <- broom_mod(partmod, subgroup = T)
     partmod$byvar = i
@@ -206,11 +206,11 @@ build_forest <- function(mod, capt, lsize = 22, ttl = NULL) {
 
 # Build forest plot for heterogeneous analysis
 build_forest_het <- function(dat, coef, v, slab, capt, lsize = 22, ttl = NULL, hetvar = NULL) {
-  mod2 <- estim_het(dat = dat, 
-                    yi = coef, 
-                    v = v, 
-                    random = ~ 1 | id_level1/id_level2, 
-                    slab = slab, 
+  mod2 <- estim_het(dat = dat,
+                    yi = coef,
+                    v = v,
+                    random = ~ 1 | id_level1/id_level2,
+                    slab = slab,
                     hetvar = hetvar)
   mod2 <- data.frame(mod2)
   mod2$byvar <- toupper(mod2$byvar)
@@ -253,6 +253,333 @@ build_forest_het <- function(dat, coef, v, slab, capt, lsize = 22, ttl = NULL, h
   return(p)
 }
 
+export2md2<-function(x, which.table="descr", nmax=TRUE, header.labels=c(),
+                    caption=NULL, format="html", width=Inf,
+                    strip=FALSE, first.strip=FALSE, background="#D2D2D2",
+                    size=NULL, landscape=FALSE,
+                    header.background=NULL, header.color=NULL,
+                    position="center", ...){
+
+  trim <- function(x){
+    x <- gsub("^[ ]+","",x)
+    x <- gsub("[ ]+$","",x)
+    x
+  }
+
+  prepare <- function (x, nmax, header.labels)
+    {
+
+        # x <- tab[1:3]
+        # nmax <- TRUE
+        # header.labels <- c()
+        # names(attributes(x))
+
+        show.all <- attr(x, "show.all")
+        show.descr <- attr(x, "show.descr")
+        groups <- attr(x, "groups")
+        ny <- attr(x, "ny")
+        all.last <- attr(x, "all.last")
+
+        varnames <- attr(x, "varnames")
+        nr <- attr(x, "nr")
+        desc <- x$desc
+        avail <- x$avail
+        nmax.pos <- attr(x, "nmax.pos")
+        nmax.avail.pos <- NULL
+        if (length(nmax.pos[[1]]) == 0 & length(nmax.pos[[2]]) == 0) nmax.avail.pos <- integer(0)
+        if (length(nmax.pos[[1]]) == 0 & length(nmax.pos[[2]]) > 0) nmax.avail.pos <- nmax.pos[[2]] + 1
+        if (length(nmax.pos[[1]]) > 0 & length(nmax.pos[[2]]) == 0) nmax.avail.pos <- 1
+        if (length(nmax.pos[[1]]) > 0 & length(nmax.pos[[2]]) > 0) nmax.avail.pos <- c(1, nmax.pos[[2]])
+        if (length(nmax.avail.pos) > 0 && nmax) {
+            Nmax <- apply(avail[, nmax.avail.pos, drop = FALSE],2, function(x) max(as.double(x)))
+        } else {
+            Nmax <- NULL
+            nmax <- FALSE
+        }
+
+        dd.pos <- attr(x, "dd.pos")
+        j <- 1
+        table1 <- NULL
+        if (!is.null(attr(x, "caption")))
+            cc <- character(0)
+        for (i in 1:length(varnames)) {
+            if (nr[i] == 1) {
+                t.i <- desc[j, , drop = FALSE]
+            } else {
+                t.i <- rbind(rep(NA, ncol(desc)), desc[j:(j + nr[i] -
+                                                              1), , drop = FALSE])
+                rownames(t.i)[1] <- paste(varnames[i], ":", sep = "")
+                rownames(t.i)[-1] <- sub(varnames[i], "", rownames(t.i)[-1], fixed = TRUE)
+                rownames(t.i)[-1] <- sub(": ", "    ", rownames(t.i)[-1])
+                if (length(dd.pos) < ncol(t.i)) {
+                    t.i[1, -dd.pos] <- t.i[2, -dd.pos]
+                    t.i[2, -dd.pos] <- NA
+                }
+            }
+            table1 <- rbind(table1, t.i)
+            j <- j + nr[i]
+            if (!is.null(attr(x, "caption"))) {
+                if (attr(x, "caption")[[i]] == "")
+                    cc <- c(cc, rep("", NROW(t.i)))
+                else cc <- c(cc, attr(x, "caption")[[i]], rep("",
+                                                              NROW(t.i) - 1))
+            }
+        }
+        if (ncol(table1) == 0) table1 <- table1[-1, ]
+        if (nmax) table1 <- rbind(colnames(table1), c(paste("N=", Nmax, sep = ""), rep("", ncol(table1) - length(Nmax))), table1) else table1 <- rbind(colnames(table1), table1)
+        table1 <- ifelse(is.na(table1), "", table1)
+        if (length(header.labels)==6 && is.null(names(header.labels))){
+            names(header.labels)<-c("all","p.overall","p.trend","ratio","p.ratio","N")
+        }
+        if ("all"%in%names(header.labels)){
+            ww.all<-grep("^\\[ALL\\]",trim(table1[1,]))
+            if (length(ww.all)>0){
+                ww.all<-ww.all[1]
+                table1[1,ww.all]<-header.labels["all"]
+            }
+        }
+        if ("p.overall"%in%names(header.labels)){
+            ww.p.overall<-which(table1[1,]=="p.overall")
+            if (length(ww.p.overall)>0){
+                ww.p.overall<-rev(ww.p.overall)[1]
+                table1[1,ww.p.overall]<-header.labels["p.overall"]
+            }
+        }
+        if ("p.trend"%in%names(header.labels)){
+            ww.p.trend<-which(table1[1,]=="p.trend")
+            if (length(ww.p.trend)>0){
+                ww.p.trend<-rev(ww.p.trend)[1]
+                table1[1,ww.p.trend]<-header.labels["p.trend"]
+            }
+        }
+        if ("ratio"%in%names(header.labels)){
+            ww.ratio<-which(table1[1,]%in%c("OR","HR"))
+            if (length(ww.ratio)>0){
+                ww.ratio<-rev(ww.ratio)[1]
+                table1[1,ww.ratio]<-header.labels["ratio"]
+            }
+        }
+        if ("p.ratio"%in%names(header.labels)){
+            ww.p.ratio<-which(table1[1,]=="p.ratio")
+            if (length(ww.p.ratio)>0){
+                ww.p.ratio<-rev(ww.p.ratio)[1]
+                table1[1,ww.p.ratio]<-header.labels["p.ratio"]
+            }
+        }
+        if ("N"%in%names(header.labels)){
+            ww.N<-which(table1[1,]=="N")
+            if (length(ww.N)>0){
+                ww.N<-rev(ww.N)[1]
+                table1[1,ww.N]<-header.labels["N"]
+            }
+        }
+        table1 <- apply(table1, 2, format, justify = "centre")
+        colnames(table1) <- rep("", ncol(table1))
+
+
+
+        table2 <- x[[2]]
+        table2 <- as.matrix(table2)
+        table2 <- ifelse(is.na(table2), "", table2)
+        table2 <- rbind(colnames(table2), table2)
+        table2 <- apply(table2, 2, format, justify = "centre")
+        colnames(table2) <- rep("", ncol(table2))
+
+        # rearrange table 1 and table 2 by putting all column after descriptives by groups.
+        if (all.last & show.all & show.descr & groups){
+            table1[,1:(ny+1)] <- table1[,c(2:(ny+1),1)]
+        }
+        if (all.last){
+            table2[,1:(ny+1)] <- table2[,c(2:(ny+1),1)]
+        }
+
+        # out
+        out <- list(table1 = table1, table2 = table2)
+        if (!is.null(attr(x, "caption"))) attr(out, "cc") <- cc
+        attr(out, "nmax") <- nmax
+        nr <- ifelse(nr>1, nr+1, nr)
+        nr <- cbind(nr, rep(0:1, length(nr))[1:length(nr)])
+        nr <- unlist(apply(nr, 1, function(x) rep(x[2],x[1])))
+        attr(out, "nr") <- nr
+        out
+
+    }
+
+  # compiled.format <- try(rmarkdown::all_output_formats(knitr::current_input())[1],silent=TRUE)
+  #
+  # if (inherits(compiled.format, "try-error") || is.null(compiled.format)){
+  #   warning("you are using export2md out of Rmarkdown context...")
+  # } else {
+  #   if (compiled.format%in%c("html_document","ioslides_presentation","slidy_presentation")) format <- "html"
+  #   if (compiled.format%in%c("pdf_document","beamer_presentation")) format <- "latex"
+  #   if (compiled.format=="word_document") format <- "markdown"
+  # }
+
+  if (missing(format)){
+    format <- NA
+    if (!interactive()){ # execute inside Rmarkdown
+      if (knitr::is_html_output()) format="html"
+      if (knitr::is_latex_output()) format="latex"
+      if (!knitr::is_html_output() & !knitr::is_latex_output()) format="markdown"
+      if (is.na(format)){
+        warning("Unable to identify format -> HTML assigned.")
+        format <- "html"
+      }
+    } else {# execute inside Rmarkdown
+      warning("You are calling export2md outside Rmarkdown without specifying format -> html format is assigned")
+      format <- "html"
+    }
+  }
+
+  extras <- list(...)
+  if (!inherits(x, "createTable"))
+    stop("x must be of class 'createTable'")
+  if (inherits(x, "cbind.createTable"))
+    stop("x cannot be of class 'cbind.createTable'")
+  ww <- charmatch(which.table, c("descr", "avail"))
+  if (is.na(ww))
+    stop(" argument 'which.table' must be either 'descr' or 'avail'")
+
+  if (attr(x,"groups")){
+    y.name.label<-attr(x,"yname")
+  }
+
+  if (!is.null(caption)){
+    if (!is.character(caption))
+      stop(" argument 'caption' must be a character'")
+  } else {
+    if (ww==1){
+      if (attr(x,"groups"))
+        if (inherits(x,"missingTable"))
+          caption<-paste("Missingness table by groups of `",y.name.label,"'",sep="")
+      else
+        caption<-paste("Summary descriptives table by groups of `",y.name.label,"'",sep="")
+      else
+        if (inherits(x,"missingTable"))
+          caption<-"Missingess table"
+        else
+          caption<-"Summary descriptives table"
+    }
+    if (ww==2){
+      if (attr(x,"groups"))
+        caption<-paste("Available data by groups of `",y.name.label,"'",sep="")
+      else
+        caption<-"Available data"
+    }
+  }
+  pp <- compareGroups:::prepare(x, nmax = nmax, header.labels)
+  #pp <- prepare(x, nmax = nmax, header.labels)
+  cc <- unlist(attr(pp, "cc"))
+  if (ww %in% c(1)) {
+    table1 <- pp[[1]]
+    ii <- ifelse(rownames(table1)[2] == "", 2, 1)
+    table1 <- cbind(rownames(table1), table1)
+    align <- c("l", rep("c", ncol(table1)))
+    table1[1, 1] <- " "
+    colnames(table1) <- table1[1, ]
+    colnames(table1)[-1] <- trim(colnames(table1)[-1])
+    table1 <- table1[-1, , drop = FALSE]
+    table1[,2:ncol(table1)] <- apply(table1[,-1,drop=FALSE],2,trim)
+    #table1 <- table1[-2]
+    #names(table1)[1] <- 'Extended Sample'
+    # N in the second row
+    table1 <- table1[,-3]
+    colnames(table1)[2] <- 'Extended Sample'
+    n.exists <- nrow(table1) > 1 && length(grep("^N=", trim(table1[1, 2])))
+    if (format=="latex" & strip)
+      table1[((1+n.exists):nrow(table1)),ncol(table1)] <- ifelse(table1[((1+n.exists):nrow(table1)),ncol(table1)]=="", "\\vphantom{}", table1[((1+n.exists):nrow(table1)),ncol(table1)])
+    if (format=="latex") caption <- gsub("%","\\\\%",caption)
+    ans <- knitr::kable(table1, align = align, row.names = FALSE, caption=caption[1], format=format,
+                        booktabs=format=="latex", longtable=TRUE, linesep="", ...)
+    ans <- add_indent(ans, grep("^ ",table1[,1]))
+    if (width!=Inf) ans <- column_spec(ans, 1, width = width)
+    # groups
+    if (!is.null(cc)){
+      for (cci in 1:length(cc)){
+        if (cc[cci]!=""){
+          group.label <- cc[cci]
+          inici <- 0
+          final <- 0
+        } else {
+          if (cc[cci-1]!="")
+            group.begin <- cci-1
+          if (cci==length(cc) || cc[cci+1]!=""){
+            group.end <- cci
+            ans <- group_rows(ans, group.label, group.begin+n.exists, group.end+n.exists)
+          }
+        }
+      }
+    }
+    if (strip){
+      nr <- attr(pp, "nr")
+      ans <- row_spec(ans, which(nr==!first.strip)+n.exists, background = background)
+    }
+    if (n.exists){
+      ans <- row_spec(ans, 1, hline_after=TRUE)
+    }
+
+    if (landscape) ans <- landscape(ans)
+    if (format=="latex"){
+      ans <- kable_styling(ans, latex_options = c("repeat_header"), font_size=size, position=position)
+      #if (n.exists) ans <- gsub("\\\\midrule", "", ans) # remove lines after N
+      if (n.exists) ans <- gsub("\\\\midrule\n\\\\endfirsthead", "\\\\endfirsthead", ans) # remove lines after N
+      if (strip) ans <- gsub("\\textbackslash{}vphantom\\{\\}", "\\vphantom{}", ans, fixed=TRUE)
+    }
+    if (format=="html"){
+      ans <- kable_styling(ans, bootstrap_options=c(if (!strip) "striped" else NULL, "condensed"), full_width=FALSE, font_size=size, position=position)
+      ans <- row_spec(ans, 0, background=header.background, color=header.color)
+      ans <- row_spec(ans, if (sum(unlist(attr(x, "nmax.pos")))>0) 1 else 0, italic=sum(unlist(attr(x, "nmax.pos")))>0, extra_css = "border-bottom: 1px solid grey")
+    }
+    return(ans)
+  }
+  if (ww %in% c(2)){
+    # table2 <- compareGroups:::prepare(x, nmax = nmax, c())[[2]]
+    table2 <- prepare(x, nmax = nmax, c())[[2]]
+    table2 <- cbind(rownames(table2), table2)
+    if (!is.null(attr(x, "caption"))) {
+      cc <- unlist(attr(x, "caption"))
+      table2[, 1] <- paste("    ", table2[, 1])
+    }
+    table2[1, 1] <- " "
+    align <- c("l", rep("c", ncol(table2)))
+    colnames(table2)[-1] <- trim(table2[1, -1])
+    table2 <- table2[-1, ,drop=FALSE]
+    ans <- knitr::kable(table2, align = align, row.names = FALSE, caption=caption[1], format=format, booktabs=format=="latex", longtable=TRUE, ...)
+    # ans <- knitr::kable(table2, align = align, row.names = FALSE, caption=caption[1], format=format, booktabs=format=="latex")
+    # groups
+    if (!is.null(cc)){
+      for (cci in 1:length(cc)){
+        if (cc[cci]!=""){
+          group.label <- cc[cci]
+          inici <- 0
+          final <- 0
+        } else {
+          if (cc[cci-1]!="")
+            group.begin <- cci-1
+          if (cci==length(cc) || cc[cci+1]!=""){
+            group.end <- cci
+            ans <- group_rows(ans, group.label, group.begin, group.end)
+          }
+        }
+      }
+    }
+    ans <- add_indent(ans, integer())
+    if (strip) ans <- row_spec(ans, which(rep(0:1, nrow(table2))[1:nrow(table2)]==!first.strip), background = background)
+    if (width!=Inf) ans <- column_spec(ans, 1, width = width)
+    if (landscape) ans <- landscape(ans)
+    if (format=="latex"){
+      ans <- kable_styling(ans, latex_options = c("repeat_header"), font_size = size, position=position)
+    }
+    if (format=="html"){
+      ans <- kable_styling(ans, bootstrap_options=c(if (!strip) "striped" else NULL, "condensed"), full_width = FALSE, font_size = size, position=position)
+      ans <- row_spec(ans, 0, background=header.background, color=header.color)
+      ans <- row_spec(ans, 0, italic=FALSE, extra_css = "border-bottom: 1px solid grey")
+    }
+
+    return(ans)
+  }
+}
+
 # Load datasets
 load("../dataset/dataCoefs.RData")
 ```
@@ -261,8 +588,8 @@ load("../dataset/dataCoefs.RData")
 
 # A Brief Introduction to the "Law of _1/n_" and the "Reverse Law of _1/n_"
 
-In this section, we present the intuition behind the "law of $1/n$", as well as
-the alternative "reverse law of $1/n$" proposed by @primo2008distributive.
+Here we present the intuition behind the "law of $1/n$", as well as the
+alternative "reverse law of $1/n$" proposed by @primo2008distributive.
 
 In their seminal paper, @weingast1981political argue that a high number of
 legislators will increase public spending beyond the optimal economic
@@ -332,7 +659,7 @@ As the above condition suggests, the "law of $1/n$" holds only in specific
 situations. @primo2008distributive advance that theory by considering other
 situations where the "law" may not hold, and they also argue that there are
 cases in which a "reverse law of $1/n$" may exist, that is, where larger
-legislatures may lead to lower public expenditures. 
+legislatures may lead to lower public expenditures.
 
 Following @primo2008distributive, let $n$ be the number of districts, $m$ the
 number of citizens in each district, and $nm$ the total population in the
@@ -384,7 +711,7 @@ levels of deadweight losses, but authors have suggested other reasons why the
 "law of $1/n$" may not apply, such as bicameralism [@chen2007law], popular
 initiatives [@matsusaka2005endogeneity], type of government
 [@coate2011government], supermajorities [@lee2015supermajority], political
-fragmentation [@lledo2003electoral], and ideology [@bjedov2014impact]. 
+fragmentation [@lledo2003electoral], and ideology [@bjedov2014impact].
 
 # Search Criteria
 
@@ -445,7 +772,7 @@ publication had all three, we kept it in our sample. Disagreements in this
 phase were discussed among the authors, and a third investigator was consulted
 when needed.
 
-The third phase consisted of filling out tables for each of the remaining 
+The third phase consisted of filling out tables for each of the remaining
 articles to systematically evaluate their eligibility. Since authors use
 different measures for government spending and the number of lower/upper house
 members, we extracted all coefficients that provided this information. In this
@@ -459,7 +786,7 @@ articles.
 
 ## Exclusion Analysis
 
-We selected the final pool of articles based on two criteria, namely the independent and the dependent variables employed in the paper. The categories follow below: 
+We selected the final pool of articles based on two criteria, namely the independent and the dependent variables employed in the paper. The categories follow below:
 
 1.  Independent variables:
 
@@ -564,7 +891,7 @@ most rigorous model from each paper, that is, those estimated with the largest
 sample size, most control variables, and fixed effects if the authors added
 them. If the article employed a regression discontinuity design, we chose the
 coefficient from the optimal bandwidth or from the intermediate one. This
-sample encompasses `r dim(dat)[1]` estimates, as 
+sample encompasses `r dim(dat)[1]` estimates, as
 `r as.numeric(table(table(dat$id))[2])` articles analysed two dependent or
 independent variables of interest. Our second sample, in contrast, contains all
 the `r dim(fulldat)[1]` effect sizes reported in the `r length(unique(dat$id))`
@@ -587,7 +914,7 @@ independent variables of interest.
 The average year of publication in our sample is `r round(mean(dat$year), 2)`
 with standard deviation of `r round(sd(dat$year), 2)`. The oldest study
 included in the paper is from `r min(dat$year)`, while the most recent paper
-was written in `r max(dat$year)`. Therefore, we cover 
+was written in `r max(dat$year)`. Therefore, we cover
 `r max(dat$year)-min(dat$year)` years of tests of the "law of $1/n$".
 
 ```{r, fig.width=7, fig.height=3, fig.cap="Study Year Frequencies", cache=TRUE, size="footnotesize", echo = FALSE}
@@ -626,7 +953,7 @@ Our sample differs considerably in regards to research design. One remarkable
 difference is that several authors apply the logics of the "law of $1/n$", which
 was built with majoritarian systems in mind, to non-majoritarian democracies.
 In the sample, `r as.numeric(table(unique(select(dat, id, elecsys2))$elecsys2)[1])`
-of the papers study *Majoritarian* systems while 
+of the papers study *Majoritarian* systems while
 `r as.numeric(table(unique(select(dat, id, elecsys2))$elecsys2)[2])` study
 *Non-Majoritarian* electoral systems\footnote{Note that for the "law of
 $1/n$" to be valid in a non-majoritarian system, we need to assume that despite
@@ -674,7 +1001,7 @@ dat %>%
 
 Most papers in our sample analyse the number of legislators in the lower
 chamber (`r as.numeric(table(dat$indepvar2)[3])`). The second most frequent
-independent variable is the number of legislators in the upper chamber 
+independent variable is the number of legislators in the upper chamber
 (`r as.numeric(table(dat$indepvar2)[1])`). Finally, the minority of papers use the
 natural log of the number of legislators in the lower chamber as an independent
 variable (`r as.numeric(table(dat$indepvar2)[2])`). As we noted above, some
@@ -685,7 +1012,7 @@ papers had multiple coefficients, and thus the total number of coefficients is
 dat %>%
   select(id, indepvar2) %>%
   unique() %>%
-  mutate(indepvar2 = factor(indepvar2, 
+  mutate(indepvar2 = factor(indepvar2,
                             labels = c("Upper Chamber Size",
                                        "Log of Lower Chamber Size",
                                        "Lower Chamber Size"
@@ -729,7 +1056,7 @@ dat %>%
 One simple statistic that we can compute to assess the validity of the "law of
 $1/n$" is the frequency of positive and negative estimates in the study sample.
 Below we plot the frequency for all papers included in the meta-analytic
-dataset. 
+dataset.
 
 ```{r, size="footnotesize", fig.width=5, fig.height=4, fig.cap="Coefficient Sign", cache=TRUE, echo = FALSE}
 dat %>%
@@ -749,30 +1076,35 @@ original study: lower chamber size; natural logarithm of lower chamber size; or
 upper chamber size. The additional moderators are: publication year; whether
 the paper was published in an academic journal; the estimation method used in
 the paper; the institutional design in terms of the division of legislative
-power; and the electoral system. 
+power; and the electoral system.
 
 ```{r, warning=F, message=F, echo = FALSE, cache=TRUE, results='asis'}
 fulldat$usemeta2 <- factor(fulldat$usemeta)
-levels(fulldat$usemeta2) <- c("Extended Sample", "Main Sample")
-aux <- select(fulldat, usemeta2, indepvar2, year, published, method,
-              instdesign, elecsys2) %>%
-  mutate(indepvar2 = recode(indepvar2,
-                            `N` = "Lower Chamber Size",
-                            `K` = "Upper Chamber Size",
-                            `logN` = "Log of Lower Chamber Size"),
-         elecsys2 = recode(elecsys2,
-                           `Non-Maj` = "Non-Majoritarian",
-                           `Maj` = "Majoritarian")) %>%
+levels(fulldat$usemeta2) <- c("Other Coefficients", "Main Sample")
+aux <- select(fulldat, usemeta2, indepvar2, elecsys2, method,
+              year, published, instdesign) %>%
   rename(`Independent Variables` = indepvar2,
          `Year`                  = year,
          `Published work`        = published,
          `Estimation method`     = method,
          `Institutional Design`  = instdesign,
          `Electoral system`      = elecsys2)
-export2md(descrTable(~.-usemeta2, aux, y = aux$usemeta2,
-                        show.p.overall = F, show.all = T),
-          caption = "Descriptive Statistics of Moderators",
-          format  = "latex")
+aux$`Independent Variables` <- recode(aux$`Independent Variables`,
+                                      `N` = "Lower Chamber Size",
+                                      `K` = "Upper Chamber Size",
+                                      `logN` = "Log of Lower Chamber Size")
+aux$`Electoral system` <- recode(aux$`Electoral system`,
+                                 `Non-Maj` = "Non-Majoritarian",
+                                 `Maj` = "Majoritarian")
+aux <- select(aux, usemeta2, `Independent Variables`, Year, `Published work`, `Estimation method`, `Institutional Design`, `Electoral system`)
+
+aux3 <- descrTable(~.-usemeta2,
+                   aux, y = aux$usemeta2,
+                   show.p.overall = F,
+                   show.all = T)
+export2md2(aux3,
+           caption = "Descriptive Statistics of Moderators",
+           format  = "latex")
 ```
 
 # Binomial Tests for Coefficient Signs
@@ -812,10 +1144,10 @@ aux2 <- binom.test(table(aux$scoef)[2], sum(table(aux$scoef)), p = 0.5)
 pander(tidy(aux2)[,-c(2,4,5,6)][,c(3,4,1,2)])
 ```
 
-Under the null hypothesis of $p=0.5$, we find that 
+Under the null hypothesis of $p=0.5$, we find that
 `r as.numeric(table(aux$scoef)[2])` out of `r sum(table(aux$scoef))` studies have
 a positive sign. The chance of a distribution with $p=0.5$ generate this sample
-is equal to p-value = `r round(as.numeric(aux2$p.value), 3)`. Thus, we 
+is equal to p-value = `r round(as.numeric(aux2$p.value), 3)`. Thus, we
 `r ifelse(as.numeric(aux2$p.value)<0.1, 'accept', 'reject')` the hypothesis that
 $p \neq 0.5$.
 
@@ -829,7 +1161,7 @@ pander(tidy(aux2)[,-c(2,4,5,6)][,c(3,4,1,2)])
 
 Out of `r sum(table(aux$scoef))` studies, `r as.numeric(table(aux$scoef)[2])`
 have a positive sign. The chance of a distribution with $p=0.5$ generate this
-sample is equal to p-value = `r round(as.numeric(aux2$p.value), 3)`. So we 
+sample is equal to p-value = `r round(as.numeric(aux2$p.value), 3)`. So we
 `r ifelse(as.numeric(aux2$p.value)<0.1, 'accept', 'reject')` the hypothesis that
 $p \neq 0.5$.
 
@@ -841,9 +1173,9 @@ aux2 <- binom.test(table(aux$scoef)[2], sum(table(aux$scoef)), p=0.5)
 pander(tidy(aux2)[,-c(2,4,5,6)][,c(3,4,1,2)])
 ```
 
-Here we see that `r as.numeric(table(aux$scoef)[2])` out of 
+Here we see that `r as.numeric(table(aux$scoef)[2])` out of
 `r sum(table(aux$scoef))` studies have a positive sign. The p-value for this test
-is `r round(as.numeric(aux2$p.value), 3)`. Therefore, we 
+is `r round(as.numeric(aux2$p.value), 3)`. Therefore, we
 `r ifelse(as.numeric(aux2$p.value)<0.1, 'accept', 'reject')` the hypothesis that
 $p \neq 0.5$. This is the only test that presents evidence of an association
 between the legislature size and expenditure.
@@ -854,7 +1186,7 @@ does not take into consideration the size of the upper house, as it would
 indicate that the cases in the paper have a non-unicameral legislature. The
 results for this analysis follow below. They show that there is no significant
 change in the sign of the relationship between public spending and legislature
-size, when controlling by the institutional design. 
+size, when controlling by the institutional design.
 
 ```{r, size="footnotesize", echo = FALSE, cache=TRUE}
 aux <- list()
@@ -883,7 +1215,7 @@ aux2$alternative <- NULL
 pander(aux2)
 ```
 
-# Meta-Analysis
+# Meta-Analysis (Main Sample)
 
 ## Estimation Method
 
@@ -999,7 +1331,7 @@ aux <- dat %>%
 mod <- rma.mv(coef, VAR, data=aux,
           slab=paste(authoryear),
           test = 't',
-          random = ~ 1 | id_level1/id_level2, 
+          random = ~ 1 | id_level1/id_level2,
           tdist = TRUE,
           method = "REML")
 
@@ -1070,7 +1402,7 @@ aux <- dat %>%
 mod <- rma.mv(coef, VAR, data=aux,
           slab=paste(authoryear),
           test = 't',
-          random = ~ 1 | id_level1/id_level2, 
+          random = ~ 1 | id_level1/id_level2,
           tdist = TRUE,
           method = "REML")
 mod
@@ -1112,7 +1444,7 @@ aux <- dat %>%
 mod <- rma.mv(coef, VAR, data=aux,
           slab=paste(authoryear),
           test = 't',
-          random = ~ 1 | id_level1/id_level2, 
+          random = ~ 1 | id_level1/id_level2,
           tdist = TRUE,
           method = "REML")
 
@@ -1157,7 +1489,7 @@ aux <- dat %>%
 mod <- rma.mv(coef, VAR, data=aux,
           slab=paste(authoryear),
           test = 't',
-          random = ~ 1 | id_level1/id_level2, 
+          random = ~ 1 | id_level1/id_level2,
           tdist = TRUE,
           method = "REML")
 mod
@@ -1206,7 +1538,7 @@ aux <- dat %>%
 mod <- rma.mv(coef, VAR, data=aux,
           slab=paste(authoryear),
           test = 't',
-          random = ~ 1 | id_level1/id_level2, 
+          random = ~ 1 | id_level1/id_level2,
           tdist = TRUE,
           method = "REML")
 mod
@@ -1249,7 +1581,7 @@ aux <- dat %>%
 mod <- rma.mv(coef, VAR, data=aux,
           slab=paste(authoryear),
           test = 't',
-          random = ~ 1 | id_level1/id_level2, 
+          random = ~ 1 | id_level1/id_level2,
           tdist = TRUE,
           method = "REML")
 
@@ -1291,7 +1623,7 @@ aux <- dat %>%
 mod <- rma.mv(coef, VAR, data=aux,
           slab=paste(authoryear),
           test = 't',
-          random = ~ 1 | id_level1/id_level2, 
+          random = ~ 1 | id_level1/id_level2,
           tdist = TRUE,
           method = "REML")
 mod
@@ -1333,7 +1665,7 @@ aux <- dat %>%
 mod <- rma.mv(coef, VAR, data=aux,
           slab=paste(authoryear),
           test = 't',
-          random = ~ 1 | id_level1/id_level2, 
+          random = ~ 1 | id_level1/id_level2,
           tdist = TRUE,
           method = "REML")
 mod
@@ -1360,14 +1692,14 @@ aux <- dat %>%
 mod <- rma.mv(coef, VAR, data=aux,
           slab=paste(authoryear),
           test = 't',
-          random = ~ 1 | id_level1/id_level2, 
+          random = ~ 1 | id_level1/id_level2,
           tdist = TRUE,
           method = "REML")
 
-f8 <- build_forest_het(aux, aux$coef, 
+f8 <- build_forest_het(aux, aux$coef,
                        aux$VAR, slab = aux$authoryear,
-                       capt = NULL, lsize = 15, 
-                       ttl = 'Lower Chamber Size and Expenditure per Capita\n(subgrouping by the estimation technique)', 
+                       capt = NULL, lsize = 15,
+                       ttl = 'Lower Chamber Size and Expenditure per Capita\n(subgrouping by the estimation technique)',
                        hetvar = aux$method)
 ```
 
@@ -1390,7 +1722,7 @@ aux <- dat %>%
 mod <- rma.mv(coef, VAR, data=aux,
           slab=paste(authoryear),
           test = 't',
-          random = ~ 1 | id_level1/id_level2, 
+          random = ~ 1 | id_level1/id_level2,
           tdist = TRUE,
           method = "REML")
 
@@ -1403,7 +1735,7 @@ Although all methods generate a null effect, the IV method seems to be well dist
 ## Lower Chamber Size and Log of Expenditure per Capita (Regression Discontinuity Design Only)
 
 In this subsection, we run a meta-analysis with papers that include regression
-discontinuity designs. 
+discontinuity designs.
 
 ```{r, size="footnotesize", cache=TRUE, echo = FALSE}
 # Pooling effects analysis -- logExpPC x N (RDD only)
@@ -1415,7 +1747,7 @@ aux <- dat %>%
 mod <- rma.mv(coef, VAR, data=aux,
           slab=paste(authoryear),
           test = 't',
-          random = ~ 1 | id_level1/id_level2, 
+          random = ~ 1 | id_level1/id_level2,
           tdist = TRUE,
           method = "REML")
 mod
@@ -1436,11 +1768,11 @@ aux <- dat %>%
 mod <- rma.mv(coef, VAR, data=aux,
           slab=paste(authoryear),
           test = 't',
-          random = ~ 1 | id_level1/id_level2, 
+          random = ~ 1 | id_level1/id_level2,
           tdist = TRUE,
           method = "REML")
 
-f9 <- build_forest(mod, capt = NULL, 
+f9 <- build_forest(mod, capt = NULL,
                        lsize = 15, ttl = 'Lower Chamber Size and Log Expenditure per Capita\n(subgrouping by RDD)')
 ```
 
@@ -1463,7 +1795,7 @@ ggarrange(f8, f9, align = 'hv')
 dev.off()
 ```
 
-# Meta-Analysis (All Coefficients)
+# Meta-Analysis (Extended Sample)
 
 ## Lower Chamber Size and Expenditure Per Capita
 
@@ -1479,7 +1811,7 @@ aux <- fulldat %>%
 mod <- rma.mv(coef, VAR, data=aux,
           slab=paste(authoryear),
           test = 't',
-          random = ~ 1 | id_level1/id_level2, 
+          random = ~ 1 | id_level1/id_level2,
           tdist = TRUE,
           method = "REML")
 mod
@@ -1545,7 +1877,7 @@ aux <- fulldat %>%
 mod <- rma.mv(coef, VAR, data=aux,
           slab=paste(authoryear),
           test = 't',
-          random = ~ 1 | id_level1/id_level2, 
+          random = ~ 1 | id_level1/id_level2,
           tdist = TRUE,
           method = "REML")
 mod
@@ -1584,7 +1916,7 @@ aux <- fulldat %>%
 mod <- rma.mv(coef, VAR, data=aux,
           slab=paste(authoryear),
           test = 't',
-          random = ~ 1 | id_level1/id_level2, 
+          random = ~ 1 | id_level1/id_level2,
           tdist = TRUE,
           method = "REML")
 mod
@@ -1621,7 +1953,7 @@ aux <- fulldat %>%
 mod <- rma.mv(coef, VAR, data=aux,
           slab=paste(authoryear),
           test = 't',
-          random = ~ 1 | id_level1/id_level2, 
+          random = ~ 1 | id_level1/id_level2,
           tdist = TRUE,
           method = "REML")
 mod
@@ -1633,7 +1965,7 @@ The forest plot:
 build_forest(mod, NULL)
 ```
 
-And the funnel plot: 
+And the funnel plot:
 
 ```{r, fig.width=4, fig.height=3.5, fig.cap="Funnel Plot -- Effect of Log of Lower Chamber Size on Log of Expenditure Per Capita", warning=FALSE, cache=TRUE, echo = FALSE}
 funnel(mod)
@@ -1666,7 +1998,7 @@ aux <- fulldat %>%
 mod <- rma.mv(coef, VAR, data=aux,
           slab=paste(authoryear),
           test = 't',
-          random = ~ 1 | id_level1/id_level2, 
+          random = ~ 1 | id_level1/id_level2,
           tdist = TRUE,
           method = "REML")
 mod
@@ -1706,7 +2038,7 @@ aux <- fulldat %>%
 mod <- rma.mv(coef, VAR, data=aux,
           slab=paste(authoryear),
           test = 't',
-          random = ~ 1 | id_level1/id_level2, 
+          random = ~ 1 | id_level1/id_level2,
           tdist = TRUE,
           method = "REML")
 mod
@@ -1746,7 +2078,7 @@ aux <- fulldat %>%
 mod <- rma.mv(coef, VAR, data=aux,
           slab=paste(authoryear),
           test = 't',
-          random = ~ 1 | id_level1/id_level2, 
+          random = ~ 1 | id_level1/id_level2,
           tdist = TRUE,
           method = "REML")
 mod
@@ -1787,7 +2119,7 @@ aux <- fulldat %>%
 mod <- rma.mv(coef, VAR, data=aux,
           slab=paste(authoryear),
           test = 't',
-          random = ~ 1 | id_level1/id_level2, 
+          random = ~ 1 | id_level1/id_level2,
           tdist = TRUE,
           method = "REML")
 mod
@@ -1828,7 +2160,7 @@ aux <- fulldat %>%
 mod <- rma.mv(coef, VAR, data=aux,
           slab=paste(authoryear),
           test = 't',
-          random = ~ 1 | id_level1/id_level2, 
+          random = ~ 1 | id_level1/id_level2,
           tdist = TRUE,
           method = "REML")
 mod
@@ -1863,7 +2195,7 @@ reported government spending data. We select the following moderators:
   - `K`: Upper Chamber Size
   - `N`: Lower Chamber Size
   - `logN`: Log of Lower Chamber Size
-  
+
 2. Year that the paper was published (for working papers, the year it was posted online; variable `year`)
 
 3. A dummy indicating whether the paper was published or not (variable `published`).
@@ -1880,7 +2212,7 @@ reported government spending data. We select the following moderators:
   - `PANEL`: Time-Series Cross-Section models, with estimated fixed effects.
   - `IV`: Instrumental Variables models.
   - `RDD`: Regression Discontinuity Designs.
-  
+
 The results follows below for the three dependent variables: expenditure per
 capita, log of expenditure per capita, and expenditure as a percentage of GDP.
 
@@ -1893,7 +2225,7 @@ mod <- rma.mv(yi = coef,
               V = VAR,
               data = dat,
               method = "REML",
-              random = ~ 1 | id_level1/id_level2, 
+              random = ~ 1 | id_level1/id_level2,
               mods = ~indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
               sparse = TRUE,
@@ -1913,7 +2245,7 @@ mod <- rma.mv(yi = coef,
               V = VAR,
               data = fulldat,
               method = "REML",
-              random = ~ 1 | id_level1/id_level2, 
+              random = ~ 1 | id_level1/id_level2,
               mods = ~indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
               tdist = TRUE,
@@ -1942,7 +2274,7 @@ mod <- rma.mv(yi = coef,
               V = VAR,
               data = dat,
               method = "REML",
-              random = ~ 1 | id_level1/id_level2, 
+              random = ~ 1 | id_level1/id_level2,
               mods = ~indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
               tdist = TRUE,
@@ -1964,7 +2296,7 @@ mod <- rma.mv(yi = coef,
               V = VAR,
               data = fulldat,
               method = "REML",
-              random = ~ 1 | id_level1/id_level2, 
+              random = ~ 1 | id_level1/id_level2,
               mods = ~indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
               tdist = TRUE,
@@ -1990,7 +2322,7 @@ mod <- rma.mv(yi = coef,
               V = VAR,
               data = dat,
               method = "REML",
-              random = ~ 1 | id_level1/id_level2, 
+              random = ~ 1 | id_level1/id_level2,
               mods = ~indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
               tdist = TRUE,
@@ -2014,7 +2346,7 @@ mod <- rma.mv(yi = coef,
               V = VAR,
               data = fulldat,
               method = "REML",
-              random = ~ 1 | id_level1/id_level2, 
+              random = ~ 1 | id_level1/id_level2,
               mods = ~indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
               tdist = TRUE,
@@ -2030,10 +2362,9 @@ The model indicates that:
 
 2. Studies using non-majoritarian systems find more positive effects between variables.
 
-3. Papers whose models included unicameral legislatures report significantly higher coefficients. 
+3. Papers whose models included unicameral legislatures report significantly higher coefficients.
 
-
-# Meta-Regressions (All Coefficients)
+## Meta-Regressions (All Coefficients)
 
 Here we aggregate all the papers in our sample and run a multivariate meta-regression, controlling for:
 
@@ -2060,7 +2391,7 @@ mod <- rma.mv(yi = coef,
               V = VAR,
               data = dat,
               method = "REML",
-              random = ~ 1 | id_level1/id_level2, 
+              random = ~ 1 | id_level1/id_level2,
               mods = ~depvar2+indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
               tdist = TRUE,
@@ -2077,7 +2408,7 @@ mod <- rma.mv(yi = coef,
               V = VAR,
               data = fulldat,
               method = "REML",
-              random = ~ 1 | id_level1/id_level2, 
+              random = ~ 1 | id_level1/id_level2,
               mods = ~depvar2+indepvar2+year+published+elecsys2+method+instdesign,
               test = "knha",
               tdist = TRUE,
@@ -2093,3 +2424,20 @@ In the full model, we see that:
 2. Evidence from unicameral systems presents significantly larger effect sizes.
 
 3. All other moderators are insignificant.
+
+## Comparing Coefficient Sizes and Dependent Variables
+
+Finally, we run a simple linear regression to check whether there are
+significant differences between effect sizes for our dependent variables.
+Although the meta-regressions show that the difference is statistically
+negligible, we can still witness larger or smaller coefficient sizes in
+different models. The results below show that the differences are indeed mostly
+negligible.
+
+```{r, size="footnotesize", echo = FALSE, cache=TRUE}
+aux <- dat
+aux$depvar2 <- factor(aux$depvar2, levels = c('PCTGDP', 'ExpPC', 'logExpPC'))
+summary(lm(coef~depvar2, data = aux))
+```
+
+
