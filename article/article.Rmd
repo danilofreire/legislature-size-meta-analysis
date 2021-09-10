@@ -2,7 +2,13 @@
 title:  |
         | The Effect of Legislature Size on Public Spending:
         | A Meta-Analysis
+author:
+- "Danilo Freire[^danilo]"
+- "Umberto Mignozzetti[^umberto]"
+- "Catarina Roman[^catarina]"
+- "Huzeyfe Alptekin[^huzeyfe]"
 date: \today
+thanks: "Freire, Mignozzetti, and Roman contributed equally to all parts of the manuscript. Alptekin helped collect data in the early stages of the project. The authors thank Guilherme Duarte, Robert Myles McDonnell, and David Skarbek for their constructive feedback. We also thank Cedric Antunes, Luis Castro, Giovanna França, Julia Oriente, and Lucas Mingardi for their excellent research assistance. Replication materials are available at <https://github.com/danilofreire/legislature-size-meta-analysis>. We kindly acknowledge funding from the São Paulo State Science Foundation (FAPESP grant number 2018/00646-1)."
 abstract: "In a seminal article, @weingast1981political argue that there is a positive relationship between legislature size and inefficiency in public expenditures. Their proposition is currently known as the \"law of $1/n$\" and has been widely debated in political science and public administration. However, recent studies have questioned the validity of the theory. In this letter, we conduct the first meta-analysis that assesses the generality of the \"law of $1/n$\". Based on a sample of 30 articles, we find no robust evidence suggesting that legislature size has either a positive or a negative effect on government budgets. Yet the aggregate results mask considerable heterogeneity. Our findings provide moderate support for the \"law of $1/n$\" in unicameral legislatures and in upper houses, but they also indicate that papers using panel/fixed-effects models or regression discontinuity designs report negative public spending estimates. We find only limited evidence that electoral systems impact public spending, which suggests that proportional representation systems may not be more prone to overspending than majoritarian ones."
 abstractspacing: double
 keywords: distributive politics; law of $1/n$; legislature size; meta-analysis; public spending
@@ -27,6 +33,15 @@ output:
     template: article-template.latex
     md_extensions: +raw_attribute
 ---
+
+[^danilo]: Senior Lecturer, School of Social and Political Sciences, University of Lincoln, <dfeire@lincoln.ac.uk>, <https://danilofreire.github.io>.
+
+[^umberto]: Visiting Assistant Professor, Quantitative Theory and Methods Department, Emory University, <umberto.mignozzetti@emory.edu>, <http://umbertomig.com>. Corresponding author.
+
+[^catarina]: PhD Student, University of California, San Diego, <acroman@ucsd.edu>, <http://catarinaroman.github.io>.
+
+[^huzeyfe]: Independent Researcher, <huzeyfealptekin@gmail.com>.
+
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE, results='hide'}
 # Knitr options

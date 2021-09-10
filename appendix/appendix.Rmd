@@ -1,6 +1,11 @@
 ---
 title: |
        | Supplementary Materials for "The Effect of Legislature Size on Public Spending: A Meta-Analysis"
+author:
+- "Danilo Freire[^danilo]"
+- "Umberto Mignozzetti[^umberto]"
+- "Catarina Roman[^catarina]"
+- "Huzeyfe Alptekin[^huzeyfe]"
 date: \today
 fontfamily: libertine
 fontawesome: yes
@@ -20,6 +25,14 @@ output:
     keep_tex: no
     template: template.latex
 ---
+
+[^danilo]: Senior Lecturer, School of Social and Political Sciences, University of Lincoln, <dfeire@lincoln.ac.uk>, <https://danilofreire.github.io>.
+
+[^umberto]: Visiting Assistant Professor, Quantitative Theory and Methods Department, Emory University, <umberto.mignozzetti@emory.edu>, <http://umbertomig.com>. Corresponding author.
+
+[^catarina]: PhD Student, University of California, San Diego, <acroman@ucsd.edu>, <http://catarinaroman.github.io>.
+
+[^huzeyfe]: Independent Researcher, <huzeyfealptekin@gmail.com>.
 
 \appendix
 
