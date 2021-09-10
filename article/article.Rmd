@@ -3,7 +3,7 @@ title:  |
         | The Effect of Legislature Size on Public Spending:
         | A Meta-Analysis
 date: \today
-abstract: "In a seminal article, @weingast1981political argue that there is a positive relationship between legislature size and inefficiency in public expenditures. Their proposition is currently known as the \"law of $1/n$\" and has been widely debated in political science and public administration. However, recent studies have questioned the validity of the theory. In this letter, we conduct the first meta-analysis that assesses the generality of the \"law of $1/n$\". Based on a sample of 30 articles, we find no robust evidence for the effect of legislature size on government budgets. Yet the aggregate results show significant heterogeneity. We find moderate support for the \"law of $1/n$\" in unicameral legislatures and in the upper house, but panel/fixed-effects models and regression discontinuity designs reduce public spending estimates. Electoral system does not strongly affect the \"law of $1/n$\", although one coefficient indicates that majoritarian systems may be more prone to overspending than others."
+abstract: "In a seminal article, @weingast1981political argue that there is a positive relationship between legislature size and inefficiency in public expenditures. Their proposition is currently known as the \"law of $1/n$\" and has been widely debated in political science and public administration. However, recent studies have questioned the validity of the theory. In this letter, we conduct the first meta-analysis that assesses the generality of the \"law of $1/n$\". Based on a sample of 30 articles, we find no robust evidence suggesting that legislature size has either a positive or a negative effect on government budgets. Yet the aggregate results mask considerable heterogeneity. Our findings provide moderate support for the \"law of $1/n$\" in unicameral legislatures and in upper houses, but they also indicate that papers using panel/fixed-effects models or regression discontinuity designs report negative public spending estimates. We find only limited evidence that electoral systems impact public spending, what suggests that proportional representation systems may not be more prone to overspending than majoritarian ones."
 abstractspacing: double
 keywords: distributive politics; law of $1/n$; legislature size; meta-analysis; public spending
 jelcodes: H21; H23; H50; H61
@@ -590,29 +590,33 @@ proliferation of new studies reflect a conscious attempt to assess the
 robustness of the theory.
 
 In this letter, we conduct the first meta-analysis that tests the generality of
-the "law of $1/n$". We select `r length(unique(dat$id))` articles that
-use quantitative methods to evaluate the impact of legislature size over
-government spending across several dimensions. Our study sample mirrors the
-diversity of the literature. We found studies that present both negative and positive coefficients, often reaching statistical significance in either. Given the volume and the disparity of
-the studies, we employ meta-analysis to summarise the results. Meta-analysis
-provides a rigorous approach to combine heterogeneous outcomes into a single
-estimation, and it allows scholars to gain valuable insights from the
-aggregated data [@cooper2019handbook; @hedges1985statistical]. Meta-analysis
-can also identify potential sources of study variability, enabling researchers
-to assess threats to external validity and direct future efforts into more
-promising areas of academic inquiry [@doucouliagos2008democracy]. Research
-synthesis methods have been successfully applied in medicine and psychology
-since the 1970s [@glass2015meta], and our work contributes to the burgeoning
-literature that uses meta-analytic methods to understand challenging questions
-in political science [@costa2017responsive; @doucouliagos2008democracy;
-@green2013field; @lau2007effects; @schwarz2020supporting].
+the "law of $1/n$". We select `r length(unique(dat$id))` articles that use
+quantitative methods to evaluate the impact of legislature size over government
+spending across several dimensions. Our study sample mirrors the diversity of
+the literature. We found articles that present a positive association between
+the number of legislators and public expenditures, others suggesting that such
+relationship is negative, and yet others that claim that there is no
+correlation between them. Given the volume and the disparity of the studies, we
+employ meta-analysis to summarise the results. Meta-analysis provides a
+rigorous approach to combine heterogeneous outcomes into a single estimation,
+and it allows scholars to gain valuable insights from the aggregated data
+[@cooper2019handbook; @hedges1985statistical]. Meta-analysis can also identify
+potential sources of study variability, enabling researchers to assess threats
+to external validity and direct future efforts into more promising areas of
+academic inquiry [@doucouliagos2008democracy]. Research synthesis methods have
+been successfully applied in medicine and psychology since the 1970s
+[@glass2015meta], and our work contributes to the burgeoning literature that
+uses meta-analytic methods to understand challenging questions in political
+science [@costa2017responsive; @doucouliagos2008democracy; @green2013field;
+@lau2007effects; @schwarz2020supporting].
 
-We run meta-regressions to further evaluate the relationship
-between legislature size and government expenditures. In those analyses, we
-measure the effect of five moderators that capture different sources of
-heterogeneity in the literature. In section G of the Supplementary Materials, we use binomial tests to assess whether the proportions of positive and negative coefficients in our
-sample are statistically different from each other. We also construct a series of funnel plots to
-test for publication bias in existing research on the "law of $1/n$"
+We run meta-regressions to further evaluate the relationship between
+legislature size and government expenditures. In those analyses, we measure the
+effect of five moderators that capture different sources of heterogeneity in
+the literature. In our Supplementary Materials, we also include binomial
+tests to assess whether the proportions of positive and negative coefficients
+are statistically different from each other, as well as funnel plots to test
+for publication bias in existing research on the "law of $1/n$"
 [@easterbrook1991publication; @gerber2001testing].
 
 Aggregate results indicate that legislature size has no significant impact on
@@ -626,20 +630,22 @@ leads to lower public spending [@debenedetto2018effect; @hohmann2017effect;
 possible that methodological choices partially explain the divergent results
 observed in the literature, as articles that use RDDs consistently point to the
 same direction. One limitation of this finding is that these studies only test
-the impact of lower house size and its natural logarithm on the natural logarithm of expenditure per
-capita, thus it remains unclear whether the results hold with other variables.
+the impact of lower house size and its natural logarithm on the natural
+logarithm of expenditure per capita, thus it remains unclear whether the
+results hold with other variables.
 
 The meta-regressions provide additional evidence that our study sample is
 highly heterogeneous and that effect sizes differ substantially according to
 study specifications. When using an extended sample of `r dim(fulldat)[1]`
 coefficients, we find that unicameralism is associated with higher public
-spending, as predicted by the "law of $1/n$". Moreover,
-one of our meta-regressions indicates that larger upper chambers spend more in terms of
+spending, as predicted by the "law of $1/n$". Moreover, one of our
+meta-regressions indicates that larger upper chambers spend more in terms of
 per capita expenditure than lower chambers, a result that also appears in the
-binomial tests. Overall, non-majoritarian voting systems seem to decrease government spending, following the idea that the $1/n$ effect grows
-weaker as the empirical cases distance from the original definition of the law.
-Finally, meta-regression results confirm that regression discontinuity designs
-reduce public spending estimates.
+binomial tests. Overall, non-majoritarian voting systems seem to decrease
+government spending, following the idea that the $1/n$ effect grows weaker as
+the empirical cases distance from the original definition of the law. Finally,
+meta-regression results confirm that regression discontinuity designs reduce
+public spending estimates.
 
 # Data and Methods
 
@@ -857,14 +863,15 @@ from the optimal bandwidth or from the intermediate one. This sample
 encompasses `r dim(dat)[1]` estimates, as 
 `r as.numeric(sum(table(table(dat$id))[-1]))` articles analysed two dependent or
 independent variables of interest\footnote{The papers that used more than one
-dependent or independent variable of interest are \citet{bjedov2014impact, bradbury2001legislative, chen2007law, crowley2019law,
-erler2007termlimits, gilligan2001fiscal, lee2015supermajority, lee2016supermajority, lee2018court,
+dependent or independent variable of interest are \citet{bjedov2014impact,
+bradbury2001legislative, chen2007law, crowley2019law, erler2007termlimits,
+gilligan2001fiscal, lee2015supermajority, lee2016supermajority, lee2018court,
 maldonado2013legislatures, primo2006stop, ricciuti2003trading,
 ricciuti2004legislatures}.}. Our second sample, in contrast, contains all the
 `r dim(fulldat)[1]` effect sizes reported in the `r length(unique(dat$id))`
 papers. Here we focus on the results for our restricted sample as we consider
-them more robust, but the findings are nearly identical when we use the extended
-set.
+them more robust, but the findings are nearly identical when we use the
+extended set.
 
 Our second procedure consists of employing multilevel random effect models
 [@cheung2014modeling; @matthes2019meta] in all of our estimations. We add two
@@ -1188,9 +1195,9 @@ discontinuity design). In our last variable, we separate coefficients produced
 from samples of unicameral or bicameral systems, and code papers that analyse
 multiple polities with different institutional designs as "mixed".
 
-Table \ref{tab:regressions} presents the meta-regression results for our restricted
-and extended samples. Each column represents one of the three measures of
-public spending we discuss in this paper, and the last one uses all
+Table \ref{tab:regressions} presents the meta-regression results for our
+restricted and extended samples. Each column represents one of the three
+measures of public spending we discuss in this paper, and the last one uses all
 coefficients. To reduce the risk of false positives in our analyses, we use
 permutation tests to calculate significance levels for the meta-regressions
 \citep{higgins2004controlling}. To interpret these results, the sign of
@@ -1532,7 +1539,7 @@ capita as the dependent variable. Among the coefficients in the restricted
 sample, those in published studies tend to be smaller than those in
 working papers\footnote{We find no evidence of publication bias in our models.
 The funnel plots for all estimations are available Sections H and I of the
-Supplementary Material.}. Another two moderators are negatively associated with
+Supplementary Material.}. Two other moderators are negatively associated with
 the outcome in our larger coefficient pool. They both refer to estimation methods.
 Studies that employ panel/fixed effects or regression discontinuity designs
 (RDDs) have lower coefficients for log expenditure per capita if we take OLS as
@@ -1542,10 +1549,11 @@ Three estimates are statistically significant in the third set of
 meta-regressions, which include public expenditure as a percentage of GDP as
 the dependent variable. Both in our restricted and in our extended samples,
 recent studies have smaller coefficients than older papers, which stands in
-contrast with the first model. Moreover, institutional design also affects
-outcomes. Papers that use mixed samples of bicameral and unicameral systems
-report significantly lower coefficients than those that analyse bicameral
-legislatures exclusively. Non-majoritarian electoral systems, a category that encompasses proportional representation and mixed systems, may have a positive effect on the "law of $1/n$", but the estimate only borders on statistical significance.
+contrast with the first model. Institutional design also affects outcomes.
+Papers that include mixed political systems report significantly lower
+coefficients than those that analyse bicameral exclusively. Non-majoritarian
+electoral systems have a small, positive effect in our extended sample model,
+yet the coefficient is only significant at the 10\% level.
 
 The last two columns report meta-regressions that aggregate all selected
 studies. In the restricted sample of coefficients, unicameralism has a positive
@@ -1554,9 +1562,9 @@ effect. This result holds for the extended sample as well. When we regress all
 stronger once again. Panel/fixed-effects models and regression discontinuity
 designs both significantly decrease the $1/n$ effect. Instrumental variable
 models follow along these lines. Non-majoritarian electoral systems are also
-significantly associated with lower levels of public spending, which may be justified since
-the "law of $1/n$" was conceived for majoritarian voting. These latter results,
-however, do not replicate in the other sets of estimations.
+significantly associated with lower levels of public spending, which may be
+justified since the "law of $1/n$" was conceived for majoritarian voting. These
+latter results, however, do not replicate in the other sets of estimations.
 
 The evidence seems to be sensitive to the methodological design. Our results
 suggest that the same study samples may produce different outcomes depending on
