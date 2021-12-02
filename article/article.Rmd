@@ -615,52 +615,28 @@ correlation between them. Given the volume and the disparity of the studies, we
 employ meta-analysis to summarise the results. Meta-analysis provides a
 rigorous approach to combine heterogeneous outcomes into a single estimation,
 and it allows scholars to gain valuable insights from the aggregated data
-[@cooper2019handbook; @hedges1985statistical]. Meta-analysis can also identify
-potential sources of study variability, enabling researchers to assess threats
-to external validity and direct future efforts into more promising areas of
-academic inquiry [@doucouliagos2008democracy]. Research synthesis methods have
-been successfully applied in medicine and psychology since the 1970s
-[@glass2015meta], and our work contributes to the burgeoning literature that
-uses meta-analytic methods to understand challenging questions in political
-science [@costa2017responsive; @doucouliagos2008democracy; @green2013field;
-@lau2007effects; @schwarz2020supporting].
-
-We run meta-regressions to further evaluate the relationship between
-legislature size and government expenditures. In those analyses, we measure the
-effect of five moderators that capture different sources of heterogeneity in
-the literature. In our Supplementary Materials, we also include binomial
-tests to assess whether the proportions of positive and negative coefficients
-are statistically different from each other, as well as funnel plots to test
-for publication bias in existing research on the "law of $1/n$"
-[@easterbrook1991publication; @gerber2001testing].
+[@cooper2019handbook; @hedges1985statistical]. Meta-analysis can also
+identify potential sources of study variability, enabling researchers to assess
+threats to external validity and direct future efforts into more promising
+areas of academic inquiry [@doucouliagos2008democracy]. Research synthesis
+methods have been successfully applied in medicine and psychology since the
+1970s [@glass2015meta], and our work contributes to the burgeoning literature
+that uses meta-analytic methods to understand challenging questions in
+political science [@costa2017responsive; @doucouliagos2008democracy;
+@green2013field; @lau2007effects; @schwarz2020supporting].
 
 Aggregate results indicate that legislature size has no significant impact on
-public spending. All of our main meta-analysis estimates show that the overall
-effect is not statistically different from zero, thus confirming the
-conflicting findings reported by the literature. However, when we look only at
-articles that employ regression discontinuity designs (RDDs), we see that all
-four papers included in our sample suggest that a higher number of legislators
-leads to lower public spending [@debenedetto2018effect; @hohmann2017effect;
-@lewis2019legislature; @petterssonlidbom2012size]. In this regard, it is
-possible that methodological choices partially explain the divergent results
-observed in the literature, as articles that use RDDs consistently point to the
-same direction. One limitation of this finding is that these studies only test
-the impact of lower house size and its natural logarithm on the natural
-logarithm of expenditure per capita, thus it remains unclear whether the
-results hold with other variables.
-
-The meta-regressions provide additional evidence that our study sample is
-highly heterogeneous and that effect sizes differ substantially according to
-study specifications. When using an extended sample of `r dim(fulldat)[1]`
-coefficients, we find that unicameralism is associated with higher public
-spending, as predicted by the "law of $1/n$". Moreover, one of our
-meta-regressions indicates that larger upper chambers spend more in terms of
-per capita expenditure than lower chambers, a result that also appears in the
-binomial tests. Overall, non-majoritarian voting systems seem to decrease
-government spending, following the idea that the $1/n$ effect grows weaker as
-the empirical cases distance from the original definition of the law. Finally,
-meta-regression results confirm that regression discontinuity designs reduce
-public spending estimates.
+public spending. Our main meta-analysis estimates show that the overall effect
+is not statistically different from zero, thus confirming the conflicting
+findings reported by the literature. However, methodological choices partially
+explain these divergent results. When we look only at articles that use
+regression discontinuity designs (RDDs), all four papers included in our sample
+consistently report a negative relationship between a higher number of
+legislators and public expenditures. Our meta-regressions provide further
+evidence that study designs significantly influence the results. Using a sample
+of `r dim(fulldat)[1]` coefficients, we find that articles that use causal
+inference methods report lower effects than those that use OLS, and that
+unicameralism is associated with higher government expenditures.
 
 # Data and Methods
 
@@ -712,11 +688,15 @@ produced a dataset of `r length(unique(dat$id))` studies as of the
 10\textsuperscript{th} of March 2021. Table \ref{tab:papers} contains the full
 list of articles we analyse in this paper.
 
-\newpage
-
 \scriptsize
 \begin{longtable}{>{\raggedright\arraybackslash}p{3.9cm}>{\centering\arraybackslash}p{1.5cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{2.3cm}>{\centering\arraybackslash}p{1cm}>{\centering\arraybackslash}p{2cm}>{\centering\arraybackslash}p{1.1cm}}
-\caption{Papers included in the meta-analysis, ordered by year of appearance}\\
+\caption{Papers Included in the Meta-Analysis, Ordered by Year of Appearance}\\
+\toprule
+\raggedright Author(s) & \centering Journal & \centering Country & \centering Dependent Variable & \centering Method & \centering Institutional Design & \centering Electoral System
+\tabularnewline
+\midrule
+\endfirsthead
+\caption{Papers Included in the Meta-Analysis, Ordered by Year of Appearance (\textit{Continued})}\\
 \toprule
 \raggedright Author(s) & \centering Journal & \centering Country & \centering Dependent Variable & \centering Method & \centering Institutional Design & \centering Electoral System
 \tabularnewline
@@ -890,13 +870,13 @@ extended set.
 
 Our second procedure consists of employing multilevel random effect models
 [@cheung2014modeling; @matthes2019meta] in all of our estimations. We add two
-extra levels to the regular meta-analysis, one including a unique publication
-ID for each paper, and another building a common index for papers that share
-the same data specifications. By adding these two levels, we account for
-within- and between-study variation, thus removing these sources of effect size
-dependency and improving the accuracy of the results. More information about
-the multilevel models can be found in Section H.1 of the Supplementary
-Material. 
+extra levels to the regular meta-analysis, the first including a unique
+publication ID for each paper, and a second one containing a common index for
+papers that share the same data specifications. By adding these two levels, we
+account for within- and between-study variation, thus removing these sources of
+effect size dependency and improving the accuracy of the results. More
+information about the multilevel models can be found in Section H.1 of the
+Supplementary Material. 
 
 We use Hedges' $g$ to calculate effect sizes in our meta-analysis
 [@hedges1981distribution]. While there are other methods to standardise
@@ -1071,12 +1051,12 @@ mod[[9]] <- metagen(coef, SE, data=aux,
           sm="SMD")
 ```
 
-We begin with the meta-analysis. We matched the house size variables with
-our measures of government spending and created a theoretical $3 \times 3$
-matrix. Out of the nine variable combinations, we found only seven the article
-pool. Our sample does not contain any papers that analyse the relationships
-between log lower chamber size and public expenditure per capita, or between
-upper chamber size and the logarithm of public expenditure per capita. 
+We begin with the meta-analysis. We matched the house size variables with our
+measures of government spending and created a theoretical $3 \times 3$ matrix.
+Out of the nine variable combinations, we found only seven in the article pool.
+Our sample does not contain any papers that analyse the relationships between
+log lower chamber size and public expenditure per capita, or between upper
+chamber size and the logarithm of public expenditure per capita. 
 
 Figure \ref{fig:plots} shows the forest plots for our restricted sample, which
 includes the `r dim(dat)[1]` main coefficients of the `r length(unique(dat$id))`
@@ -1122,7 +1102,7 @@ as the restricted sample -- positive and negative, respectively.
 \begin{landscape}
 \begin{figure}[!ht]
 \centering
-\caption{Forest plots of the relationship between legislature size and government spending (main sample)}
+\caption{Forest Plots of the Relationship between Legislature Size and Government Spending (Main Sample)}
 \vspace{0.3cm}
 \includegraphics[width=25cm,height=17cm]{../graphs/graph1.pdf}
 \label{fig:plots}
@@ -1167,7 +1147,7 @@ the natural logarithm of expenditure per capita (right).
 
 \begin{figure}[htb]
 \begin{center}
-\caption{Forest plots of the relationship between legislature size and government spending with regression method heterogeneity (main sample)}
+\caption{Forest Plots of the Relationship between Legislature Size and Government Spending with Regression Method Heterogeneity (Main Sample)}
 \vspace{.3cm}
 \includegraphics[width=1\linewidth, height=7.8cm]{../graphs/graph2.pdf}
 \label{fig:plots2}
@@ -1411,7 +1391,7 @@ res[[8]] <- extract_coefs(mod, "Full Model - All coefs")
 
 ```{=latex}
 \begin{table}[htpb]
-\caption{Meta-regression results\label{tab:regressions}}
+\caption{Meta-Regression Results\label{tab:regressions}}
 \scriptsize
 \centering
 \begin{tabular}{lcccccccc}
@@ -1565,10 +1545,11 @@ meta-regressions, which include public expenditure as a percentage of GDP as
 the dependent variable. Both in our restricted and in our extended samples,
 recent studies have smaller coefficients than older papers, which stands in
 contrast with the first model. Institutional design also affects outcomes.
-Papers that include mixed political systems report significantly lower
-coefficients than those that analyse bicameral exclusively. Non-majoritarian
-electoral systems have a small, positive effect in our extended sample model,
-yet the coefficient is only significant at the 10\% level.
+Papers that include both unicameral and bicameral political systems report
+lower coefficients than those that analyse bicameral exclusively.
+Non-majoritarian electoral systems have a small, positive effect in our
+extended sample model, yet the coefficient is only significant at the 10\%
+level.
 
 The last two columns report meta-regressions that aggregate all selected
 studies. In the restricted sample of coefficients, unicameralism has a positive
@@ -1598,19 +1579,13 @@ its original theoretical framework.
 
 In this letter, we use meta-analytic methods to assess the generality of the
 "law of $1/n$". Based on a sample of `r length(unique(dat$id))` publications,
-our meta-analyses show that there is no strong evidence that an increase in the
-number of legislators has a significant effect on public expenditures. The
-meta-regressions indicate that study characteristics have a considerable
-influence on reported results. Electoral system affects the relationship
-between legislature size and public expenditure, but the results are not
-replicable in all estimations. In our extended sample, we find that
-unicameralism favours the $1/n$ effect. Publication year generates conflicting
-findings in our models, but recent papers tend to present smaller coefficients
-than older ones. The meta-regressions confirm that modern estimation methods
-such as RDDs and panel/fixed-effects models decrease effects more frequently
-than OLS regressions. In a nutshell, we only find moderate support for the "law
-of $1/n$" in unicameral governments and in the upper house, mostly when authors
-used OLS estimators.
+our meta-analyses show that there is no strong evidence that more legislators
+increase public expenditures. The meta-regressions indicate that methodological
+considerations have a considerable influence on reported results. In our
+extended sample, we find that modern inference methods, such as RDDs, IVs and
+panel data yield lower coefficients than OLS estimators. The models also
+indicate that unicameralism favours the $1/n$ effect. The remaining moderators
+show no consistent effects.
 
 While the vast literature covering the "law of $1/n$" builds important
 empirical knowledge, we hypothesise that some of the null findings that we
@@ -1628,14 +1603,14 @@ heterogeneous results.
 In this sense, the empirical cases in the literature may not always be the most
 fortunate testing ground for the "law of $1/n$". While we believe that moving
 beyond the majoritarian districts framework could produce valuable insights,
-institutional features that are central to the theory cannot be overrun. For
-example, proportional representation (PR) electoral systems allow candidates
-whose constituents are spread across large territories to provide diffused
-public goods and win elections. However, geographically-targeted service
-provision is at the very core of the legislative behaviour that produces the
-"law of $1/n$". Thus, scholars should consider the possible implications of
-these micro-level dynamics when applying the "law of $1/n$" logic to different
-settings. 
+institutional features that are central to the theory cannot be disregarded.
+For example, proportional representation (PR) electoral systems allow
+candidates whose constituents are spread across large territories to provide
+diffused public goods and win elections. However, geographically-targeted
+service provision is at the very core of the legislative behaviour that
+produces the "law of $1/n$". Thus, scholars should consider the possible
+implications of these micro-level dynamics when applying the "law of $1/n$"
+logic to different settings. 
 
 Another plausible reason why there is no clear-cut evidence in favour or
 against the "law of $1/n$" may be that there are few incentives for the pure
@@ -1646,11 +1621,11 @@ studies and research syntheses in the field, although we have seen some
 positive changes in this respect, such as EGAP's _Metaketa
 Initiative_\footnote{See
 \url{https://egap.org/our-work/the-metaketa-initiative} for further
-information.}. Here we show that continuously producing and consuming
-meta-analyses is a viable path towards knowledge-building in our discipline.
-Although aggregating observational -- instead of experimental -- data can be
-especially challenging, we believe that research synthesis methods play an
-essential role in advancing our understanding of complex political phenomena.
+information.}. Here we show that meta-analyses provide a viable path towards
+knowledge-building in our discipline. Although aggregating observational --
+instead of experimental -- data can be especially challenging, we believe that
+research synthesis methods play an essential role in advancing our
+understanding of complex political phenomena.
 
 Our analyses suggest other avenues for further research. First, our study
 sample did not include articles that evaluate the association between the
@@ -1669,6 +1644,7 @@ meta-analysis. These suggestions may help scholars to validate the robustness
 of their findings and policy-makers to reach an optimal balance between sound
 fiscal policy and the demands for increased political representation.
 
+\newpage
 \setlength{\parindent}{0cm}
 \setlength{\parskip}{5pt}
 

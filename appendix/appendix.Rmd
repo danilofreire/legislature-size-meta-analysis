@@ -1249,7 +1249,7 @@ they have at least three other important sources of dispersion:
 1.  **Study sample**: Counties, Municipalities, States, Provinces, Countries.
 2.  **Electoral systems**: Majoritarian, PR, Mixed.
 3.  **Modelling strategies**: Panel data, Standard OLS, IV, RDD.
-4.  **Institutional design**: Unicameral, Bicameral, or the Mixed of both Unicameral and Bicameral.
+4.  **Institutional design**: Unicameral, Bicameral, or a Mix of both Unicameral and Bicameral.
 
 These sources of heterogeneity have two implications. First, they make our
 estimates notably disperse. Second, the amount of heterogeneity makes fixed
@@ -1714,7 +1714,7 @@ mod <- rma.mv(coef, VAR, data=aux,
 f8 <- build_forest_het(aux, aux$coef,
                        aux$VAR, slab = aux$authoryear,
                        capt = NULL, lsize = 15,
-                       ttl = 'Lower Chamber Size and Expenditure per Capita\n(subgrouping by the estimation technique)',
+                       ttl = 'Lower Chamber Size and Expenditure per Capita\n(Subgrouping by Estimation Technique)',
                        hetvar = aux$method)
 ```
 
@@ -1729,7 +1729,7 @@ Highlights:
 
 Over time, the literature evolved to use causally identified techniques to determine the effect of legislature size on the expenditure per capita. To study whether the method had an effect on the estimated coefficients, we fit a subgroup analysis using the method employed in each paper.
 
-```{r, fig.width=8, fig.height=6, fig.cap="Subgroup Analysis of Lower Chamber Size x Expenditure Per Capita, Controlling by Estimation Methods", warning=FALSE, cache=TRUE, echo = FALSE}
+```{r, fig.width=8, fig.height=6, fig.cap="Subgroup Analysis of Lower Chamber Size x Expenditure Per Capita, Controlling by Estimation Method", warning=FALSE, cache=TRUE, echo = FALSE}
 aux <- dat %>%
   filter(indepvar2 == 'N',
          depvar2 == 'ExpPC')
@@ -1770,7 +1770,7 @@ mod
 
 Forest plot:
 
-```{r, fig.width=8, fig.height=3, fig.cap="Effect of Lower Chamber Size on Expenditure Per Capita (RDD Only)", warning=FALSE, cache=TRUE, echo = FALSE}
+```{r, fig.width=8, fig.height=3, fig.cap="Effect of Lower Chamber Size on Expenditure Per Capita (RDDs)", warning=FALSE, cache=TRUE, echo = FALSE}
 build_forest(mod, NULL)
 ```
 
@@ -1788,7 +1788,7 @@ mod <- rma.mv(coef, VAR, data=aux,
           method = "REML")
 
 f9 <- build_forest(mod, capt = NULL,
-                       lsize = 15, ttl = 'Lower Chamber Size and Log Expenditure per Capita\n(subgrouping by RDD)')
+                       lsize = 15, ttl = 'Lower Chamber Size and Log Expenditure per Capita\n(RDDs)')
 ```
 
 Highlights:
@@ -1797,7 +1797,7 @@ Highlights:
 2.  The estimated SMD in the random effects model is $g =$ `r round(predict(mod)$pred,2)` ($SE =$ `r round(predict(mod)$se,3)`).
 3.  The prediction interval ranges from `r round(predict(mod)$cr.lb,2)` to `r round(predict(mod)$cr.ub,2)`. Therefore, it `r ifelse(((predict(mod)$cr.lb)*(predict(mod)$cr.ub))>0,'does not emcompasses zero.','emcompasses zero.')`
 4. The @egger1997bias test `r ifelse(ranktest(mod)$pval<0.05, 'confirmed', 'rejected')` the hypothesis of publication bias.
-5. One notable absence in the analysis is the seminar paper by @petterssonlidbom2012size. The reason is because in that paper, the author uses Log of Expenditure Per Capita x Log of Legislature Size.
+5. One notable absence in the analysis is the seminar paper by @petterssonlidbom2012size. This is because the author uses Log of Expenditure Per Capita x Log of Legislature Size.
 
 ```{r, warning=F, cache=TRUE, echo = FALSE, results='hide'}
 ## Plot 1

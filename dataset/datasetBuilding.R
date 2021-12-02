@@ -1,8 +1,8 @@
-##################################################################
-## Script: Building the Dataset for Distributive Politics Paper ##
-## Authors: Alptekin, Freire, Mignozzetti, and Roman            ##
-## Last Modified: Mar 22, 2021                                  ##
-##################################################################
+#################################################################################
+## Article: The Effect of Legislature Size on Public Spending: A Meta-Analysis ##
+## Authors: Freire, Mignozzetti, Roman, and Alptekin                           ##
+## Last Modified: 01 Dec, 2021                                                 ##
+#################################################################################
 
 # Needed packages
 rm(list=ls())
