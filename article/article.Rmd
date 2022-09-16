@@ -36,7 +36,7 @@ output:
 
 [^danilo]: Senior Lecturer, School of Social and Political Sciences, University of Lincoln, <dfeire@lincoln.ac.uk>, <https://danilofreire.github.io>.
 
-[^umberto]: Visiting Assistant Professor, Quantitative Theory and Methods Department, Emory University, <umberto.mignozzetti@emory.edu>, <http://umbertomig.com>. Corresponding author.
+[^umberto]: Assistant Teaching Professor, Department of Political Science and Computational Social Sciences Program, University of California, San Diego, <umbertomig@ucsd.edu>, <http://umbertomig.com>. Corresponding author.
 
 [^catarina]: PhD Student, University of California, San Diego, <acroman@ucsd.edu>, <http://catarinaroman.github.io>.
 
