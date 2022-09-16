@@ -27,7 +27,7 @@ output:
     citation_package: natbib
     fig_caption: yes
     number_sections: yes
-    keep_tex: no
+    keep_tex: yes
     toc: no
     toc_depth: 3
     template: article-template.latex
@@ -1644,11 +1644,25 @@ meta-analysis. These suggestions may help scholars to validate the robustness
 of their findings and policy-makers to reach an optimal balance between sound
 fiscal policy and the demands for increased political representation.
 
+# Backmatter Headings
+
+* **Supplementary Materials**: The supplementary materials for this paper can be found at <https://URL_JOURNAL_HERE>.
+
+* **Data Availability Statement**: Replication data for this paper can be found at <https://doi.org/10.7910/DVN/5DEGYP>. Replication materials are also available at <https://github.com/danilofreire/legislature-size-meta-analysis>.
+
+* **Acknowledgements**: The authors thank Guilherme Duarte, Cathy Hafer, Robert Myles McDonnell, David Skarbek, and Howard Rosenthal for their constructive feedback. We also thank Cedric Antunes, Luis Castro, Giovanna França, Julia Oriente, and Lucas Mingardi for their excellent research assistance. 
+
+* **Author Contributions**: Freire, Mignozzetti, and Roman contributed equally to all parts of the manuscript. Alptekin helped collect data in the early stages of the project.
+
+* **Financial Support**: We kindly acknowledge funding from the São Paulo State Science Foundation (FAPESP), grant number 2018/00646-1.
+
+* **Competing Interests**: None.
+
 \newpage
 \setlength{\parindent}{0cm}
 \setlength{\parskip}{5pt}
 
-\nocite{baskaran2013coalition, bradbury2009spatially, drew2017price,
+\nocite{datasetCite, baskaran2013coalition, bradbury2009spatially, drew2017price,
 erler2007termlimits, fiorino2007legislature, hohmann2017effect,
 kessler2014communication, lewis2019legislature, lledo2003electoral,
 mukherjee2003politicalparties, petterssonlidbom2012size, schaltegger2009large,
